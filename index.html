@@ -5,12 +5,147 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vikas Public School</title>
   <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
     rel="stylesheet"
   />
   <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* Modern Global Styles */
+    :root {
+      --primary-color: #6366f1;
+      --primary-dark: #4f46e5;
+      --primary-light: #a5b4fc;
+      --secondary-color: #f59e0b;
+      --accent-color: #10b981;
+      --background: #fafbfc;
+      --surface: #ffffff;
+      --surface-elevated: #ffffff;
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --text-muted: #9ca3af;
+      --border: #e5e7eb;
+      --border-light: #f3f4f6;
+      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+      --border-radius: 12px;
+      --border-radius-lg: 16px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--background);
+      overflow-x: hidden;
+    }
+
+    /* Modern Header */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-light);
+      transition: var(--transition);
+    }
+
+    /* Smooth scroll behavior */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Modern typography */
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 600;
+      line-height: 1.2;
+      color: var(--text-primary);
+    }
+
+    /* Glass morphism effect for cards */
+    .glass {
+      background: rgba(255, 255, 255, 0.25);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: var(--shadow-xl);
+    }
+
+    /* Modern button styles */
+    .btn-modern {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--gradient-primary);
+      color: white;
+      text-decoration: none;
+      border-radius: var(--border-radius);
+      font-weight: 500;
+      transition: var(--transition);
+      border: none;
+      cursor: pointer;
+      box-shadow: var(--shadow-md);
+    }
+
+    .btn-modern:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    /* Loading animations */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInRight {
+      from {
+        opacity: 0;
+        transform: translateX(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Intersection Observer animations */
+    .animate-on-scroll {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .animate-on-scroll.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
   <!-- Include fontawesome icons for social -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" defer></script>
+  
+  <!-- Firebase SDKs - Free Tier Optimized -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
   <header>
@@ -346,5 +481,534 @@
   </footer>
 
   <script src="js/main.js"></script>
+  
+  <!-- Firebase Configuration - Free Tier Optimized -->
+  <script>
+    // Wait for DOM to be fully loaded before running Firebase code
+    document.addEventListener('DOMContentLoaded', function() {
+      // Firebase configuration for free tier
+      const firebaseConfig = {
+        apiKey: "AIzaSyDZH0ZcGAtrILqdRdI5dIhZCUA0eAJzRpE",
+        authDomain: "vpschool-918d6.firebaseapp.com",
+        projectId: "vpschool-918d6",
+        storageBucket: "vpschool-918d6.firebasestorage.app",
+        messagingSenderId: "290237090155",
+        appId: "1:290237090155:web:90356cb12d25d5a0a8a42e",
+        measurementId: "G-02JK84S8NH"
+      };
+      
+      // Initialize Firebase for main website
+      let db;
+      if (typeof firebase !== 'undefined') {
+        try {
+          firebase.initializeApp(firebaseConfig);
+          db = firebase.firestore();
+          
+          // Enable offline persistence for free tier efficiency
+          db.enablePersistence({ synchronizeTabs: true })
+            .then(() => {
+              console.log('Firebase persistence enabled - optimized for free tier!');
+            })
+            .catch(() => {
+              console.log('Persistence not available in this browser');
+            });
+          
+          console.log('Firebase initialized for main website');
+          
+          // Load dynamic content efficiently
+          loadDynamicContent();
+        } catch (error) {
+          console.log('Firebase not available, using static content');
+        }
+      }
+      
+      // Enhanced cache checking function
+      async function shouldUseCache(type, cachedTime, now, CACHE_DURATION) {
+        // First check if cache is within time limit
+        if (!cachedTime || (now - cachedTime >= CACHE_DURATION)) {
+          return false;
+        }
+        
+        try {
+          // Check if admin has invalidated this cache
+          const cacheDoc = await db.collection('cache').doc(type).get();
+          if (cacheDoc.exists) {
+            const cacheInfo = cacheDoc.data();
+            const lastUpdated = cacheInfo.lastUpdated;
+            
+            // If admin updated content after our cache, invalidate it
+            if (lastUpdated > cachedTime) {
+              console.log(`Cache invalidated for ${type} - admin updated content`);
+              return false;
+            }
+          }
+          
+          return true;
+        } catch (error) {
+          console.log(`Error checking cache invalidation for ${type}, using time-based cache:`, error);
+          return (now - cachedTime < CACHE_DURATION);
+        }
+      }
+
+      // Free tier optimized data loading with auto-invalidation
+      async function loadDynamicContent() {
+        try {
+          const now = Date.now();
+          const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+          
+          // Load faculty data with smart caching
+          const facultyCache = localStorage.getItem('facultyData');
+          const facultyCacheTime = parseInt(localStorage.getItem('facultyCacheTime'));
+          
+          if (facultyCache && await shouldUseCache('faculty', facultyCacheTime, now, CACHE_DURATION)) {
+            // Use cached data to minimize reads
+            console.log('Using cached faculty data');
+            updateFacultySection(JSON.parse(facultyCache));
+          } else {
+            // Fetch fresh data only when needed
+            console.log('Fetching fresh faculty data');
+            const facultySnapshot = await db.collection('faculty').get();
+            const facultyData = facultySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            
+            // Cache the data
+            localStorage.setItem('facultyData', JSON.stringify(facultyData));
+            localStorage.setItem('facultyCacheTime', now.toString());
+            
+            console.log('Faculty data loaded:', facultyData); // Debug log
+            updateFacultySection(facultyData);
+          }
+          
+          // Load testimonials with smart caching
+          const testimonialsCache = localStorage.getItem('testimonialsData');
+          const testimonialsCacheTime = parseInt(localStorage.getItem('testimonialsCacheTime'));
+          
+          if (testimonialsCache && await shouldUseCache('testimonials', testimonialsCacheTime, now, CACHE_DURATION)) {
+            console.log('Using cached testimonials data');
+            updateTestimonialsSection(JSON.parse(testimonialsCache));
+          } else {
+            console.log('Fetching fresh testimonials data');
+            const testimonialsSnapshot = await db.collection('testimonials').get();
+            const testimonialsData = testimonialsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            
+            localStorage.setItem('testimonialsData', JSON.stringify(testimonialsData));
+            localStorage.setItem('testimonialsCacheTime', now.toString());
+            
+            updateTestimonialsSection(testimonialsData);
+          }
+          
+          // Load gallery data with smart caching
+          const galleryCache = localStorage.getItem('galleryData');
+          const galleryCacheTime = parseInt(localStorage.getItem('galleryCacheTime'));
+          
+          if (galleryCache && await shouldUseCache('gallery', galleryCacheTime, now, CACHE_DURATION)) {
+            console.log('Using cached gallery data');
+            updateGallerySection(JSON.parse(galleryCache));
+          } else {
+            console.log('Fetching fresh gallery data');
+            const gallerySnapshot = await db.collection('gallery').get();
+            const galleryData = gallerySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            
+            localStorage.setItem('galleryData', JSON.stringify(galleryData));
+            localStorage.setItem('galleryCacheTime', now.toString());
+            
+            updateGallerySection(galleryData);
+          }
+          
+          // Load events data with smart caching
+          const eventsCache = localStorage.getItem('eventsData');
+          const eventsCacheTime = parseInt(localStorage.getItem('eventsCacheTime'));
+          
+          if (eventsCache && await shouldUseCache('events', eventsCacheTime, now, CACHE_DURATION)) {
+            console.log('Using cached events data');
+            updateEventsSection(JSON.parse(eventsCache));
+          } else {
+            console.log('Fetching fresh events data');
+            const eventsSnapshot = await db.collection('events').get();
+            const eventsData = eventsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            
+            localStorage.setItem('eventsData', JSON.stringify(eventsData));
+            localStorage.setItem('eventsCacheTime', now.toString());
+            
+            updateEventsSection(eventsData);
+          }
+          
+          // Load hero section data
+          await loadSettingsData('hero', updateHeroSection);
+          
+          // Load about section data
+          await loadSettingsData('about', updateAboutSection);
+          
+          // Load school info data
+          await loadSettingsData('school-info', updateSchoolInfoSection);
+          
+          // Load contact data
+          await loadSettingsData('contact', updateContactSection);
+          
+        } catch (error) {
+          console.log('Error loading dynamic content, using static fallback:', error);
+        }
+      }
+      
+      // Helper function to load settings data (hero, about, school-info, contact)
+      async function loadSettingsData(type, updateFunction) {
+        try {
+          const now = Date.now();
+          const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+          
+          const cacheKey = `${type}Data`;
+          const cacheTimeKey = `${type}CacheTime`;
+          
+          const cachedData = localStorage.getItem(cacheKey);
+          const cacheTime = parseInt(localStorage.getItem(cacheTimeKey));
+          
+          if (cachedData && await shouldUseCache(type, cacheTime, now, CACHE_DURATION)) {
+            console.log(`Using cached ${type} data`);
+            updateFunction(JSON.parse(cachedData));
+          } else {
+            console.log(`Fetching fresh ${type} data`);
+            const docSnapshot = await db.collection('settings').doc(type).get();
+            
+            if (docSnapshot.exists) {
+              const data = docSnapshot.data();
+              
+              // Cache the data
+              localStorage.setItem(cacheKey, JSON.stringify(data));
+              localStorage.setItem(cacheTimeKey, now.toString());
+              
+              updateFunction(data);
+            } else {
+              console.log(`No ${type} data found in database`);
+            }
+          }
+        } catch (error) {
+          console.log(`Error loading ${type} data:`, error);
+        }
+      }
+      
+      // Force refresh function for immediate updates
+      function forceRefreshContent() {
+        console.log('Force refreshing all content...');
+        
+        // Clear all cache
+        localStorage.removeItem('facultyData');
+        localStorage.removeItem('facultyCacheTime');
+        localStorage.removeItem('testimonialsData');
+        localStorage.removeItem('testimonialsCacheTime');
+        localStorage.removeItem('galleryData');
+        localStorage.removeItem('galleryCacheTime');
+        localStorage.removeItem('eventsData');
+        localStorage.removeItem('eventsCacheTime');
+        localStorage.removeItem('heroData');
+        localStorage.removeItem('heroCacheTime');
+        localStorage.removeItem('aboutData');
+        localStorage.removeItem('aboutCacheTime');
+        localStorage.removeItem('school-infoData');
+        localStorage.removeItem('school-infoCacheTime');
+        localStorage.removeItem('contactData');
+        localStorage.removeItem('contactCacheTime');
+        
+        // Reload content
+        loadDynamicContent();
+        
+        // Show user feedback
+        showUpdateNotification('Content refreshed successfully!');
+      }
+      
+      // Show update notification
+      function showUpdateNotification(message) {
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: #10b981;
+          color: white;
+          padding: 12px 20px;
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+          z-index: 1000;
+          font-family: inherit;
+          font-size: 14px;
+          opacity: 0;
+          transform: translateX(100%);
+          transition: all 0.3s ease;
+        `;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        // Show notification
+        setTimeout(() => {
+          notification.style.opacity = '1';
+          notification.style.transform = 'translateX(0)';
+        }, 100);
+        
+        // Hide and remove notification
+        setTimeout(() => {
+          notification.style.opacity = '0';
+          notification.style.transform = 'translateX(100%)';
+          setTimeout(() => {
+            if (notification.parentNode) {
+              notification.parentNode.removeChild(notification);
+            }
+          }, 300);
+        }, 3000);
+      }
+      
+      // Add keyboard shortcut for force refresh (Ctrl+Shift+R)
+      document.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+          e.preventDefault();
+          forceRefreshContent();
+        }
+      });
+      
+      function updateFacultySection(facultyData) {
+        const facultyList = document.querySelector('.faculty-list');
+        if (facultyList && facultyData.length > 0) {
+          facultyList.innerHTML = facultyData.map(faculty => {
+            // Handle both regular URLs and base64 data URLs
+            const photoSrc = faculty.photo || 'assets/faculty1.jpg'; // fallback image
+            const safeName = (faculty.name || 'Faculty Member').replace(/"/g, '&quot;');
+            const safeRole = (faculty.role || 'Staff').replace(/"/g, '&quot;');
+            const safeDescription = (faculty.description || '').replace(/"/g, '&quot;');
+            
+            return `
+            <li class="faculty-member">
+              <img src="${photoSrc}" alt="${safeName}" class="faculty-photo" 
+                   onerror="this.src='assets/faculty1.jpg'; console.log('Faculty image failed to load, using fallback');" />
+              <div class="faculty-info">
+                <h3>${safeName}</h3>
+                <p>${safeRole}${safeDescription ? ' - ' + safeDescription : ''}</p>
+              </div>
+            </li>
+          `;
+          }).join('');
+        }
+      }
+      
+      function updateTestimonialsSection(testimonialsData) {
+        const testimonialsList = document.querySelector('.testimonial-list');
+        if (testimonialsList && testimonialsData.length > 0) {
+          testimonialsList.innerHTML = testimonialsData.map(testimonial => `
+            <li class="testimonial-item">
+              <div class="testimonial-info">
+                <h3>${testimonial.name}, ${testimonial.role}</h3>
+                <p>"${testimonial.text}"</p>
+              </div>
+            </li>
+          `).join('');
+        }
+      }
+      
+      function updateGallerySection(galleryData) {
+        const gallery = document.querySelector('.gallery');
+        if (gallery && galleryData.length > 0) {
+          gallery.innerHTML = galleryData.map(item => {
+            // Handle both regular URLs and base64 data URLs
+            const imageSrc = item.src || 'assets/gallery7.jpg'; // fallback image
+            const safeAlt = (item.alt || 'Gallery image').replace(/"/g, '&quot;');
+            
+            return `
+            <a href="#" data-img="${imageSrc}" tabindex="0" role="listitem" class="gallery-link">
+              <img src="${imageSrc}" alt="${safeAlt}" 
+                   onerror="this.src='assets/gallery7.jpg'; console.log('Gallery image failed to load, using fallback');" />
+            </a>
+          `;
+          }).join('');
+          
+          // Re-attach gallery click events after updating content
+          setTimeout(() => {
+            if (window.attachGalleryEvents) {
+              window.attachGalleryEvents();
+            }
+          }, 100);
+        }
+      }
+      
+      // Update functions for admin panel sections
+      function updateHeroSection(heroData) {
+        const heroElement = document.querySelector('.hero');
+        if (heroElement && heroData) {
+          // Update hero text
+          if (heroData.title || heroData.subtitle) {
+            const title = heroData.title || 'Vikas Public School';
+            const subtitle = heroData.subtitle || 'Excellence in Education';
+            heroElement.textContent = `${title} - ${subtitle}`;
+          }
+          
+          // Update background image if provided
+          if (heroData.backgroundImage) {
+            heroElement.style.backgroundImage = `url(${heroData.backgroundImage})`;
+            heroElement.style.backgroundSize = 'cover';
+            heroElement.style.backgroundPosition = 'center';
+          }
+        }
+      }
+      
+      function updateAboutSection(aboutData) {
+        const aboutSection = document.getElementById('about');
+        if (aboutSection && aboutData) {
+          // Find the main content paragraph (first p tag)
+          const mainParagraph = aboutSection.querySelector('p');
+          if (mainParagraph && aboutData.content) {
+            mainParagraph.textContent = aboutData.content;
+          }
+          
+          // Add mission and vision if they exist
+          let existingMissionVision = aboutSection.querySelector('.mission-vision');
+          if (existingMissionVision) {
+            existingMissionVision.remove();
+          }
+          
+          if (aboutData.mission || aboutData.vision) {
+            const missionVisionDiv = document.createElement('div');
+            missionVisionDiv.className = 'mission-vision';
+            missionVisionDiv.style.marginTop = '1rem';
+            
+            let content = '';
+            if (aboutData.mission) {
+              content += `<div style="margin-bottom: 1rem;"><strong>Mission:</strong> ${aboutData.mission}</div>`;
+            }
+            if (aboutData.vision) {
+              content += `<div><strong>Vision:</strong> ${aboutData.vision}</div>`;
+            }
+            
+            missionVisionDiv.innerHTML = content;
+            
+            // Insert after the main paragraph
+            if (mainParagraph) {
+              mainParagraph.parentNode.insertBefore(missionVisionDiv, mainParagraph.nextSibling);
+            }
+          }
+        }
+      }
+      
+      function updateSchoolInfoSection(schoolData) {
+        // Update header title if school name is provided
+        if (schoolData && schoolData.name) {
+          const headerTitle = document.querySelector('header h1');
+          if (headerTitle) {
+            headerTitle.textContent = schoolData.name;
+          }
+          
+          // Update page title
+          document.title = schoolData.name;
+        }
+      }
+      
+      function updateContactSection(contactData) {
+        const contactSection = document.getElementById('contact');
+        if (contactSection && contactData) {
+          const address = contactSection.querySelector('address');
+          if (address) {
+            let addressHTML = '';
+            
+            if (contactData.address) {
+              addressHTML += `<p><strong>Address:</strong> ${contactData.address}</p>`;
+            }
+            if (contactData.email) {
+              addressHTML += `<p><strong>Email:</strong> <a href="mailto:${contactData.email}">${contactData.email}</a></p>`;
+            }
+            if (contactData.phone) {
+              addressHTML += `<p><strong>Phone:</strong> ${contactData.phone}</p>`;
+            }
+            if (contactData.hours) {
+              addressHTML += `<p><strong>Office Hours:</strong> ${contactData.hours}</p>`;
+            }
+            
+            // Only update if we have some data
+            if (addressHTML) {
+              address.innerHTML = addressHTML;
+            }
+          }
+        }
+      }
+      
+      function updateEventsSection(eventsData) {
+        const eventsList = document.querySelector('.events-list');
+        if (eventsList && eventsData.length > 0) {
+          eventsList.innerHTML = eventsData.map(event => {
+            const safeTitle = (event.title || 'Event').replace(/"/g, '&quot;');
+            const safeDate = (event.date || '').replace(/"/g, '&quot;');
+            const safeDescription = (event.description || '').replace(/"/g, '&quot;');
+            
+            return `
+            <li class="event-item">
+              <div class="event-info">
+                <h3>${safeTitle}${safeDate ? ' - ' + safeDate : ''}</h3>
+                <p>${safeDescription}</p>
+              </div>
+            </li>
+          `;
+          }).join('');
+        }
+      }
+      
+      // Helper function to clear cache for testing (call from browser console)
+      window.clearDynamicContentCache = function() {
+        localStorage.removeItem('facultyData');
+        localStorage.removeItem('facultyCacheTime');
+        localStorage.removeItem('testimonialsData');
+        localStorage.removeItem('testimonialsCacheTime');
+        localStorage.removeItem('galleryData');
+        localStorage.removeItem('galleryCacheTime');
+        localStorage.removeItem('eventsData');
+        localStorage.removeItem('eventsCacheTime');
+        localStorage.removeItem('heroData');
+        localStorage.removeItem('heroCacheTime');
+        localStorage.removeItem('aboutData');
+        localStorage.removeItem('aboutCacheTime');
+        localStorage.removeItem('school-infoData');
+        localStorage.removeItem('school-infoCacheTime');
+        localStorage.removeItem('contactData');
+        localStorage.removeItem('contactCacheTime');
+        console.log('All cache cleared! Reload the page to see fresh data.');
+      };
+    });
+  </script>
+
+  <!-- Floating Refresh Button -->
+  <button 
+    id="refresh-fab" 
+    onclick="forceRefreshContent()" 
+    title="Refresh content (Ctrl+Shift+R)"
+    style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: #1a237e;
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+      cursor: pointer;
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      opacity: 0.8;
+    "
+    onmouseover="
+      this.style.opacity='1';
+      this.style.transform='scale(1.1)';
+      this.style.boxShadow='0 6px 16px rgba(26, 35, 126, 0.4)';
+    "
+    onmouseout="
+      this.style.opacity='0.8';
+      this.style.transform='scale(1)';
+      this.style.boxShadow='0 4px 12px rgba(26, 35, 126, 0.3)';
+    "
+    onmousedown="this.style.transform='scale(0.95)'"
+    onmouseup="this.style.transform='scale(1.1)'"
+  >
+    🔄
+  </button>
+
 </body>
 </html>

@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Panel - Static Data Editor</title>
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <style>
+    body {
+      font-family: Montserrat, Arial, sans-serif;
+      background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%);
+      margin: 0; padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background: #2a4d8f;
+      color: #fff;
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px #0001;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    .header .user-info {
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .main {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+    .sidebar {
+      background: #f4f7fb;
+      width: 220px;
+      padding: 2rem 1rem;
+      box-shadow: 2px 0 8px #0001;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    .sidebar h2 {
+      color: #2a4d8f;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+    }
+    .sidebar button {
+      width: 100%;
+      background: #2a4d8f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.7rem 0;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 6px #0001;
+    }
+    .sidebar button:hover {
+      background: #1d3560;
+      box-shadow: 0 4px 12px #0002;
+    }
+    .content {
+      flex: 1;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 0 16px 16px 0;
+      box-shadow: 0 4px 16px #0002;
+      min-width: 0;
+    }
+    .section {
+      margin-bottom: 2.5rem;
+    }
+    .section h2 {
+      color: #2a4d8f;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 1rem;
+      background: #f9fbff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px #0001;
+    }
+    th, td {
+      border: 1px solid #dbe6f7;
+      padding: 0.7rem;
+      text-align: left;
+      font-size: 1rem;
+    }
+    th {
+      background: #e3f0ff;
+      color: #2a4d8f;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      border: 1px solid #dbe6f7;
+      font-size: 1rem;
+      background: #fff;
+      transition: border-color 0.2s;
+    }
+    input:focus, textarea:focus {
+      border-color: #2a4d8f;
+      outline: none;
+    }
+    .actions button {
+      background: #e74c3c;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.4rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 0.5rem;
+      margin-bottom: 0.2rem;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 6px #0001;
+    }
+    .actions button:hover {
+      background: #c0392b;
+      box-shadow: 0 4px 12px #0002;
+    }
+    .file-upload {
+      margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    .file-input {
+      margin-top: 5px;
+      padding: 0.2rem;
+      font-size: 0.9rem;
+    }
+    .image-preview {
+      max-width: 80px;
+      max-height: 60px;
+      border-radius: 6px;
+      margin-top: 5px;
+      display: block;
+    }
+    .upload-progress {
+      background: #e9ecef;
+      border-radius: 3px;
+      height: 4px;
+      margin-top: 5px;
+      overflow: hidden;
+    }
+    .upload-progress-bar {
+      background: #2a4d8f;
+      height: 100%;
+      transition: width 0.3s ease;
+    }
+    .login-panel {
+      max-width: 400px;
+      margin: 4rem auto;
+      background: #fff;
+      padding: 2rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 4px 16px #0002;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+    }
+    .login-panel h2 {
+      color: #2a4d8f;
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+    .login-panel input {
+      margin-bottom: 1rem;
+    }
+    .login-panel button {
+      background: #2a4d8f;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 0.5rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-bottom: 0.2rem;
+      transition: background 0.2s, box-shadow 0.2s;
+      box-shadow: 0 2px 6px #0001;
+    }
+    .login-panel button:hover {
+      background: #1d3560;
+      box-shadow: 0 4px 12px #0002;
+    }
+    @media (max-width: 900px) {
+      .main { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; gap: 1rem; padding: 1rem; }
+      .content { border-radius: 0 0 16px 16px; padding: 1rem; }
+    }
+    @media (max-width: 600px) {
+      .header { flex-direction: column; gap: 1rem; padding: 1rem; }
+      .sidebar { padding: 0.5rem; }
+      .login-panel { padding: 1rem; }
+      th, td { font-size: 0.95rem; }
+      h1 { font-size: 1.5rem; }
+      h2 { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Admin Panel - <span id="mode-indicator">Loading...</span></h1>
+    <div class="user-info" id="user-info" style="display:none;">
+      <span id="user-email"></span>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </div>
+  <div class="main">
+    <div class="sidebar" id="sidebar" style="display:none;">
+      <div>
+        <h2>Faculty</h2>
+        <button class="add-row" onclick="addRow('faculty')">Add Faculty Member</button>
+      </div>
+      <div>
+        <h2>Gallery</h2>
+        <button class="add-row" onclick="addRow('gallery')">Add Gallery Image</button>
+      </div>
+      <div>
+        <h2>Testimonials</h2>
+        <button class="add-row" onclick="addRow('testimonials')">Add Testimonial</button>
+      </div>
+    </div>
+    <div class="content">
+      <div id="login-panel" class="login-panel">
+        <h2>Admin Login</h2>
+        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
+          For testing, you can create a new admin account or use existing credentials.
+        </p>
+        <input type="email" id="login-email" placeholder="Email" value="admin@vpschool.com" />
+        <input type="password" id="login-password" placeholder="Password" value="admin123" />
+        <button onclick="login()">Login</button>
+        <button onclick="createTestUser()" style="background: #28a745; margin-top: 0.5rem;">Create Test Admin Account</button>
+        <div id="login-status" style="margin-top: 1rem; font-size: 0.9rem; color: #666;"></div>
+      </div>
+      <div class="section" id="faculty-section" style="display:none;">
+        <h2>Faculty</h2>
+        <div id="faculty-table"></div>
+      </div>
+      <div class="section" id="gallery-section" style="display:none;">
+        <h2>Gallery</h2>
+        <div id="gallery-table"></div>
+      </div>
+      <div class="section" id="testimonials-section" style="display:none;">
+        <h2>Testimonials</h2>
+        <div id="testimonials-table"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Debug Firebase loading
+    console.log('Firebase scripts loaded, initializing...');
+    
+    // Add a bypass mode for testing
+    const BYPASS_AUTH = true; // Temporarily set to true for debugging
+    
+    // Firebase config and initialization
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZH0ZcGAtrILqdRdI5dIhZCUA0eAJzRpE",
+      authDomain: "vpschool-918d6.firebaseapp.com",
+      projectId: "vpschool-918d6",
+      storageBucket: "vpschool-918d6.firebasestorage.app",
+      messagingSenderId: "290237090155",
+      appId: "1:290237090155:web:90356cb12d25d5a0a8a42e",
+      measurementId: "G-02JK84S8NH"
+    };
+
+    // Initialize Firebase
+    let db, storage, auth;
+    try {
+      console.log('Starting Firebase initialization...');
+      firebase.initializeApp(firebaseConfig);
+      console.log('Firebase app initialized');
+      
+      db = firebase.firestore();
+      console.log('Firestore initialized');
+      
+      storage = firebase.storage();
+      console.log('Storage initialized');
+      
+      auth = firebase.auth();
+      console.log('Auth initialized');
+      
+      // Test Firebase connection
+      if (!BYPASS_AUTH) {
+        console.log('Testing Firebase connection...');
+        db.enableNetwork().then(() => {
+          console.log('Firestore network enabled successfully');
+        }).catch(error => {
+          console.error('Firestore network error:', error);
+          alert('Firebase connection failed. Switching to local mode.');
+          window.location.reload();
+        });
+      }
+      
+      console.log('Firebase initialized successfully');
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+      alert('Firebase initialization failed: ' + error.message + '\n\nSwitching to local mode for now.');
+    }
+
+    // Data holders
+    let facultyData = [];
+    let galleryData = [];
+    let testimonialsData = [];
+
+    // Sample data for local mode
+    const sampleData = {
+      faculty: [
+        { id: '1', name: 'Ms. Priya Sharma', role: 'Head of Science Department', description: '15 years of teaching experience and passion for student mentoring.', photo: 'assets/faculty1.jpg' },
+        { id: '2', name: 'Mr. Arjun Singh', role: 'Mathematics Teacher', description: 'Expert in advanced problem solving and Olympiad training.', photo: 'assets/faculty2.jpg' },
+        { id: '3', name: 'Mrs. Neha Verma', role: 'English Literature', description: 'Creative curriculum developer and drama club advisor.', photo: 'assets/faculty3.jpg' }
+      ],
+      gallery: [
+        { id: '1', src: 'assets/gallery7.jpg', alt: 'Science experiments in the school lab' },
+        { id: '2', src: 'assets/gallery8.jpg', alt: 'School activity or event' },
+        { id: '3', src: 'assets/gallery9.jpg', alt: 'Students in classroom' }
+      ],
+      testimonials: [
+        { id: '1', name: 'Ravi Kumar', role: 'Parent', text: 'Vikas Public School has transformed my child\'s life with excellent academics and a nurturing environment.' },
+        { id: '2', name: 'Meera Singh', role: 'Student', text: 'The teachers here are supportive and the activities are fun and enriching. I love being part of the school.' }
+      ]
+    };
+
+    // Load all data
+    function loadAllData() {
+      if (BYPASS_AUTH) {
+        // Load sample data in local mode
+        facultyData.length = 0;
+        galleryData.length = 0;
+        testimonialsData.length = 0;
+        
+        facultyData.push(...sampleData.faculty);
+        galleryData.push(...sampleData.gallery);
+        testimonialsData.push(...sampleData.testimonials);
+        
+        renderTable('faculty');
+        renderTable('gallery');
+        renderTable('testimonials');
+        console.log('Loaded sample data in local mode');
+      } else {
+        loadCollection('faculty', facultyData, renderTable);
+        loadCollection('gallery', galleryData, renderTable);
+        loadCollection('testimonials', testimonialsData, renderTable);
+      }
+    }
+
+    // Initialize sample data in Firebase if collections are empty
+    function initializeSampleData() {
+      console.log('Checking if sample data needs to be initialized...');
+      
+      // Check if faculty collection is empty
+      db.collection('faculty').get().then(snapshot => {
+        if (snapshot.empty) {
+          console.log('Faculty collection is empty, adding sample data...');
+          sampleData.faculty.forEach(item => {
+            const data = {...item};
+            delete data.id; // Remove id field before adding to Firestore
+            db.collection('faculty').add(data);
+          });
+        }
+      });
+      
+      // Check if gallery collection is empty
+      db.collection('gallery').get().then(snapshot => {
+        if (snapshot.empty) {
+          console.log('Gallery collection is empty, adding sample data...');
+          sampleData.gallery.forEach(item => {
+            const data = {...item};
+            delete data.id;
+            db.collection('gallery').add(data);
+          });
+        }
+      });
+      
+      // Check if testimonials collection is empty
+      db.collection('testimonials').get().then(snapshot => {
+        if (snapshot.empty) {
+          console.log('Testimonials collection is empty, adding sample data...');
+          sampleData.testimonials.forEach(item => {
+            const data = {...item};
+            delete data.id;
+            db.collection('testimonials').add(data);
+          });
+        }
+      });
+    }
+
+    function loadCollection(collection, dataArr, renderFn) {
+      if (BYPASS_AUTH) {
+        // In bypass mode, data is already loaded
+        renderFn(collection);
+        return;
+      }
+      
+      console.log(`Loading collection: ${collection}`);
+      db.collection(collection).get().then(snapshot => {
+        console.log(`Loaded ${snapshot.size} documents from ${collection}`);
+        dataArr.length = 0;
+        snapshot.forEach(doc => {
+          let item = doc.data();
+          item.id = doc.id;
+          dataArr.push(item);
+        });
+        renderFn(collection);
+      }).catch(err => {
+        console.error('Error loading collection', collection, err);
+        alert(`Failed to load ${collection} data: ${err.message}`);
+        // Still render empty table to show UI
+        renderFn(collection);
+      });
+    }
+
+    // Renderers
+    function renderTable(type) {
+      let data, columns, tableId;
+      if (type === 'faculty') {
+        data = facultyData;
+        columns = ['name', 'role', 'description', 'photo'];
+        tableId = 'faculty-table';
+      } else if (type === 'gallery') {
+        data = galleryData;
+        columns = ['src', 'alt'];
+        tableId = 'gallery-table';
+      } else if (type === 'testimonials') {
+        data = testimonialsData;
+        columns = ['name', 'role', 'text'];
+        tableId = 'testimonials-table';
+      }
+      
+      let html = '<table><thead><tr>' + columns.map(c => `<th>${c.charAt(0).toUpperCase() + c.slice(1)}</th>`).join('') + '<th>Actions</th></tr></thead><tbody>';
+      
+      if (data.length === 0) {
+        html += `<tr><td colspan="${columns.length + 1}" style="text-align:center;color:#666;">No ${type} data available. Click "Add ${type.charAt(0).toUpperCase() + type.slice(1).replace('y', 'y')}" to add new entries.</td></tr>`;
+      } else {
+        data.forEach((row, idx) => {
+          html += '<tr>' + columns.map(c => {
+            const value = row[c] || '';
+            if (c === 'photo' || (type === 'gallery' && c === 'src')) {
+              return `<td>
+                <input value="${value.replace(/"/g, '&quot;')}" onchange="updateCell('${type}',${idx},'${c}',this.value)" placeholder="Enter ${c} URL">
+                <input type="file" accept="image/*" onchange="uploadImage('${type}',${idx},'${c}',this)" class="file-input" title="Upload image">
+                <div id="progress-${type}-${idx}-${c}" class="upload-progress" style="display:none;">
+                  <div class="upload-progress-bar" style="width:0%"></div>
+                </div>
+                ${value ? `<img src="${value}" class="image-preview" onerror="this.style.display='none'">` : ''}
+              </td>`;
+            } else if (c === 'description' || c === 'text') {
+              return `<td><textarea value="${value.replace(/"/g, '&quot;')}" onchange="updateCell('${type}',${idx},'${c}',this.value)" placeholder="Enter ${c}" rows="2" style="resize:vertical;">${value}</textarea></td>`;
+            } else {
+              return `<td><input value="${value.replace(/"/g, '&quot;')}" onchange="updateCell('${type}',${idx},'${c}',this.value)" placeholder="Enter ${c}"></td>`;
+            }
+          }).join('') + `<td class="actions"><button onclick="deleteRow('${type}',${idx})" style="background:#e74c3c;">Delete</button></td></tr>`;
+        });
+      }
+      
+      html += '</tbody></table>';
+      document.getElementById(tableId).innerHTML = html;
+    }
+
+    // Update cell and save to Firestore
+    function updateCell(type, idx, col, val) {
+      let dataArr = getDataArr(type);
+      dataArr[idx][col] = val;
+      saveRow(type, idx);
+    }
+
+    function saveRow(type, idx) {
+      let dataArr = getDataArr(type);
+      let data = Object.assign({}, dataArr[idx]);
+      let id = data.id;
+      delete data.id;
+      
+      if (BYPASS_AUTH) {
+        // In local mode, just update the data array
+        console.log(`Saved ${type} row ${idx} in local mode`);
+        return;
+      }
+      
+      if (id) {
+        db.collection(type).doc(id).set(data).then(() => {
+          loadCollection(type, dataArr, renderTable);
+        }).catch(err => {
+          alert('Failed to save: ' + err.message);
+          console.error('Firestore set error:', err);
+        });
+      } else {
+        db.collection(type).add(data).then(docRef => {
+          dataArr[idx].id = docRef.id;
+          loadCollection(type, dataArr, renderTable);
+        }).catch(err => {
+          alert('Failed to add: ' + err.message);
+          console.error('Firestore add error:', err);
+        });
+      }
+    }
+
+    function addRow(type) {
+      let dataArr = getDataArr(type);
+      let newRow;
+      if (type === 'faculty') newRow = { name: '', role: '', description: '', photo: '' };
+      else if (type === 'gallery') newRow = { src: '', alt: '' };
+      else if (type === 'testimonials') newRow = { name: '', role: '', text: '' };
+      
+      if (BYPASS_AUTH) {
+        // In local mode, just add to array with a temporary ID
+        newRow.id = Date.now().toString();
+        dataArr.push(newRow);
+        renderTable(type);
+        console.log(`Added new ${type} row in local mode`);
+        return;
+      }
+      
+      // Add to Firestore immediately
+      db.collection(type).add(newRow).then(docRef => {
+        newRow.id = docRef.id;
+        dataArr.push(newRow);
+        renderTable(type);
+      }).catch(err => {
+        alert('Failed to add new row: ' + err.message);
+        console.error('Firestore add error:', err);
+      });
+    }
+
+    function deleteRow(type, idx) {
+      let dataArr = getDataArr(type);
+      let id = dataArr[idx].id;
+      
+      if (BYPASS_AUTH) {
+        // In local mode, just remove from array
+        dataArr.splice(idx, 1);
+        renderTable(type);
+        console.log(`Deleted ${type} row ${idx} in local mode`);
+        return;
+      }
+      
+      if (id) {
+        db.collection(type).doc(id).delete().then(() => {
+          dataArr.splice(idx, 1);
+          renderTable(type);
+        }).catch(err => {
+          alert('Deletion failed: ' + err.message);
+          console.error('Firestore delete error:', err);
+        });
+      } else {
+        dataArr.splice(idx, 1);
+        renderTable(type);
+      }
+    }
+
+    function getDataArr(type) {
+      if (type === 'faculty') return facultyData;
+      if (type === 'gallery') return galleryData;
+      if (type === 'testimonials') return testimonialsData;
+    }
+
+    // Image upload
+    function uploadImage(type, idx, col, input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file.');
+        input.value = '';
+        return;
+      }
+
+      const progressId = `progress-${type}-${idx}-${col}`;
+      const progressDiv = document.getElementById(progressId);
+      const progressBar = progressDiv.querySelector('.upload-progress-bar');
+      
+      if (BYPASS_AUTH) {
+        // In local mode, convert to base64
+        progressDiv.style.display = 'block';
+        input.disabled = true;
+        
+        // Simulate progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+          progress += Math.random() * 30;
+          if (progress > 100) progress = 100;
+          progressBar.style.width = progress + '%';
+          
+          if (progress >= 100) {
+            clearInterval(progressInterval);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const imageUrl = e.target.result;
+              updateCell(type, idx, col, imageUrl);
+              
+              setTimeout(() => {
+                progressDiv.style.display = 'none';
+                progressBar.style.width = '0%';
+                input.disabled = false;
+                input.value = '';
+              }, 500);
+            };
+            reader.readAsDataURL(file);
+          }
+        }, 100);
+        return;
+      }
+      
+      // Show progress bar and disable input
+      progressDiv.style.display = 'block';
+      input.disabled = true;
+      
+      const refPath = `${type}/${Date.now()}_${file.name}`;
+      const ref = storage.ref(refPath);
+      const uploadTask = ref.put(file);
+      
+      // Track upload progress
+      uploadTask.on('state_changed', 
+        function(snapshot) {
+          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          progressBar.style.width = progress + '%';
+          console.log('Upload is ' + progress + '% done');
+        },
+        function(error) {
+          // Handle error
+          console.error('Upload error:', error);
+          alert('Upload failed: ' + error.message);
+          progressDiv.style.display = 'none';
+          progressBar.style.width = '0%';
+          input.disabled = false;
+          input.value = '';
+        },
+        function() {
+          // Upload completed successfully
+          uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
+            console.log('File available at', downloadURL);
+            updateCell(type, idx, col, downloadURL);
+            
+            // Hide progress bar and re-enable input
+            setTimeout(() => {
+              progressDiv.style.display = 'none';
+              progressBar.style.width = '0%';
+              input.disabled = false;
+              input.value = '';
+            }, 500);
+          });
+        }
+      );
+    }
+
+    // Logout function
+    function logout() {
+      if (BYPASS_AUTH) {
+        alert('Logout is not available in local mode');
+        return;
+      }
+      
+      auth.signOut().catch(err => {
+        alert('Logout failed: ' + err.message);
+        console.error('Sign out error:', err);
+      });
+    }
+
+    // Initial data load after login
+    if (BYPASS_AUTH) {
+      // Skip authentication in bypass mode
+      console.log('Bypass mode enabled - showing admin interface');
+      document.getElementById('mode-indicator').textContent = 'Local Mode';
+      document.getElementById('login-panel').style.display = 'none';
+      document.getElementById('sidebar').style.display = '';
+      document.getElementById('user-info').style.display = 'flex';
+      document.getElementById('user-email').textContent = 'Local Mode';
+      document.getElementById('faculty-section').style.display = '';
+      document.getElementById('gallery-section').style.display = '';
+      document.getElementById('testimonials-section').style.display = '';
+      loadAllData();
+    } else {
+      document.getElementById('mode-indicator').textContent = 'Firebase Mode';
+      auth.onAuthStateChanged(function(user) {
+        if (user) {
+          console.log('User authenticated:', user.email);
+          document.getElementById('login-panel').style.display = 'none';
+          document.getElementById('sidebar').style.display = '';
+          document.getElementById('user-info').style.display = 'flex';
+          document.getElementById('user-email').textContent = user.email;
+          document.getElementById('faculty-section').style.display = '';
+          document.getElementById('gallery-section').style.display = '';
+          document.getElementById('testimonials-section').style.display = '';
+          
+          // Initialize sample data if needed, then load all data
+          initializeSampleData();
+          setTimeout(() => loadAllData(), 1000); // Wait a bit for sample data to be added
+        } else {
+          document.getElementById('login-panel').style.display = 'flex';
+          document.getElementById('sidebar').style.display = 'none';
+          document.getElementById('user-info').style.display = 'none';
+          document.getElementById('user-email').textContent = '';
+          document.getElementById('faculty-section').style.display = 'none';
+          document.getElementById('gallery-section').style.display = 'none';
+          document.getElementById('testimonials-section').style.display = 'none';
+        }
+      });
+    }
+
+    // Add keyboard support for login
+    document.addEventListener('DOMContentLoaded', function() {
+      const emailInput = document.getElementById('login-email');
+      const passwordInput = document.getElementById('login-password');
+      
+      if (emailInput && passwordInput) {
+        emailInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            passwordInput.focus();
+          }
+        });
+        
+        passwordInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            login();
+          }
+        });
+      }
+    });
+
+    // Login function
+    function login() {
+      var email = document.getElementById('login-email').value;
+      var password = document.getElementById('login-password').value;
+      
+      if (!email || !password) {
+        alert('Please enter both email and password');
+        return;
+      }
+      
+      document.getElementById('login-status').innerHTML = 'Logging in...';
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          console.log('Login successful:', userCredential.user.email);
+          document.getElementById('login-status').innerHTML = 'Login successful!';
+        })
+        .catch(function(error) {
+          console.error('Firebase login error:', error);
+          document.getElementById('login-status').innerHTML = `Login failed: ${error.message}`;
+          
+          if (error.code === 'auth/user-not-found') {
+            document.getElementById('login-status').innerHTML += '<br>User not found. Try creating a test account first.';
+          } else if (error.code === 'auth/wrong-password') {
+            document.getElementById('login-status').innerHTML += '<br>Incorrect password.';
+          } else if (error.code === 'auth/invalid-email') {
+            document.getElementById('login-status').innerHTML += '<br>Invalid email format.';
+          }
+        });
+    }
+
+    // Create test user function
+    function createTestUser() {
+      const email = document.getElementById('login-email').value || 'admin@vpschool.com';
+      const password = document.getElementById('login-password').value || 'admin123';
+      
+      document.getElementById('login-status').innerHTML = 'Creating test account...';
+      
+      auth.createUserWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          console.log('Test user created:', userCredential.user.email);
+          document.getElementById('login-status').innerHTML = `Test account created successfully! Email: ${email}`;
+        })
+        .catch(function(error) {
+          console.error('Create user error:', error);
+          if (error.code === 'auth/email-already-in-use') {
+            document.getElementById('login-status').innerHTML = 'Account already exists. Try logging in instead.';
+          } else {
+            document.getElementById('login-status').innerHTML = `Account creation failed: ${error.message}`;
+          }
+        });
+    }
+  </script>
+</body>
+</html>
