@@ -69,12 +69,17 @@ header {
   padding: 1rem 1.5rem;
   max-width: 1200px;
   margin: 0 auto;
+  position: relative;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .logo-section {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-shrink: 0;
+  min-width: 0;
 }
 
 .logo-img {
@@ -82,6 +87,7 @@ header {
   height: 50px;
   border-radius: 50%;
   object-fit: cover;
+  flex-shrink: 0;
 }
 
 .logo-text .school-name {
@@ -90,6 +96,7 @@ header {
   font-weight: 700;
   color: var(--primary-color);
   margin: 0;
+  white-space: nowrap;
 }
 
 .logo-text .school-tagline {
@@ -102,13 +109,17 @@ header {
 /* Modern Navigation */
 .main-nav {
   display: flex;
+  flex-shrink: 1;
+  min-width: 0;
 }
 
 .nav-menu {
   display: flex;
   list-style: none;
-  gap: 2rem;
+  gap: 2.5rem;
   margin: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .nav-link {
@@ -1109,6 +1120,18 @@ main {
   padding-bottom: 2rem;
 }
 
+/* Handle navigation overflow on smaller desktop screens */
+@media (max-width: 1200px) {
+  .nav-menu {
+    gap: 2rem;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
   .about-grid {
@@ -1124,17 +1147,60 @@ main {
   .hero-stats {
     grid-template-columns: repeat(2, 1fr);
   }
+  
+  /* Fix navigation overflow on medium screens */
+  .nav-menu {
+    gap: 1.5rem;
+  }
+  
+  .nav-link {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .header-container {
+    padding: 1rem;
+  }
 }
 
 @media (max-width: 768px) {
+  /* Switch to mobile navigation */
   .main-nav {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    box-shadow: var(--shadow-lg);
+    border-radius: 0 0 var(--border-radius) var(--border-radius);
+  }
+  
+  .main-nav.show {
+    display: block;
+  }
+  
+  .nav-menu {
+    flex-direction: column;
+    gap: 0;
+    padding: 1rem;
+    margin: 0;
+  }
+  
+  .nav-link {
+    display: block;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
   }
   
   .hamburger {
     display: flex;
   }
-  
+}
+
+@media (max-width: 768px) {
   .hero-actions {
     flex-direction: column;
     align-items: center;
@@ -1241,4 +1307,36 @@ main {
   .header-container {
     padding: 1rem;
   }
+}
+
+/* Floating Action Button */
+.refresh-fab {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #1a237e;
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+  cursor: pointer;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  opacity: 0.8;
+}
+
+.refresh-fab:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(26, 35, 126, 0.4);
+}
+
+.refresh-fab:active {
+  transform: scale(0.95);
 }

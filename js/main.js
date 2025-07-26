@@ -1,6 +1,6 @@
 // Vikas Public School JS - moved from index.html
 function toggleMenu() {
-  const menu = document.getElementById("menu");
+  const menu = document.querySelector(".main-nav");
   const hamburger = document.querySelector(".hamburger");
   const isExpanded = hamburger.getAttribute("aria-expanded") === "true";
 

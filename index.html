@@ -149,38 +149,42 @@
 </head>
 <body>
   <header>
-    <img
-      src="assets/logo.png"
-      alt="Vikas Public School Logo"
-      aria-hidden="false"
-      aria-label="School Logo"
-    />
-    <h1>Vikas Public School</h1>
-    <div
-      class="hamburger"
-      role="button"
-      aria-label="Toggle navigation menu"
-      aria-expanded="false"
-      tabindex="0"
-      onclick="toggleMenu()"
-      onkeypress="event.key === 'Enter' && toggleMenu()"
-    >
-      &#9776;
+    <div class="header-container">
+      <div class="logo-section">
+        <img
+          src="assets/logo.png"
+          alt="Vikas Public School Logo"
+          class="logo-img"
+          aria-label="School Logo"
+        />
+        <div class="logo-text">
+          <h1 class="school-name">Vikas Public School</h1>
+        </div>
+      </div>
+      <div
+        class="hamburger"
+        role="button"
+        aria-label="Toggle navigation menu"
+        aria-expanded="false"
+        tabindex="0"
+        onclick="toggleMenu()"
+        onkeypress="event.key === 'Enter' && toggleMenu()"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <nav class="main-nav" aria-label="Primary navigation">
+        <ul class="nav-menu" id="menu">
+          <li><a href="#" class="nav-link" tabindex="0">Home</a></li>
+          <li><a href="#about" class="nav-link" tabindex="0">About</a></li>
+          <li><a href="#academics" class="nav-link" tabindex="0">Academics</a></li>
+          <li><a href="#gallery" class="nav-link" tabindex="0">Gallery</a></li>
+          <li><a href="#admissions" class="nav-link" tabindex="0">Admissions</a></li>
+          <li><a href="#contact" class="nav-link" tabindex="0">Contact</a></li>
+        </ul>
+      </nav>
     </div>
-    <nav aria-label="Primary navigation">
-      <ul id="menu">
-        <li><a href="#" tabindex="0">Home</a></li>
-        <li><a href="#about" tabindex="0">About</a></li>
-        <li><a href="#academics" tabindex="0">Academics</a></li>
-        <li><a href="#faculty" tabindex="0">Faculty</a></li>
-        <li><a href="#events" tabindex="0">Events</a></li>
-        <li><a href="#gallery" tabindex="0">Gallery</a></li>
-        <li><a href="#testimonials" tabindex="0">Testimonials</a></li>
-        <li><a href="#faq" tabindex="0">FAQ</a></li>
-        <li><a href="#admissions" tabindex="0">Admissions</a></li>
-        <li><a href="#contact" tabindex="0">Contact</a></li>
-      </ul>
-    </nav>
   </header>
 
   <div class="hero" role="banner" aria-label="Welcome message">
@@ -395,7 +399,7 @@
         Passport-size Photographs, Address Proof.
       </p>
       <div class="cta-wrapper">
-        <a href="assets/admission_form.pdf" class="cta-button" download>Download Admission Form</a>
+        <button onclick="alert('Admission form will be available soon. Please contact the school office.')" class="cta-button">Get Admission Form</button>
       </div>
     </section>
 
@@ -649,6 +653,9 @@
         }
       }
       
+      // Make loadDynamicContent globally accessible
+      window.loadDynamicContent = loadDynamicContent;
+      
       // Helper function to load settings data (hero, about, school-info, contact)
       async function loadSettingsData(type, updateFunction) {
         try {
@@ -685,8 +692,8 @@
         }
       }
       
-      // Force refresh function for immediate updates
-      function forceRefreshContent() {
+      // Force refresh function for immediate updates - make it globally accessible
+      window.forceRefreshContent = function() {
         console.log('Force refreshing all content...');
         
         // Clear all cache
@@ -708,14 +715,18 @@
         localStorage.removeItem('contactCacheTime');
         
         // Reload content
-        loadDynamicContent();
+        if (typeof window.loadDynamicContent === 'function') {
+          window.loadDynamicContent();
+        }
         
         // Show user feedback
-        showUpdateNotification('Content refreshed successfully!');
-      }
+        if (typeof window.showUpdateNotification === 'function') {
+          window.showUpdateNotification('Content refreshed successfully!');
+        }
+      };
       
-      // Show update notification
-      function showUpdateNotification(message) {
+      // Show update notification - make it globally accessible
+      window.showUpdateNotification = function(message) {
         // Create notification element
         const notification = document.createElement('div');
         notification.style.cssText = `
@@ -754,13 +765,15 @@
             }
           }, 300);
         }, 3000);
-      }
+      };
       
       // Add keyboard shortcut for force refresh (Ctrl+Shift+R)
       document.addEventListener('keydown', function(e) {
         if (e.ctrlKey && e.shiftKey && e.key === 'R') {
           e.preventDefault();
-          forceRefreshContent();
+          if (typeof window.forceRefreshContent === 'function') {
+            window.forceRefreshContent();
+          }
         }
       });
       
@@ -972,40 +985,9 @@
   <!-- Floating Refresh Button -->
   <button 
     id="refresh-fab" 
-    onclick="forceRefreshContent()" 
+    class="refresh-fab"
+    onclick="window.forceRefreshContent && window.forceRefreshContent()" 
     title="Refresh content (Ctrl+Shift+R)"
-    style="
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: #1a237e;
-      color: white;
-      border: none;
-      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
-      cursor: pointer;
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      z-index: 1000;
-      opacity: 0.8;
-    "
-    onmouseover="
-      this.style.opacity='1';
-      this.style.transform='scale(1.1)';
-      this.style.boxShadow='0 6px 16px rgba(26, 35, 126, 0.4)';
-    "
-    onmouseout="
-      this.style.opacity='0.8';
-      this.style.transform='scale(1)';
-      this.style.boxShadow='0 4px 12px rgba(26, 35, 126, 0.3)';
-    "
-    onmousedown="this.style.transform='scale(0.95)'"
-    onmouseup="this.style.transform='scale(1.1)'"
   >
     🔄
   </button>
