@@ -68,40 +68,75 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-// Modal logic for gallery images
+// Modal logic for gallery images - Updated to handle dynamic content
 document.addEventListener('DOMContentLoaded', function () {
+  initializeGalleryModal();
+});
+
+function initializeGalleryModal() {
   const modal = document.getElementById('imgModal');
   const modalImg = document.getElementById('modalImg');
   const modalClose = document.getElementById('modalClose');
-  const galleryLinks = document.querySelectorAll('.gallery-link');
+  
+  if (!modal || !modalImg || !modalClose) {
+    console.log('Gallery modal elements not found');
+    return;
+  }
 
-  galleryLinks.forEach(link => {
-    link.addEventListener('click', function (e) {
-      e.preventDefault();
-      const imgSrc = link.getAttribute('data-img');
-      modalImg.src = imgSrc;
-      modal.style.display = 'block';
-      modal.focus();
+  // Function to attach events to gallery links
+  function attachGalleryEvents() {
+    const galleryLinks = document.querySelectorAll('.gallery-link');
+    
+    galleryLinks.forEach(link => {
+      // Remove existing listeners to prevent duplicates
+      link.removeEventListener('click', handleGalleryClick);
+      link.addEventListener('click', handleGalleryClick);
     });
-  });
+  }
+
+  function handleGalleryClick(e) {
+    e.preventDefault();
+    const imgSrc = this.getAttribute('data-img');
+    modalImg.src = imgSrc;
+    modal.style.display = 'block';
+    modal.focus();
+  }
 
   function closeModal() {
     modal.style.display = 'none';
     modalImg.src = '';
   }
 
+  // Attach close events (only once)
+  modalClose.removeEventListener('click', closeModal);
   modalClose.addEventListener('click', closeModal);
-  modalClose.addEventListener('keypress', function (e) {
+  
+  modalClose.removeEventListener('keypress', handleCloseKeypress);
+  modalClose.addEventListener('keypress', handleCloseKeypress);
+
+  function handleCloseKeypress(e) {
     if (e.key === 'Enter' || e.key === ' ') closeModal();
-  });
+  }
 
   // Close modal when clicking outside the image
-  modal.addEventListener('click', function (e) {
+  modal.removeEventListener('click', handleModalClick);
+  modal.addEventListener('click', handleModalClick);
+
+  function handleModalClick(e) {
     if (e.target === modal) closeModal();
-  });
+  }
 
   // Close modal on Escape key
-  document.addEventListener('keydown', function (e) {
+  document.removeEventListener('keydown', handleEscapeKey);
+  document.addEventListener('keydown', handleEscapeKey);
+
+  function handleEscapeKey(e) {
     if (modal.style.display === 'block' && e.key === 'Escape') closeModal();
-  });
-});
+  }
+
+  // Initial attachment
+  attachGalleryEvents();
+  
+  // Make attachGalleryEvents globally available for Firebase updates
+  window.attachGalleryEvents = attachGalleryEvents;
+}

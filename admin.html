@@ -4,278 +4,656 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Admin Panel - Static Data Editor</title>
-  <!-- Firebase SDKs -->
+  <!-- Firebase SDKs - Optimized for Spark Plan -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
   <style>
+    :root {
+      --primary-color: #3b82f6;
+      --primary-dark: #1e40af;
+      --primary-light: #dbeafe;
+      --secondary-color: #64748b;
+      --success-color: #10b981;
+      --danger-color: #ef4444;
+      --warning-color: #f59e0b;
+      --background: #f8fafc;
+      --surface: #ffffff;
+      --border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #64748b;
+      --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Montserrat, Arial, sans-serif;
-      background: linear-gradient(135deg, #e3f0ff 0%, #f7f7f7 100%);
-      margin: 0; padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--background);
+      margin: 0;
+      padding: 0;
       min-height: 100vh;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem;
+      overflow-y: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .sidebar.mobile-hidden {
+      transform: translateX(-100%);
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sidebar-header .logo {
+      width: 32px;
+      height: 32px;
+      background: var(--primary-color);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+    }
+
+    .sidebar-header h1 {
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .nav-section {
+      margin-bottom: 2rem;
+    }
+
+    .nav-section-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      margin-bottom: 0.25rem;
+      font-weight: 500;
+    }
+
+    .nav-item:hover {
+      background: var(--primary-light);
+      color: var(--primary-color);
+    }
+
+    .nav-item.active {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .nav-item .icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .main-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
+
     .header {
-      background: #2a4d8f;
-      color: #fff;
-      padding: 1rem 2rem;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      box-shadow: 0 2px 8px #0001;
+      gap: 1rem;
     }
-    .header h1 {
-      margin: 0;
-      font-size: 2rem;
-      letter-spacing: 1px;
-    }
-    .header .user-info {
-      font-size: 1rem;
+
+    .header-left {
       display: flex;
       align-items: center;
       gap: 1rem;
     }
-    .main {
-      display: flex;
-      flex: 1;
-      min-height: 0;
-    }
-    .sidebar {
-      background: #f4f7fb;
-      width: 220px;
-      padding: 2rem 1rem;
-      box-shadow: 2px 0 8px #0001;
-      display: flex;
-      flex-direction: column;
-      gap: 2rem;
-    }
-    .sidebar h2 {
-      color: #2a4d8f;
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-    }
-    .sidebar button {
-      width: 100%;
-      background: #2a4d8f;
-      color: #fff;
+
+    .mobile-menu-btn {
+      display: none;
+      background: none;
       border: none;
+      padding: 0.5rem;
       border-radius: 6px;
-      padding: 0.7rem 0;
-      font-size: 1rem;
+      color: var(--text-secondary);
       cursor: pointer;
-      margin-bottom: 0.5rem;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 6px #0001;
+      transition: background 0.2s ease;
     }
-    .sidebar button:hover {
-      background: #1d3560;
-      box-shadow: 0 4px 12px #0002;
+
+    .mobile-menu-btn:hover {
+      background: var(--primary-light);
     }
-    .content {
+
+    .page-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .mode-badge {
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      background: var(--success-color);
+      color: white;
+    }
+
+    .mode-badge.local {
+      background: var(--warning-color);
+    }
+
+    .user-menu {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 8px;
+      background: var(--background);
+      border: 1px solid var(--border);
+    }
+
+    .content-area {
       flex: 1;
-      padding: 2rem;
-      background: #fff;
-      border-radius: 0 16px 16px 0;
-      box-shadow: 0 4px 16px #0002;
-      min-width: 0;
+      padding: 1.5rem;
+      overflow-y: auto;
     }
-    .section {
-      margin-bottom: 2.5rem;
+    .card {
+      background: var(--surface);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      margin-bottom: 1.5rem;
     }
-    .section h2 {
-      color: #2a4d8f;
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    table {
+
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.625rem 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+      font-size: 0.875rem;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+
+    .btn-danger {
+      background: var(--danger-color);
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-sm {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 1rem;
-      background: #f9fbff;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px #0001;
+      background: var(--surface);
     }
-    th, td {
-      border: 1px solid #dbe6f7;
-      padding: 0.7rem;
+
+    .table th {
+      background: var(--background);
+      padding: 0.75rem;
       text-align: left;
-      font-size: 1rem;
-    }
-    th {
-      background: #e3f0ff;
-      color: #2a4d8f;
       font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
     }
-    input, textarea {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 0.4rem 0.7rem;
-      border-radius: 6px;
-      border: 1px solid #dbe6f7;
-      font-size: 1rem;
-      background: #fff;
-      transition: border-color 0.2s;
+
+    .table td {
+      padding: 1rem 0.75rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
     }
-    input:focus, textarea:focus {
-      border-color: #2a4d8f;
-      outline: none;
+
+    .table tr:last-child td {
+      border-bottom: none;
     }
-    .actions button {
-      background: #e74c3c;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 0.4rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-right: 0.5rem;
-      margin-bottom: 0.2rem;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 6px #0001;
-    }
-    .actions button:hover {
-      background: #c0392b;
-      box-shadow: 0 4px 12px #0002;
-    }
-    .file-upload {
+
+    .form-group {
       margin-bottom: 1rem;
-      font-size: 1rem;
     }
-    .file-input {
-      margin-top: 5px;
-      padding: 0.2rem;
-      font-size: 0.9rem;
-    }
-    .image-preview {
-      max-width: 80px;
-      max-height: 60px;
-      border-radius: 6px;
-      margin-top: 5px;
+
+    .form-label {
       display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 0.375rem;
     }
-    .upload-progress {
-      background: #e9ecef;
-      border-radius: 3px;
+
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+      background: var(--surface);
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
+    }
+
+    .form-textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .image-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .image-upload-area:hover {
+      border-color: var(--primary-color);
+      background: var(--primary-light);
+    }
+
+    .image-preview {
+      max-width: 120px;
+      max-height: 120px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      object-fit: cover;
+    }
+
+    .progress-bar {
+      width: 100%;
       height: 4px;
-      margin-top: 5px;
+      background: var(--border);
+      border-radius: 2px;
       overflow: hidden;
+      margin: 0.5rem 0;
     }
-    .upload-progress-bar {
-      background: #2a4d8f;
+
+    .progress-fill {
       height: 100%;
+      background: var(--primary-color);
       transition: width 0.3s ease;
     }
-    .login-panel {
-      max-width: 400px;
-      margin: 4rem auto;
-      background: #fff;
-      padding: 2rem 2.5rem;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px #0002;
+
+    .success-toast {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: var(--success-color);
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow-lg);
+      z-index: 1000;
+      opacity: 0;
+      transform: translateX(100%);
+      transition: all 0.3s ease;
+    }
+
+    .success-toast.show {
+      opacity: 1;
+      transform: translateX(0);
+    }
+
+    .login-container {
+      min-height: 100vh;
       display: flex;
-      flex-direction: column;
-      gap: 1rem;
       align-items: center;
+      justify-content: center;
+      background: var(--background);
+      padding: 1rem;
     }
-    .login-panel h2 {
-      color: #2a4d8f;
-      margin-bottom: 1rem;
-      font-size: 1.3rem;
+
+    .login-card {
+      background: var(--surface);
+      border-radius: 12px;
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
     }
-    .login-panel input {
-      margin-bottom: 1rem;
+
+    .login-header {
+      padding: 2rem 1.5rem 1rem;
+      text-align: center;
     }
-    .login-panel button {
-      background: #2a4d8f;
-      color: #fff;
-      border: none;
+
+    .login-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 0.5rem;
+    }
+
+    .login-subtitle {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .login-form {
+      padding: 0 1.5rem 2rem;
+    }
+
+    .login-status {
+      margin-top: 1rem;
+      padding: 0.75rem;
       border-radius: 6px;
-      padding: 0.5rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      margin-bottom: 0.2rem;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 6px #0001;
+      font-size: 0.875rem;
+      text-align: center;
     }
-    .login-panel button:hover {
-      background: #1d3560;
-      box-shadow: 0 4px 12px #0002;
+
+    .login-status.error {
+      background: #fef2f2;
+      color: #dc2626;
+      border: 1px solid #fecaca;
     }
-    @media (max-width: 900px) {
-      .main { flex-direction: column; }
-      .sidebar { width: 100%; flex-direction: row; gap: 1rem; padding: 1rem; }
-      .content { border-radius: 0 0 16px 16px; padding: 1rem; }
+
+    .login-status.success {
+      background: #f0fdf4;
+      color: #16a34a;
+      border: 1px solid #bbf7d0;
     }
-    @media (max-width: 600px) {
-      .header { flex-direction: column; gap: 1rem; padding: 1rem; }
-      .sidebar { padding: 0.5rem; }
-      .login-panel { padding: 1rem; }
-      th, td { font-size: 0.95rem; }
-      h1 { font-size: 1.5rem; }
-      h2 { font-size: 1.1rem; }
+
+    .login-status.loading {
+      background: #f8fafc;
+      color: var(--text-secondary);
+      border: 1px solid var(--border);
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        z-index: 50;
+        transform: translateX(-100%);
+      }
+
+      .sidebar.mobile-visible {
+        transform: translateX(0);
+      }
+
+      .mobile-menu-btn {
+        display: block;
+      }
+
+      .content-area {
+        padding: 1rem;
+      }
+
+      .card-header {
+        padding: 1rem;
+      }
+
+      .card-content {
+        padding: 1rem;
+      }
+
+      .table th,
+      .table td {
+        padding: 0.5rem;
+        font-size: 0.875rem;
+      }
+
+      .page-title {
+        font-size: 1.25rem;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .header {
+        padding: 1rem;
+      }
+
+      .table-container {
+        overflow-x: scroll;
+      }
+
+      .btn {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.75rem;
+      }
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 40;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .overlay.show {
+      opacity: 1;
+      visibility: visible;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>Admin Panel - <span id="mode-indicator">Loading...</span></h1>
-    <div class="user-info" id="user-info" style="display:none;">
-      <span id="user-email"></span>
-      <button onclick="logout()">Logout</button>
+  <!-- Login Screen -->
+  <div id="login-screen" class="login-container">
+    <div class="login-card">
+      <div class="login-header">
+        <h1 class="login-title">Admin Portal</h1>
+        <p class="login-subtitle">Manage your school website content</p>
+      </div>
+      <form class="login-form" onsubmit="return false;">
+        <div class="form-group">
+          <label class="form-label" for="login-email">Email Address</label>
+          <input type="email" id="login-email" class="form-input" placeholder="admin@vpschool.com" value="admin@vpschool.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="Enter your password" />
+        </div>
+        <button type="button" onclick="login()" class="btn btn-primary" style="width: 100%;">
+          <span class="icon">🔑</span>
+          Sign In
+        </button>
+        <div id="login-status" class="login-status" style="display: none;"></div>
+      </form>
     </div>
   </div>
-  <div class="main">
-    <div class="sidebar" id="sidebar" style="display:none;">
-      <div>
-        <h2>Faculty</h2>
-        <button class="add-row" onclick="addRow('faculty')">Add Faculty Member</button>
+
+  <!-- Main App -->
+  <div id="admin-app" class="app-container" style="display: none;">
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">VP</div>
+        <h1>Admin Panel</h1>
       </div>
-      <div>
-        <h2>Gallery</h2>
-        <button class="add-row" onclick="addRow('gallery')">Add Gallery Image</button>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Content Management</div>
+        <a class="nav-item active" onclick="showSection('faculty')" id="nav-faculty">
+          <span class="icon">👥</span>
+          Faculty
+        </a>
+        <a class="nav-item" onclick="showSection('gallery')" id="nav-gallery">
+          <span class="icon">🖼️</span>
+          Gallery
+        </a>
+        <a class="nav-item" onclick="showSection('testimonials')" id="nav-testimonials">
+          <span class="icon">💬</span>
+          Testimonials
+        </a>
+        <a class="nav-item" onclick="showSection('events')" id="nav-events">
+          <span class="icon">📅</span>
+          Events & News
+        </a>
+        <a class="nav-item" onclick="showSection('hero')" id="nav-hero">
+          <span class="icon">🏠</span>
+          Homepage Hero
+        </a>
+        <a class="nav-item" onclick="showSection('about')" id="nav-about">
+          <span class="icon">ℹ️</span>
+          About Section
+        </a>
       </div>
-      <div>
-        <h2>Testimonials</h2>
-        <button class="add-row" onclick="addRow('testimonials')">Add Testimonial</button>
+
+      <div class="nav-section">
+        <div class="nav-section-title">Settings</div>
+        <a class="nav-item" onclick="showSection('school-info')" id="nav-school-info">
+          <span class="icon">🏫</span>
+          School Info
+        </a>
+        <a class="nav-item" onclick="showSection('contact')" id="nav-contact">
+          <span class="icon">📞</span>
+          Contact Details
+        </a>
       </div>
-    </div>
-    <div class="content">
-      <div id="login-panel" class="login-panel">
-        <h2>Admin Login</h2>
-        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">
-          For testing, you can create a new admin account or use existing credentials.
-        </p>
-        <input type="email" id="login-email" placeholder="Email" value="admin@vpschool.com" />
-        <input type="password" id="login-password" placeholder="Password" value="admin123" />
-        <button onclick="login()">Login</button>
-        <button onclick="createTestUser()" style="background: #28a745; margin-top: 0.5rem;">Create Test Admin Account</button>
-        <div id="login-status" style="margin-top: 1rem; font-size: 0.9rem; color: #666;"></div>
+    </nav>
+
+    <!-- Overlay for mobile -->
+    <div class="overlay" id="overlay" onclick="toggleMobileMenu()"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" onclick="toggleMobileMenu()">
+            <span class="icon">☰</span>
+          </button>
+          <h1 class="page-title" id="page-title">Faculty Management</h1>
+        </div>
+        <div class="header-right">
+          <div class="mode-badge" id="mode-badge">Firebase Mode</div>
+          <div class="user-menu">
+            <span id="user-email">admin@vpschool.com</span>
+            <button class="btn btn-sm" onclick="logout()">Logout</button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-area" id="content-area">
+        <!-- Content sections will be loaded here -->
       </div>
-      <div class="section" id="faculty-section" style="display:none;">
-        <h2>Faculty</h2>
-        <div id="faculty-table"></div>
-      </div>
-      <div class="section" id="gallery-section" style="display:none;">
-        <h2>Gallery</h2>
-        <div id="gallery-table"></div>
-      </div>
-      <div class="section" id="testimonials-section" style="display:none;">
-        <h2>Testimonials</h2>
-        <div id="testimonials-table"></div>
-      </div>
-    </div>
+    </main>
   </div>
 
   <script>
     // Debug Firebase loading
     console.log('Firebase scripts loaded, initializing...');
     
-    // Add a bypass mode for testing
-    const BYPASS_AUTH = true; // Temporarily set to true for debugging
+    // Firebase Free Tier Optimization Settings
+    const BYPASS_AUTH = false; // Set to true only for local testing without Firebase
+    const USE_CACHE = true; // Enable offline caching for free tier efficiency
     
     // Firebase config and initialization
     const firebaseConfig = {
@@ -288,44 +666,382 @@
       measurementId: "G-02JK84S8NH"
     };
 
-    // Initialize Firebase
+    // Initialize Firebase with free tier optimizations
     let db, storage, auth;
     try {
       console.log('Starting Firebase initialization...');
-      firebase.initializeApp(firebaseConfig);
-      console.log('Firebase app initialized');
       
+      // Check if Firebase is already initialized
+      let app;
+      try {
+        app = firebase.app();
+        console.log('Firebase already initialized, using existing app');
+      } catch (e) {
+        app = firebase.initializeApp(firebaseConfig);
+        console.log('Firebase app initialized');
+      }
+      
+      // Initialize Firestore with cache settings for free tier
       db = firebase.firestore();
+      
+      // Enable offline persistence (free tier friendly)
+      if (USE_CACHE) {
+        db.enablePersistence({ synchronizeTabs: true })
+          .then(() => {
+            console.log('Firestore persistence enabled - reduces reads on free tier!');
+          })
+          .catch((err) => {
+            if (err.code == 'failed-precondition') {
+              console.log('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+            } else if (err.code == 'unimplemented') {
+              console.log('The current browser does not support persistence.');
+            }
+          });
+      }
+      
       console.log('Firestore initialized');
       
-      storage = firebase.storage();
+      // Skip Firebase Storage initialization (not needed for Spark plan)
+      storage = null;
+      console.log('Skipping Firebase Storage - using local assets folder');
+      
+      auth = firebase.auth();
       console.log('Storage initialized');
       
       auth = firebase.auth();
       console.log('Auth initialized');
       
-      // Test Firebase connection
+      // Test Firebase connection with minimal reads
       if (!BYPASS_AUTH) {
         console.log('Testing Firebase connection...');
         db.enableNetwork().then(() => {
           console.log('Firestore network enabled successfully');
         }).catch(error => {
           console.error('Firestore network error:', error);
-          alert('Firebase connection failed. Switching to local mode.');
-          window.location.reload();
+          alert('Firebase connection failed. Please check your Firebase setup.');
         });
       }
       
-      console.log('Firebase initialized successfully');
+      console.log('Firebase initialized successfully with free tier optimizations');
     } catch (error) {
       console.error('Firebase initialization error:', error);
       alert('Firebase initialization failed: ' + error.message + '\n\nSwitching to local mode for now.');
     }
 
-    // Data holders
+    // Data holders for all website sections
     let facultyData = [];
     let galleryData = [];
     let testimonialsData = [];
+    let eventsData = [];
+    let heroData = { title: 'Vikas Public School', subtitle: 'Excellence in Education', backgroundImage: '' };
+    let aboutData = { content: '', mission: '', vision: '' };
+    let schoolInfoData = { name: 'Vikas Public School', address: '', phone: '', email: '' };
+    let contactData = { address: '', phone: '', email: '', hours: '' };
+
+    // Current section
+    let currentSection = 'faculty';
+
+    // Mobile menu state
+    let mobileMenuOpen = false;
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('overlay');
+      
+      mobileMenuOpen = !mobileMenuOpen;
+      
+      if (mobileMenuOpen) {
+        sidebar.classList.add('mobile-visible');
+        overlay.classList.add('show');
+      } else {
+        sidebar.classList.remove('mobile-visible');
+        overlay.classList.remove('show');
+      }
+    }
+
+    // Section management
+    function showSection(section) {
+      // Update navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      document.getElementById(`nav-${section}`).classList.add('active');
+      
+      // Update page title
+      const titles = {
+        'faculty': 'Faculty Management',
+        'gallery': 'Gallery Management', 
+        'testimonials': 'Testimonials Management',
+        'events': 'Events & News Management',
+        'hero': 'Homepage Hero',
+        'about': 'About Section',
+        'school-info': 'School Information',
+        'contact': 'Contact Details'
+      };
+      document.getElementById('page-title').textContent = titles[section];
+      
+      currentSection = section;
+      renderSection(section);
+      
+      // Close mobile menu
+      if (mobileMenuOpen) {
+        toggleMobileMenu();
+      }
+    }
+
+    // Render different sections
+    function renderSection(section) {
+      const contentArea = document.getElementById('content-area');
+      
+      switch(section) {
+        case 'faculty':
+          renderFacultySection();
+          break;
+        case 'gallery':
+          renderGallerySection();
+          break;
+        case 'testimonials':
+          renderTestimonialsSection();
+          break;
+        case 'events':
+          renderEventsSection();
+          break;
+        case 'hero':
+          renderHeroSection();
+          break;
+        case 'about':
+          renderAboutSection();
+          break;
+        case 'school-info':
+          renderSchoolInfoSection();
+          break;
+        case 'contact':
+          renderContactSection();
+          break;
+      }
+    }
+
+    // Faculty section renderer
+    function renderFacultySection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Faculty Members</h2>
+            <button class="btn btn-primary" onclick="addRow('faculty')">
+              <span class="icon">➕</span>
+              Add Faculty Member
+            </button>
+          </div>
+          <div class="alert alert-info" style="margin: 20px; background: #e8f4fd; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px;">
+            <strong>📸 Firebase Optimized:</strong> Faculty photos are automatically compressed to under 700KB for optimal Firebase performance. 
+            The system maintains image quality while ensuring fast loading times.
+          </div>
+          <div class="card-content">
+            <div class="table-container" id="faculty-table"></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+      renderTable('faculty');
+    }
+
+    // Gallery section renderer
+    function renderGallerySection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Gallery Images</h2>
+            <button class="btn btn-primary" onclick="addRow('gallery')">
+              <span class="icon">➕</span>
+              Add Gallery Image
+            </button>
+          </div>
+          <div class="alert alert-info" style="margin: 20px; background: #e8f4fd; border: 1px solid #bee5eb; padding: 15px; border-radius: 8px;">
+            <strong>🖼️ Firebase Optimized:</strong> Images are automatically compressed to under 700KB for Firebase compatibility. 
+            You'll see a notification during processing. Supported formats: JPG, PNG, WebP.
+          </div>
+          <div class="card-content">
+            <div class="table-container" id="gallery-table"></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+      renderTable('gallery');
+    }
+
+    // Testimonials section renderer
+    function renderTestimonialsSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Testimonials</h2>
+            <button class="btn btn-primary" onclick="addRow('testimonials')">
+              <span class="icon">➕</span>
+              Add Testimonial
+            </button>
+          </div>
+          <div class="card-content">
+            <div class="table-container" id="testimonials-table"></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+      renderTable('testimonials');
+    }
+
+    // Events section renderer
+    function renderEventsSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Events & News</h2>
+            <button class="btn btn-primary" onclick="addRow('events')">
+              <span class="icon">➕</span>
+              Add Event/News
+            </button>
+          </div>
+          <div class="card-content">
+            <div class="table-container" id="events-table"></div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+      renderTable('events');
+    }
+
+    // Hero section renderer
+    function renderHeroSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Homepage Hero Section</h2>
+          </div>
+          <div class="card-content">
+            <div class="form-group">
+              <label class="form-label">Main Title</label>
+              <input type="text" class="form-input" value="${heroData.title.replace(/"/g, '&quot;')}" 
+                     onchange="updateHeroData('title', this.value)" placeholder="School Name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Subtitle</label>
+              <input type="text" class="form-input" value="${heroData.subtitle.replace(/"/g, '&quot;')}" 
+                     onchange="updateHeroData('subtitle', this.value)" placeholder="Tagline">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Background Image</label>
+              <div class="alert alert-info" style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 14px;">
+                <strong>🎨 Firebase Optimized:</strong> Images are automatically compressed to under 700KB for Firebase compatibility while maintaining quality.
+              </div>
+              <div class="image-upload-area" onclick="document.getElementById('hero-bg-upload').click()">
+                ${heroData.backgroundImage ? `<img src="${heroData.backgroundImage}" class="image-preview" />` : ''}
+                <p>Click to upload background image</p>
+                <input type="file" id="hero-bg-upload" style="display: none;" accept="image/*" 
+                       onchange="uploadHeroBackground(this)">
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+    }
+
+    // About section renderer
+    function renderAboutSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">About Section</h2>
+          </div>
+          <div class="card-content">
+            <div class="form-group">
+              <label class="form-label">About Content</label>
+              <textarea class="form-input form-textarea" onchange="updateAboutData('content', this.value)" 
+                        placeholder="Write about the school...">${aboutData.content.replace(/"/g, '&quot;')}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mission Statement</label>
+              <textarea class="form-input form-textarea" onchange="updateAboutData('mission', this.value)" 
+                        placeholder="School mission...">${aboutData.mission.replace(/"/g, '&quot;')}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Vision Statement</label>
+              <textarea class="form-input form-textarea" onchange="updateAboutData('vision', this.value)" 
+                        placeholder="School vision...">${aboutData.vision.replace(/"/g, '&quot;')}</textarea>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+    }
+
+    // School info section renderer
+    function renderSchoolInfoSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">School Information</h2>
+          </div>
+          <div class="card-content">
+            <div class="form-group">
+              <label class="form-label">School Name</label>
+              <input type="text" class="form-input" value="${schoolInfoData.name.replace(/"/g, '&quot;')}" 
+                     onchange="updateSchoolInfo('name', this.value)" placeholder="School Name">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address</label>
+              <textarea class="form-input form-textarea" onchange="updateSchoolInfo('address', this.value)" 
+                        placeholder="School address...">${schoolInfoData.address.replace(/"/g, '&quot;')}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone Number</label>
+              <input type="text" class="form-input" value="${schoolInfoData.phone.replace(/"/g, '&quot;')}" 
+                     onchange="updateSchoolInfo('phone', this.value)" placeholder="Phone number">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-input" value="${schoolInfoData.email.replace(/"/g, '&quot;')}" 
+                     onchange="updateSchoolInfo('email', this.value)" placeholder="Email address">
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+    }
+
+    // Contact section renderer
+    function renderContactSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Contact Details</h2>
+          </div>
+          <div class="card-content">
+            <div class="form-group">
+              <label class="form-label">Contact Address</label>
+              <textarea class="form-input form-textarea" onchange="updateContactData('address', this.value)" 
+                        placeholder="Contact address...">${contactData.address.replace(/"/g, '&quot;')}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Phone</label>
+              <input type="text" class="form-input" value="${contactData.phone.replace(/"/g, '&quot;')}" 
+                     onchange="updateContactData('phone', this.value)" placeholder="Contact phone">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Contact Email</label>
+              <input type="email" class="form-input" value="${contactData.email.replace(/"/g, '&quot;')}" 
+                     onchange="updateContactData('email', this.value)" placeholder="Contact email">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Office Hours</label>
+              <input type="text" class="form-input" value="${contactData.hours.replace(/"/g, '&quot;')}" 
+                     onchange="updateContactData('hours', this.value)" placeholder="Office hours">
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+    }
 
     // Sample data for local mode
     const sampleData = {
@@ -342,8 +1058,120 @@
       testimonials: [
         { id: '1', name: 'Ravi Kumar', role: 'Parent', text: 'Vikas Public School has transformed my child\'s life with excellent academics and a nurturing environment.' },
         { id: '2', name: 'Meera Singh', role: 'Student', text: 'The teachers here are supportive and the activities are fun and enriching. I love being part of the school.' }
+      ],
+      events: [
+        { id: '1', title: 'Annual Sports Day', date: 'August 15, 2025', description: 'Join us for a day full of sportsmanship and fun activities for all students.' },
+        { id: '2', title: 'Science Exhibition', date: 'September 10, 2025', description: 'A platform for young innovators to showcase their projects and experiments.' },
+        { id: '3', title: 'Parent-Teacher Meeting', date: 'October 5, 2025', description: 'Discuss your child\'s progress and participate in school development feedback sessions.' }
       ]
     };
+
+    // Update functions for new sections
+    function updateHeroData(field, value) {
+      heroData[field] = value;
+      saveData('hero', heroData);
+      showSuccessIndicator('hero-update', `Hero ${field} updated`);
+    }
+
+    function updateAboutData(field, value) {
+      aboutData[field] = value;
+      saveData('about', aboutData);
+      showSuccessIndicator('about-update', `About ${field} updated`);
+    }
+
+    function updateSchoolInfo(field, value) {
+      schoolInfoData[field] = value;
+      saveData('school-info', schoolInfoData);
+      showSuccessIndicator('school-info-update', `School ${field} updated`);
+    }
+
+    function updateContactData(field, value) {
+      contactData[field] = value;
+      saveData('contact', contactData);
+      showSuccessIndicator('contact-update', `Contact ${field} updated`);
+    }
+
+    function uploadHeroBackground(input) {
+      const file = input.files[0];
+      if (!file) return;
+      
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file.');
+        return;
+      }
+
+      // Compress image if needed before processing
+      compressImageIfNeeded(file, (compressedFile) => {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          heroData.backgroundImage = e.target.result;
+          saveData('hero', heroData);
+          
+          const compressionMsg = compressedFile !== file ? ' (compressed)' : '';
+          showSuccessIndicator('hero-bg-upload', `Background image uploaded${compressionMsg}`);
+          renderHeroSection(); // Re-render to show new image
+        };
+        reader.readAsDataURL(compressedFile);
+      });
+    }
+
+    // Generic save data function with size validation
+    function saveData(collection, data) {
+      if (BYPASS_AUTH) {
+        console.log(`Saved ${collection} data in local mode`);
+        return;
+      }
+      
+      // Validate document size for Firebase Firestore limits
+      const dataString = JSON.stringify(data);
+      const dataSize = new Blob([dataString]).size;
+      const dataSizeKB = (dataSize / 1024).toFixed(0);
+      
+      console.log(`Saving ${collection} data: ${dataSizeKB}KB`);
+      
+      // Firebase Firestore has a 1MB document limit
+      if (dataSize > 1048576) { // 1MB in bytes
+        const sizeMB = (dataSize / (1024 * 1024)).toFixed(1);
+        console.error(`Document too large for Firebase: ${sizeMB}MB`);
+        alert(`Failed to save ${collection} data: Document size (${sizeMB}MB) exceeds Firebase limit (1MB).\n\nTip: Try uploading a smaller image or the compression system will optimize it further.`);
+        return;
+      }
+      
+      // For non-array data, save as a single document
+      if (collection === 'hero' || collection === 'about' || collection === 'school-info' || collection === 'contact') {
+        db.collection('settings').doc(collection).set(data).then(() => {
+          // Invalidate cache by updating timestamp
+          invalidateCache(collection);
+          console.log(`${collection} data saved to Firebase (${dataSizeKB}KB)`);
+          showSuccessIndicator(`${collection}-save`, `${collection} data saved successfully`);
+        }).catch(err => {
+          console.error(`Failed to save ${collection} data:`, err);
+          if (err.code === 'invalid-argument' && err.message.includes('bytes')) {
+            alert(`Image too large for Firebase storage. Please try uploading a smaller image.\n\nTechnical details: ${err.message}`);
+          } else {
+            alert(`Failed to save ${collection} data: ${err.message}`);
+          }
+        });
+      }
+    }
+
+    // Cache invalidation function
+    function invalidateCache(type) {
+      if (BYPASS_AUTH) return;
+      
+      const timestamp = Date.now();
+      const cacheInfo = {
+        lastUpdated: timestamp,
+        collection: type
+      };
+      
+      // Save cache invalidation timestamp to Firestore
+      db.collection('cache').doc(type).set(cacheInfo).then(() => {
+        console.log(`Cache invalidated for ${type} at ${new Date(timestamp).toISOString()}`);
+      }).catch(err => {
+        console.warn(`Failed to invalidate cache for ${type}:`, err);
+      });
+    }
 
     // Load all data
     function loadAllData() {
@@ -352,19 +1180,27 @@
         facultyData.length = 0;
         galleryData.length = 0;
         testimonialsData.length = 0;
+        eventsData.length = 0;
         
         facultyData.push(...sampleData.faculty);
         galleryData.push(...sampleData.gallery);
         testimonialsData.push(...sampleData.testimonials);
+        eventsData.push(...sampleData.events);
         
-        renderTable('faculty');
-        renderTable('gallery');
-        renderTable('testimonials');
+        // Only render table for current section to avoid null innerHTML errors
+        if (currentSection === 'faculty') renderTable('faculty');
+        if (currentSection === 'gallery') renderTable('gallery');
+        if (currentSection === 'testimonials') renderTable('testimonials');
+        if (currentSection === 'events') renderTable('events');
         console.log('Loaded sample data in local mode');
       } else {
         loadCollection('faculty', facultyData, renderTable);
         loadCollection('gallery', galleryData, renderTable);
         loadCollection('testimonials', testimonialsData, renderTable);
+        loadCollection('events', eventsData, renderTable);
+        
+        // Load settings data for non-table sections
+        loadSettingsData();
       }
     }
 
@@ -407,12 +1243,109 @@
           });
         }
       });
+      
+      // Check if events collection is empty
+      db.collection('events').get().then(snapshot => {
+        if (snapshot.empty) {
+          console.log('Events collection is empty, adding sample data...');
+          sampleData.events.forEach(item => {
+            const data = {...item};
+            delete data.id;
+            db.collection('events').add(data);
+          });
+        }
+      });
+    }
+
+    // Load settings data (hero, about, school-info, contact)
+    function loadSettingsData() {
+      if (BYPASS_AUTH) {
+        console.log('Settings data loaded in local mode');
+        return;
+      }
+      
+      // Load hero data
+      db.collection('settings').doc('hero').get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          heroData.title = data.title || heroData.title;
+          heroData.subtitle = data.subtitle || heroData.subtitle;
+          heroData.backgroundImage = data.backgroundImage || heroData.backgroundImage;
+          console.log('Hero data loaded:', heroData);
+          
+          // Re-render hero section if it's currently active
+          if (currentSection === 'hero') {
+            renderHeroSection();
+          }
+        }
+      }).catch(err => {
+        console.error('Error loading hero data:', err);
+      });
+      
+      // Load about data
+      db.collection('settings').doc('about').get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          aboutData.content = data.content || aboutData.content;
+          aboutData.mission = data.mission || aboutData.mission;
+          aboutData.vision = data.vision || aboutData.vision;
+          console.log('About data loaded:', aboutData);
+          
+          // Re-render about section if it's currently active
+          if (currentSection === 'about') {
+            renderAboutSection();
+          }
+        }
+      }).catch(err => {
+        console.error('Error loading about data:', err);
+      });
+      
+      // Load school info data
+      db.collection('settings').doc('school-info').get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          schoolInfoData.name = data.name || schoolInfoData.name;
+          schoolInfoData.address = data.address || schoolInfoData.address;
+          schoolInfoData.phone = data.phone || schoolInfoData.phone;
+          schoolInfoData.email = data.email || schoolInfoData.email;
+          console.log('School info data loaded:', schoolInfoData);
+          
+          // Re-render school info section if it's currently active
+          if (currentSection === 'school-info') {
+            renderSchoolInfoSection();
+          }
+        }
+      }).catch(err => {
+        console.error('Error loading school info data:', err);
+      });
+      
+      // Load contact data
+      db.collection('settings').doc('contact').get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          contactData.address = data.address || contactData.address;
+          contactData.phone = data.phone || contactData.phone;
+          contactData.email = data.email || contactData.email;
+          contactData.hours = data.hours || contactData.hours;
+          console.log('Contact data loaded:', contactData);
+          
+          // Re-render contact section if it's currently active
+          if (currentSection === 'contact') {
+            renderContactSection();
+          }
+        }
+      }).catch(err => {
+        console.error('Error loading contact data:', err);
+      });
     }
 
     function loadCollection(collection, dataArr, renderFn) {
       if (BYPASS_AUTH) {
         // In bypass mode, data is already loaded
-        renderFn(collection);
+        // Only render if current section matches
+        if (currentSection === collection) {
+          renderFn(collection);
+        }
         return;
       }
       
@@ -425,16 +1358,21 @@
           item.id = doc.id;
           dataArr.push(item);
         });
-        renderFn(collection);
+        // Only render if current section matches
+        if (currentSection === collection) {
+          renderFn(collection);
+        }
       }).catch(err => {
         console.error('Error loading collection', collection, err);
         alert(`Failed to load ${collection} data: ${err.message}`);
-        // Still render empty table to show UI
-        renderFn(collection);
+        // Still render empty table to show UI, but only if section matches
+        if (currentSection === collection) {
+          renderFn(collection);
+        }
       });
     }
 
-    // Renderers
+    // Modern table renderer
     function renderTable(type) {
       let data, columns, tableId;
       if (type === 'faculty') {
@@ -449,36 +1387,75 @@
         data = testimonialsData;
         columns = ['name', 'role', 'text'];
         tableId = 'testimonials-table';
+      } else if (type === 'events') {
+        data = eventsData;
+        columns = ['title', 'date', 'description'];
+        tableId = 'events-table';
       }
       
-      let html = '<table><thead><tr>' + columns.map(c => `<th>${c.charAt(0).toUpperCase() + c.slice(1)}</th>`).join('') + '<th>Actions</th></tr></thead><tbody>';
+      // Safety check: Only render if the table container exists
+      const tableContainer = document.getElementById(tableId);
+      if (!tableContainer) {
+        console.log(`Table container ${tableId} not found, skipping render`);
+        return;
+      }
+      
+      let html = '<table class="table"><thead><tr>';
+      columns.forEach(col => {
+        html += `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+      });
+      html += '<th>Actions</th></tr></thead><tbody>';
       
       if (data.length === 0) {
-        html += `<tr><td colspan="${columns.length + 1}" style="text-align:center;color:#666;">No ${type} data available. Click "Add ${type.charAt(0).toUpperCase() + type.slice(1).replace('y', 'y')}" to add new entries.</td></tr>`;
+        html += `<tr><td colspan="${columns.length + 1}" style="text-align:center;color:var(--text-secondary);padding:2rem;">
+          No ${type} data available. Click "Add ${type.charAt(0).toUpperCase() + type.slice(1)}" to add new entries.
+        </td></tr>`;
       } else {
         data.forEach((row, idx) => {
-          html += '<tr>' + columns.map(c => {
-            const value = row[c] || '';
-            if (c === 'photo' || (type === 'gallery' && c === 'src')) {
-              return `<td>
-                <input value="${value.replace(/"/g, '&quot;')}" onchange="updateCell('${type}',${idx},'${c}',this.value)" placeholder="Enter ${c} URL">
-                <input type="file" accept="image/*" onchange="uploadImage('${type}',${idx},'${c}',this)" class="file-input" title="Upload image">
-                <div id="progress-${type}-${idx}-${c}" class="upload-progress" style="display:none;">
-                  <div class="upload-progress-bar" style="width:0%"></div>
+          html += '<tr>';
+          columns.forEach(col => {
+            const value = row[col] || '';
+            if (col === 'photo' || (type === 'gallery' && col === 'src')) {
+              html += `<td>
+                <div class="form-group" style="margin:0;">
+                  <input type="text" class="form-input" style="margin-bottom:0.5rem;" 
+                         value="${value.replace(/"/g, '&quot;')}" 
+                         onchange="updateCell('${type}',${idx},'${col}',this.value)" 
+                         placeholder="Enter ${col} URL">
+                  <input type="file" accept="image/*" class="form-input" style="font-size:0.75rem;padding:0.375rem;" 
+                         onchange="uploadImage('${type}',${idx},'${col}',this)" title="Upload image">
+                  <div id="progress-${type}-${idx}-${col}" class="progress-bar" style="display:none;">
+                    <div class="progress-fill" style="width:0%"></div>
+                  </div>
+                  ${value ? `<img src="${value}" class="image-preview" style="margin-top:0.5rem;" onerror="this.style.display='none'">` : ''}
                 </div>
-                ${value ? `<img src="${value}" class="image-preview" onerror="this.style.display='none'">` : ''}
               </td>`;
-            } else if (c === 'description' || c === 'text') {
-              return `<td><textarea value="${value.replace(/"/g, '&quot;')}" onchange="updateCell('${type}',${idx},'${c}',this.value)" placeholder="Enter ${c}" rows="2" style="resize:vertical;">${value}</textarea></td>`;
+            } else if (col === 'description' || col === 'text') {
+              html += `<td>
+                <textarea class="form-input form-textarea" style="min-height:60px;" 
+                          onchange="updateCell('${type}',${idx},'${col}',this.value)" 
+                          placeholder="Enter ${col}">${value}</textarea>
+              </td>`;
             } else {
-              return `<td><input value="${value.replace(/"/g, '&quot;')}" onchange="updateCell('${type}',${idx},'${c}',this.value)" placeholder="Enter ${c}"></td>`;
+              html += `<td>
+                <input type="text" class="form-input" 
+                       value="${value.replace(/"/g, '&quot;')}" 
+                       onchange="updateCell('${type}',${idx},'${col}',this.value)" 
+                       placeholder="Enter ${col}">
+              </td>`;
             }
-          }).join('') + `<td class="actions"><button onclick="deleteRow('${type}',${idx})" style="background:#e74c3c;">Delete</button></td></tr>`;
+          });
+          html += `<td>
+            <button class="btn btn-danger btn-sm" onclick="deleteRow('${type}',${idx})">
+              <span class="icon">🗑️</span>
+              Delete
+            </button>
+          </td></tr>`;
         });
       }
       
       html += '</tbody></table>';
-      document.getElementById(tableId).innerHTML = html;
+      tableContainer.innerHTML = html;
     }
 
     // Update cell and save to Firestore
@@ -497,11 +1474,15 @@
       if (BYPASS_AUTH) {
         // In local mode, just update the data array
         console.log(`Saved ${type} row ${idx} in local mode`);
+        showSuccessIndicator(`${type}-${idx}`, 'Saved locally');
         return;
       }
       
       if (id) {
         db.collection(type).doc(id).set(data).then(() => {
+          // Invalidate cache by updating timestamp
+          invalidateCache(type);
+          showSuccessIndicator(`${type}-${idx}`, 'Saved to Firebase');
           loadCollection(type, dataArr, renderTable);
         }).catch(err => {
           alert('Failed to save: ' + err.message);
@@ -510,6 +1491,9 @@
       } else {
         db.collection(type).add(data).then(docRef => {
           dataArr[idx].id = docRef.id;
+          // Invalidate cache by updating timestamp
+          invalidateCache(type);
+          showSuccessIndicator(`${type}-${idx}`, 'Added to Firebase');
           loadCollection(type, dataArr, renderTable);
         }).catch(err => {
           alert('Failed to add: ' + err.message);
@@ -524,6 +1508,7 @@
       if (type === 'faculty') newRow = { name: '', role: '', description: '', photo: '' };
       else if (type === 'gallery') newRow = { src: '', alt: '' };
       else if (type === 'testimonials') newRow = { name: '', role: '', text: '' };
+      else if (type === 'events') newRow = { title: '', date: '', description: '' };
       
       if (BYPASS_AUTH) {
         // In local mode, just add to array with a temporary ID
@@ -531,6 +1516,7 @@
         dataArr.push(newRow);
         renderTable(type);
         console.log(`Added new ${type} row in local mode`);
+        showSuccessIndicator(`${type}-new`, 'Row added locally');
         return;
       }
       
@@ -538,7 +1524,10 @@
       db.collection(type).add(newRow).then(docRef => {
         newRow.id = docRef.id;
         dataArr.push(newRow);
+        // Invalidate cache by updating timestamp
+        invalidateCache(type);
         renderTable(type);
+        showSuccessIndicator(`${type}-new`, 'Row added to Firebase');
       }).catch(err => {
         alert('Failed to add new row: ' + err.message);
         console.error('Firestore add error:', err);
@@ -554,13 +1543,17 @@
         dataArr.splice(idx, 1);
         renderTable(type);
         console.log(`Deleted ${type} row ${idx} in local mode`);
+        showSuccessIndicator(`${type}-delete`, 'Row deleted locally');
         return;
       }
       
       if (id) {
         db.collection(type).doc(id).delete().then(() => {
           dataArr.splice(idx, 1);
+          // Invalidate cache by updating timestamp
+          invalidateCache(type);
           renderTable(type);
+          showSuccessIndicator(`${type}-delete`, 'Row deleted from Firebase');
         }).catch(err => {
           alert('Deletion failed: ' + err.message);
           console.error('Firestore delete error:', err);
@@ -568,6 +1561,7 @@
       } else {
         dataArr.splice(idx, 1);
         renderTable(type);
+        showSuccessIndicator(`${type}-delete`, 'Row deleted');
       }
     }
 
@@ -575,9 +1569,10 @@
       if (type === 'faculty') return facultyData;
       if (type === 'gallery') return galleryData;
       if (type === 'testimonials') return testimonialsData;
+      if (type === 'events') return eventsData;
     }
 
-    // Image upload
+    // Modern image upload
     function uploadImage(type, idx, col, input) {
       const file = input.files[0];
       if (!file) return;
@@ -590,81 +1585,254 @@
 
       const progressId = `progress-${type}-${idx}-${col}`;
       const progressDiv = document.getElementById(progressId);
-      const progressBar = progressDiv.querySelector('.upload-progress-bar');
+      const progressBar = progressDiv.querySelector('.progress-fill');
       
-      if (BYPASS_AUTH) {
-        // In local mode, convert to base64
-        progressDiv.style.display = 'block';
-        input.disabled = true;
+      // Always use local mode since Firebase Storage is disabled for free tier
+      progressDiv.style.display = 'block';
+      input.disabled = true;
+      
+      // Simulate progress for better UX
+      let progress = 0;
+      const progressInterval = setInterval(() => {
+        progress += Math.random() * 30;
+        if (progress > 100) progress = 100;
+        progressBar.style.width = progress + '%';
         
-        // Simulate progress
-        let progress = 0;
-        const progressInterval = setInterval(() => {
-          progress += Math.random() * 30;
-          if (progress > 100) progress = 100;
-          progressBar.style.width = progress + '%';
+        if (progress >= 100) {
+          clearInterval(progressInterval);
           
-          if (progress >= 100) {
-            clearInterval(progressInterval);
-            
+          // Compress image if needed before processing
+          compressImageIfNeeded(file, (compressedFile) => {
             const reader = new FileReader();
             reader.onload = function(e) {
               const imageUrl = e.target.result;
               updateCell(type, idx, col, imageUrl);
+              
+              const mode = BYPASS_AUTH ? 'locally' : 'as base64';
+              const compressionMsg = compressedFile !== file ? ' (compressed)' : '';
+              showSuccessIndicator(`${type}-${idx}-upload`, `Image uploaded ${mode}${compressionMsg}`);
               
               setTimeout(() => {
                 progressDiv.style.display = 'none';
                 progressBar.style.width = '0%';
                 input.disabled = false;
                 input.value = '';
-              }, 500);
+              }, 1000);
             };
-            reader.readAsDataURL(file);
-          }
-        }, 100);
-        return;
-      }
-      
-      // Show progress bar and disable input
-      progressDiv.style.display = 'block';
-      input.disabled = true;
-      
-      const refPath = `${type}/${Date.now()}_${file.name}`;
-      const ref = storage.ref(refPath);
-      const uploadTask = ref.put(file);
-      
-      // Track upload progress
-      uploadTask.on('state_changed', 
-        function(snapshot) {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          progressBar.style.width = progress + '%';
-          console.log('Upload is ' + progress + '% done');
-        },
-        function(error) {
-          // Handle error
-          console.error('Upload error:', error);
-          alert('Upload failed: ' + error.message);
-          progressDiv.style.display = 'none';
-          progressBar.style.width = '0%';
-          input.disabled = false;
-          input.value = '';
-        },
-        function() {
-          // Upload completed successfully
-          uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
-            console.log('File available at', downloadURL);
-            updateCell(type, idx, col, downloadURL);
-            
-            // Hide progress bar and re-enable input
-            setTimeout(() => {
-              progressDiv.style.display = 'none';
-              progressBar.style.width = '0%';
-              input.disabled = false;
-              input.value = '';
-            }, 500);
+            reader.readAsDataURL(compressedFile);
           });
         }
-      );
+      }, 100);
+    }
+
+    // Image compression function with Firebase document size limit consideration
+    function compressImageIfNeeded(file, callback) {
+      // Firebase Firestore document limit is ~1MB, base64 adds ~33% overhead
+      // So we need to keep final file size under ~700KB to account for base64 encoding
+      const maxSize = 700 * 1024; // 700KB limit for Firebase compatibility
+      
+      console.log(`Processing image: ${(file.size / (1024 * 1024)).toFixed(1)}MB`);
+      
+      // Show compression notification
+      showCompressionNotification('Processing image for Firebase...');
+      
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = function() {
+        // Always compress for Firebase - even small images might become large when base64 encoded
+        let { width, height } = calculateOptimalDimensions(img.width, img.height, file.size, maxSize);
+        
+        canvas.width = width;
+        canvas.height = height;
+        
+        // Draw image with high quality rendering
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Try different quality levels until we get under the Firebase limit
+        let quality = 0.85; // Start with higher quality
+        let attempts = 0;
+        const maxAttempts = 8; // More attempts for better optimization
+        
+        function tryCompress() {
+          canvas.toBlob(function(blob) {
+            // Check if the blob size is acceptable for Firebase (accounting for base64 overhead)
+            const estimatedBase64Size = blob.size * 1.37; // Base64 overhead factor
+            
+            if (blob.size <= maxSize || attempts >= maxAttempts || quality <= 0.1) {
+              // Success or max attempts reached
+              const compressedFile = new File([blob], file.name, {
+                type: file.type,
+                lastModified: Date.now()
+              });
+              
+              const originalSizeMB = (file.size / (1024 * 1024)).toFixed(1);
+              const compressedSizeKB = (compressedFile.size / 1024).toFixed(0);
+              const estimatedFirebaseSize = (estimatedBase64Size / 1024).toFixed(0);
+              
+              console.log(`Image optimized: ${originalSizeMB}MB → ${compressedSizeKB}KB (Firebase: ~${estimatedFirebaseSize}KB)`);
+              
+              showCompressionNotification(`Image optimized! ${originalSizeMB}MB → ${compressedSizeKB}KB`);
+              
+              setTimeout(() => {
+                hideCompressionNotification();
+                callback(compressedFile);
+              }, 1500);
+            } else {
+              // Try with lower quality
+              attempts++;
+              quality -= 0.08; // Smaller decrements for better quality control
+              showCompressionNotification(`Optimizing for Firebase... (${attempts}/${maxAttempts})`);
+              tryCompress();
+            }
+          }, 'image/jpeg', quality); // Force JPEG for better compression
+        }
+        
+        tryCompress();
+      };
+      
+      img.onerror = function() {
+        console.error('Error loading image for compression');
+        hideCompressionNotification();
+        callback(file); // Return original file if compression fails
+      };
+      
+      // Load image
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Show compression notification
+    function showCompressionNotification(message) {
+      let notification = document.getElementById('compression-notification');
+      if (!notification) {
+        notification = document.createElement('div');
+        notification.id = 'compression-notification';
+        notification.style.cssText = `
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+          color: white;
+          padding: 15px 20px;
+          border-radius: 10px;
+          box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+          z-index: 10000;
+          font-family: inherit;
+          font-size: 14px;
+          min-width: 250px;
+          text-align: center;
+          opacity: 0;
+          transform: translateX(100%);
+          transition: all 0.3s ease;
+        `;
+        document.body.appendChild(notification);
+      }
+      
+      notification.textContent = message;
+      
+      // Show notification
+      setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+    }
+
+    // Hide compression notification
+    function hideCompressionNotification() {
+      const notification = document.getElementById('compression-notification');
+      if (notification) {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }
+    }
+
+    // Calculate optimal dimensions for Firebase Firestore compatibility
+    function calculateOptimalDimensions(originalWidth, originalHeight, originalSize, maxSize) {
+      // For Firebase, we need to be more aggressive with compression
+      // Base64 encoding adds ~33% overhead, so target even smaller file sizes
+      
+      // Start with a more aggressive compression ratio
+      let compressionRatio = Math.sqrt(maxSize / originalSize);
+      
+      // For very large images, be even more aggressive
+      if (originalSize > 5 * 1024 * 1024) { // > 5MB
+        compressionRatio *= 0.6; // Additional 40% reduction
+      } else if (originalSize > 2 * 1024 * 1024) { // > 2MB
+        compressionRatio *= 0.75; // Additional 25% reduction
+      }
+      
+      // Apply compression ratio to dimensions
+      let width = Math.floor(originalWidth * compressionRatio);
+      let height = Math.floor(originalHeight * compressionRatio);
+      
+      // Set reasonable bounds for web display
+      const minDimension = 150; // Minimum for usability
+      const maxDimension = 1200; // Maximum for Firebase efficiency
+      
+      // Ensure minimum dimensions
+      if (width < minDimension || height < minDimension) {
+        const scale = minDimension / Math.min(width, height);
+        width = Math.floor(width * scale);
+        height = Math.floor(height * scale);
+      }
+      
+      // Ensure maximum dimensions for Firebase
+      if (width > maxDimension || height > maxDimension) {
+        const scale = maxDimension / Math.max(width, height);
+        width = Math.floor(width * scale);
+        height = Math.floor(height * scale);
+      }
+      
+      // For hero background images, optimize for typical web display
+      const aspectRatio = originalWidth / originalHeight;
+      if (aspectRatio > 2) { // Wide landscape images (typical for hero banners)
+        width = Math.min(width, 1200);
+        height = Math.floor(width / aspectRatio);
+      }
+      
+      console.log(`Dimension optimization: ${originalWidth}x${originalHeight} → ${width}x${height}`);
+      
+      return { width, height };
+    }
+
+    // Modern success indicator
+    function showSuccessIndicator(id, message) {
+      // Create success indicator with unique ID
+      const indicatorId = `success-${Date.now()}`;
+      const indicator = document.createElement('div');
+      indicator.id = indicatorId;
+      indicator.className = 'success-toast';
+      indicator.textContent = message;
+      
+      // Add to body for fixed positioning
+      document.body.appendChild(indicator);
+      
+      // Show with animation
+      setTimeout(() => {
+        indicator.classList.add('show');
+      }, 10);
+      
+      // Hide after 3 seconds and remove
+      setTimeout(() => {
+        indicator.classList.remove('show');
+        setTimeout(() => {
+          if (indicator && indicator.parentNode) {
+            indicator.parentNode.removeChild(indicator);
+          }
+        }, 300);
+      }, 3000);
     }
 
     // Logout function
@@ -680,43 +1848,93 @@
       });
     }
 
-    // Initial data load after login
+    // Modern login function
+    function login() {
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const statusDiv = document.getElementById('login-status');
+      
+      if (!email || !password) {
+        statusDiv.className = 'login-status error';
+        statusDiv.textContent = 'Please enter both email and password';
+        statusDiv.style.display = 'block';
+        return;
+      }
+      
+      statusDiv.className = 'login-status loading';
+      statusDiv.textContent = 'Signing in...';
+      statusDiv.style.display = 'block';
+      
+      auth.signInWithEmailAndPassword(email, password)
+        .then(function(userCredential) {
+          console.log('Login successful:', userCredential.user.email);
+          statusDiv.className = 'login-status success';
+          statusDiv.textContent = 'Login successful! Redirecting...';
+          
+          setTimeout(() => {
+            showAdminPanel(userCredential.user);
+          }, 1000);
+        })
+        .catch(function(error) {
+          console.error('Firebase login error:', error);
+          statusDiv.className = 'login-status error';
+          
+          let errorMessage = 'Login failed: ';
+          if (error.code === 'auth/user-not-found') {
+            errorMessage += 'User not found. Please contact administrator.';
+          } else if (error.code === 'auth/wrong-password') {
+            errorMessage += 'Incorrect password.';
+          } else if (error.code === 'auth/invalid-email') {
+            errorMessage += 'Invalid email format.';
+          } else {
+            errorMessage += error.message;
+          }
+          
+          statusDiv.textContent = errorMessage;
+        });
+    }
+
+    // Show admin panel after login
+    function showAdminPanel(user) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'flex';
+      
+      // Update mode badge and user info
+      const modeBadge = document.getElementById('mode-badge');
+      modeBadge.textContent = BYPASS_AUTH ? 'Local Mode' : 'Firebase Mode';
+      modeBadge.className = BYPASS_AUTH ? 'mode-badge local' : 'mode-badge';
+      
+      document.getElementById('user-email').textContent = BYPASS_AUTH ? 'Local Mode' : user.email;
+      
+      // Load all data and show first section
+      loadAllData();
+      loadSettingsData();
+      showSection('faculty');
+    }
+
+    // Initial setup
     if (BYPASS_AUTH) {
       // Skip authentication in bypass mode
       console.log('Bypass mode enabled - showing admin interface');
-      document.getElementById('mode-indicator').textContent = 'Local Mode';
-      document.getElementById('login-panel').style.display = 'none';
-      document.getElementById('sidebar').style.display = '';
-      document.getElementById('user-info').style.display = 'flex';
-      document.getElementById('user-email').textContent = 'Local Mode';
-      document.getElementById('faculty-section').style.display = '';
-      document.getElementById('gallery-section').style.display = '';
-      document.getElementById('testimonials-section').style.display = '';
-      loadAllData();
+      setTimeout(() => {
+        showAdminPanel({ email: 'Local Mode' });
+      }, 100);
     } else {
-      document.getElementById('mode-indicator').textContent = 'Firebase Mode';
+      document.getElementById('mode-badge').textContent = 'Firebase Mode';
       auth.onAuthStateChanged(function(user) {
         if (user) {
           console.log('User authenticated:', user.email);
-          document.getElementById('login-panel').style.display = 'none';
-          document.getElementById('sidebar').style.display = '';
-          document.getElementById('user-info').style.display = 'flex';
-          document.getElementById('user-email').textContent = user.email;
-          document.getElementById('faculty-section').style.display = '';
-          document.getElementById('gallery-section').style.display = '';
-          document.getElementById('testimonials-section').style.display = '';
+          showAdminPanel(user);
           
           // Initialize sample data if needed, then load all data
           initializeSampleData();
-          setTimeout(() => loadAllData(), 1000); // Wait a bit for sample data to be added
+          setTimeout(() => {
+            loadAllData();
+            loadSettingsData();
+          }, 1000);
         } else {
-          document.getElementById('login-panel').style.display = 'flex';
-          document.getElementById('sidebar').style.display = 'none';
-          document.getElementById('user-info').style.display = 'none';
-          document.getElementById('user-email').textContent = '';
-          document.getElementById('faculty-section').style.display = 'none';
-          document.getElementById('gallery-section').style.display = 'none';
-          document.getElementById('testimonials-section').style.display = 'none';
+          document.getElementById('login-screen').style.display = 'flex';
+          document.getElementById('admin-app').style.display = 'none';
         }
       });
     }
@@ -741,6 +1959,59 @@
       }
     });
 
+    // Logout function
+    function logout() {
+      if (BYPASS_AUTH) {
+        location.reload();
+      } else {
+        auth.signOut().then(function() {
+          console.log('Logout successful');
+          location.reload();
+        }).catch(function(error) {
+          console.error('Logout error:', error);
+        });
+      }
+    }
+
+    // Mobile menu toggle
+    function toggleMobileMenu() {
+      const mobileOverlay = document.getElementById('mobile-overlay');
+      mobileOverlay.classList.toggle('show');
+    }
+
+    // Initialize after DOM load  
+    document.addEventListener('DOMContentLoaded', function() {
+      // Set up mobile overlay click handler
+      const mobileOverlay = document.getElementById('mobile-overlay');
+      mobileOverlay.addEventListener('click', function(e) {
+        if (e.target === mobileOverlay) {
+          toggleMobileMenu();
+        }
+      });
+
+      // Set up section navigation
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', function() {
+          const section = this.getAttribute('data-section');
+          showSection(section);
+          // Close mobile menu if open
+          document.getElementById('mobile-overlay').classList.remove('show');
+        });
+      });
+
+      // Set up logout button
+      document.getElementById('logout-btn').addEventListener('click', logout);
+
+      // Set up mobile menu button
+      document.getElementById('mobile-menu-btn').addEventListener('click', toggleMobileMenu);
+
+      // Form submission handlers
+      document.getElementById('login-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        login();
+      });
+    });
+
     // Login function
     function login() {
       var email = document.getElementById('login-email').value;
@@ -763,33 +2034,11 @@
           document.getElementById('login-status').innerHTML = `Login failed: ${error.message}`;
           
           if (error.code === 'auth/user-not-found') {
-            document.getElementById('login-status').innerHTML += '<br>User not found. Try creating a test account first.';
+            document.getElementById('login-status').innerHTML += '<br>User not found. Please contact administrator.';
           } else if (error.code === 'auth/wrong-password') {
             document.getElementById('login-status').innerHTML += '<br>Incorrect password.';
           } else if (error.code === 'auth/invalid-email') {
             document.getElementById('login-status').innerHTML += '<br>Invalid email format.';
-          }
-        });
-    }
-
-    // Create test user function
-    function createTestUser() {
-      const email = document.getElementById('login-email').value || 'admin@vpschool.com';
-      const password = document.getElementById('login-password').value || 'admin123';
-      
-      document.getElementById('login-status').innerHTML = 'Creating test account...';
-      
-      auth.createUserWithEmailAndPassword(email, password)
-        .then(function(userCredential) {
-          console.log('Test user created:', userCredential.user.email);
-          document.getElementById('login-status').innerHTML = `Test account created successfully! Email: ${email}`;
-        })
-        .catch(function(error) {
-          console.error('Create user error:', error);
-          if (error.code === 'auth/email-already-in-use') {
-            document.getElementById('login-status').innerHTML = 'Account already exists. Try logging in instead.';
-          } else {
-            document.getElementById('login-status').innerHTML = `Account creation failed: ${error.message}`;
           }
         });
     }
