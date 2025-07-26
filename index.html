@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vikas Public School</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="css/style.css" />
+  <!-- Include fontawesome icons for social -->
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" defer></script>
+</head>
+<body>
+  <header>
+    <img
+      src="assets/logo.png"
+      alt="Vikas Public School Logo"
+      aria-hidden="false"
+      aria-label="School Logo"
+    />
+    <h1>Vikas Public School</h1>
+    <div
+      class="hamburger"
+      role="button"
+      aria-label="Toggle navigation menu"
+      aria-expanded="false"
+      tabindex="0"
+      onclick="toggleMenu()"
+      onkeypress="event.key === 'Enter' && toggleMenu()"
+    >
+      &#9776;
+    </div>
+    <nav aria-label="Primary navigation">
+      <ul id="menu">
+        <li><a href="#" tabindex="0">Home</a></li>
+        <li><a href="#about" tabindex="0">About</a></li>
+        <li><a href="#academics" tabindex="0">Academics</a></li>
+        <li><a href="#faculty" tabindex="0">Faculty</a></li>
+        <li><a href="#events" tabindex="0">Events</a></li>
+        <li><a href="#gallery" tabindex="0">Gallery</a></li>
+        <li><a href="#testimonials" tabindex="0">Testimonials</a></li>
+        <li><a href="#faq" tabindex="0">FAQ</a></li>
+        <li><a href="#admissions" tabindex="0">Admissions</a></li>
+        <li><a href="#contact" tabindex="0">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="hero" role="banner" aria-label="Welcome message">
+    Excellence in Education, Empowering Future Leaders
+  </div>
+
+  <main>
+    <section class="section" id="about" tabindex="-1">
+      <h2>About Us</h2>
+      <p>
+        Vikas Public School, established in 1995, is committed to nurturing young minds through
+        holistic education. Our mission is to foster intellectual curiosity, critical thinking,
+        and responsible citizenship through a dynamic curriculum and dedicated faculty. We
+        strive to create lifelong learners and compassionate leaders, ready to make a positive
+        impact in a rapidly changing world.
+      </p>
+      <ul>
+        <li>CBSE Affiliation with accredited standards</li>
+        <li>Modern campus with smart classrooms, libraries, science labs, and sports facilities</li>
+        <li>Focus on academics, co-curricular activities, and personal development</li>
+        <li>Safe and inclusive learning environment</li>
+      </ul>
+      <div class="buttons">
+        <a href="#admissions">Admissions</a>
+        <a href="#contact">Contact Us</a>
+      </div>
+    </section>
+
+    <section class="section" id="academics" tabindex="-1" aria-labelledby="academics-heading">
+      <h2 id="academics-heading">Academics</h2>
+      <p>
+        At Vikas Public School, we offer a comprehensive curriculum that nurtures academic excellence and critical thinking skills.
+      </p>
+      <ul>
+        <li><strong>Curriculum:</strong> CBSE syllabus from Nursery to Class XII.</li>
+        <li><strong>Special Programs:</strong> STEM initiatives, Coding clubs, Language enrichment.</li>
+        <li><strong>Assessment:</strong> Continuous Evaluation, Project Based Learning, Olympiads preparation.</li>
+        <li><strong>Extra-Curricular:</strong> Art, Music, Dance, Debate, and Sports to nurture talents.</li>
+      </ul>
+    </section>
+
+    <section class="section" id="faculty" tabindex="-1" aria-labelledby="faculty-heading">
+      <h2 id="faculty-heading">Our Faculty</h2>
+      <ul class="faculty-list" aria-live="polite">
+        <li class="faculty-member">
+          <img src="assets/faculty1.jpg" alt="Ms. Priya Sharma" class="faculty-photo" />
+          <div class="faculty-info">
+            <h3>Ms. Priya Sharma</h3>
+            <p>Head of Science Department - 15 years of teaching experience and passion for student mentoring.</p>
+          </div>
+        </li>
+        <li class="faculty-member">
+          <img src="assets/faculty2.jpg" alt="Mr. Arjun Singh" class="faculty-photo" />
+          <div class="faculty-info">
+            <h3>Mr. Arjun Singh</h3>
+            <p>Mathematics Teacher - Expert in advanced problem solving and Olympiad training.</p>
+          </div>
+        </li>
+        <li class="faculty-member">
+          <img src="assets/faculty3.jpg" alt="Mrs. Neha Verma" class="faculty-photo" />
+          <div class="faculty-info">
+            <h3>Mrs. Neha Verma</h3>
+            <p>English Literature - Creative curriculum developer and drama club advisor.</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="events" tabindex="-1" aria-labelledby="events-heading">
+      <h2 id="events-heading">Events & News</h2>
+      <ul class="events-list" aria-live="polite">
+        <li class="event-item">
+          <div class="event-info">
+            <h3>Annual Sports Day - August 15, 2025</h3>
+            <p>Join us for a day full of sportsmanship and fun activities for all students.</p>
+          </div>
+        </li>
+        <li class="event-item">
+          <div class="event-info">
+            <h3>Science Exhibition - September 10, 2025</h3>
+            <p>A platform for young innovators to showcase their projects and experiments.</p>
+          </div>
+        </li>
+        <li class="event-item">
+          <div class="event-info">
+            <h3>Parent-Teacher Meeting - October 5, 2025</h3>
+            <p>Discuss your child's progress and participate in school development feedback sessions.</p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="gallery" tabindex="-1" aria-labelledby="gallery-heading">
+      <h2 id="gallery-heading">Gallery</h2>
+      <div class="gallery" role="list" aria-label="School photo gallery">
+        <img src="assets/gallery1.jpg" alt="Students at Annual Day Celebration" tabindex="0" role="listitem" />
+        <img src="assets/gallery2.jpg" alt="Science Lab Activities" tabindex="0" role="listitem" />
+        <img src="assets/gallery3.jpg" alt="Football Team in Action" tabindex="0" role="listitem" />
+        <img src="assets/gallery4.jpg" alt="Art and Craft Workshop" tabindex="0" role="listitem" />
+        <img src="assets/gallery5.jpg" alt="Library Reading Session" tabindex="0" role="listitem" />
+        <img src="assets/gallery6.jpg" alt="Cultural Fest Performances" tabindex="0" role="listitem" />
+      </div>
+    </section>
+
+    <section class="section" id="testimonials" tabindex="-1" aria-labelledby="testimonials-heading">
+      <h2 id="testimonials-heading">Testimonials</h2>
+      <ul class="testimonial-list" aria-live="polite">
+        <li class="testimonial-item">
+          <div class="testimonial-info">
+            <h3>Ravi Kumar, Parent</h3>
+            <p>
+              "Vikas Public School has transformed my child's life with excellent academics and a nurturing environment."
+            </p>
+          </div>
+        </li>
+        <li class="testimonial-item">
+          <div class="testimonial-info">
+            <h3>Meera Singh, Student</h3>
+            <p>
+              "The teachers here are supportive and the activities are fun and enriching. I love being part of the school."
+            </p>
+          </div>
+        </li>
+        <li class="testimonial-item">
+          <div class="testimonial-info">
+            <h3>Anita Joshi, Parent</h3>
+            <p>
+              "Strong focus on all-round development helped my daughter flourish in academics and sports."
+            </p>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="faq" tabindex="-1" aria-labelledby="faq-heading">
+      <h2 id="faq-heading">Frequently Asked Questions</h2>
+      <ul class="faq-list" role="list">
+        <li class="faq-item">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq1" id="faq1-btn">
+            What is the admission process?
+          </button>
+          <div class="faq-answer" id="faq1" role="region" aria-labelledby="faq1-btn">
+            We have an application followed by an entrance test and interview. Detailed steps are available in the Admissions section.
+          </div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq2" id="faq2-btn">
+            Do you offer transportation facilities?
+          </button>
+          <div class="faq-answer" id="faq2" role="region" aria-labelledby="faq2-btn">
+            Yes, we provide safe and reliable transport services covering major areas of Bengaluru.
+          </div>
+        </li>
+        <li class="faq-item">
+          <button class="faq-question" aria-expanded="false" aria-controls="faq3" id="faq3-btn">
+            What co-curricular activities are available?
+          </button>
+          <div class="faq-answer" id="faq3" role="region" aria-labelledby="faq3-btn">
+            Students can participate in sports, music, dance, arts, debate, coding clubs, and more.
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <section class="section" id="admissions" tabindex="-1" aria-labelledby="admissions-heading">
+      <h2 id="admissions-heading">Admissions</h2>
+      <p>
+        Admissions open for academic year 2025-26. Registration forms are available online and at
+        our campus.
+      </p>
+      <p><strong>Eligibility:</strong> Nursery to Class XII</p>
+      <p>
+        <strong>Process:</strong> Application &rarr; Entrance Test &rarr; Interview &rarr; Admission
+        Confirmation
+      </p>
+      <p>
+        <strong>Required Documents:</strong> Birth Certificate, Previous Year’s Marksheet,
+        Passport-size Photographs, Address Proof.
+      </p>
+      <div class="cta-wrapper">
+        <a href="assets/admission_form.pdf" class="cta-button" download>Download Admission Form</a>
+      </div>
+    </section>
+
+    <section class="section" id="contact" tabindex="-1" aria-labelledby="contact-heading">
+      <h2 id="contact-heading">Contact Us</h2>
+      <address>
+        <p><strong>Address:</strong> Jaunpur, UP India 222146</p>
+        <p><strong>Email:</strong> <a href="mailto:info@vikasschool.edu.in">info@vikasschool.edu.in</a></p>
+        <p><strong>Phone:</strong> +91-98765 43210</p>
+        <p><strong>Office Hours:</strong> 9 AM – 4 PM, Monday to Saturday</p>
+      </address>
+      <form
+        action="#"
+        method="post"
+        aria-label="Contact form"
+        onsubmit="return handleSubmit(event)"
+        novalidate
+      >
+        <input
+          type="text"
+          name="name"
+          id="name"
+          placeholder="Your Name"
+          required
+          aria-required="true"
+          aria-describedby="name-error"
+        />
+        <span id="name-error" style="color:#d32f2f; font-size:0.85rem; display:none;"
+          >Please enter your name.</span
+        >
+
+        <input
+          type="email"
+          name="email"
+          id="email"
+          placeholder="Your Email"
+          required
+          aria-required="true"
+          aria-describedby="email-error"
+        />
+        <span id="email-error" style="color:#d32f2f; font-size:0.85rem; display:none;"
+          >Please enter a valid email.</span
+        >
+
+        <textarea
+          name="message"
+          id="message"
+          rows="4"
+          placeholder="Your Message"
+          aria-describedby="message-help"
+        ></textarea>
+        <small id="message-help" style="color:#666;">Optional</small>
+
+        <button type="submit">Send Message</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-container">
+      <div class="social-icons" aria-label="Social media links">
+        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" tabindex="0">
+          <i class="fab fa-facebook"></i>
+        </a>
+        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter" tabindex="0">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram" tabindex="0">
+          <i class="fab fa-instagram"></i>
+        </a>
+        <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn" tabindex="0">
+          <i class="fab fa-linkedin"></i>
+        </a>
+      </div>
+      <div class="quick-links" aria-label="Quick links">
+        <a href="#about" tabindex="0">About</a> |
+        <a href="#academics" tabindex="0">Academics</a> |
+        <a href="#admissions" tabindex="0">Admissions</a> |
+        <a href="#contact" tabindex="0">Contact</a>
+      </div>
+    </div>
+    <div style="margin-top:0.8rem;">&copy; 2025 Vikas Public School, Jaunpur. All Rights Reserved.</div>
+  </footer>
+
+  <script src="js/main.js"></script>
+</body>
+</html>
