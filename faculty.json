@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Ms. Priya Sharma",
+    "role": "Head of Science Department",
+    "description": "15 years of teaching experience and passion for student mentoring.",
+    "photo": "assets/faculty1.jpg"
+  },
+  {
+    "name": "Mr. Arjun Singh",
+    "role": "Mathematics Teacher",
+    "description": "Expert in advanced problem solving and Olympiad training.",
+    "photo": "assets/faculty2.jpg"
+  },
+  {
+    "name": "Mrs. Neha Verma",
+    "role": "English Literature",
+    "description": "Creative curriculum developer and drama club advisor.",
+    "photo": "assets/faculty3.jpg"
+  }
+]

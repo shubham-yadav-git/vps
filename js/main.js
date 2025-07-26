@@ -67,3 +67,41 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   });
 });
+
+// Modal logic for gallery images
+document.addEventListener('DOMContentLoaded', function () {
+  const modal = document.getElementById('imgModal');
+  const modalImg = document.getElementById('modalImg');
+  const modalClose = document.getElementById('modalClose');
+  const galleryLinks = document.querySelectorAll('.gallery-link');
+
+  galleryLinks.forEach(link => {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      const imgSrc = link.getAttribute('data-img');
+      modalImg.src = imgSrc;
+      modal.style.display = 'block';
+      modal.focus();
+    });
+  });
+
+  function closeModal() {
+    modal.style.display = 'none';
+    modalImg.src = '';
+  }
+
+  modalClose.addEventListener('click', closeModal);
+  modalClose.addEventListener('keypress', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') closeModal();
+  });
+
+  // Close modal when clicking outside the image
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close modal on Escape key
+  document.addEventListener('keydown', function (e) {
+    if (modal.style.display === 'block' && e.key === 'Escape') closeModal();
+  });
+});

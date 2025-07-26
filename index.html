@@ -56,12 +56,26 @@
     <section class="section" id="about" tabindex="-1">
       <h2>About Us</h2>
       <p>
-        Vikas Public School, established in 1995, is committed to nurturing young minds through
+        Vikas Public School, established in 2004, is committed to nurturing young minds through
         holistic education. Our mission is to foster intellectual curiosity, critical thinking,
         and responsible citizenship through a dynamic curriculum and dedicated faculty. We
         strive to create lifelong learners and compassionate leaders, ready to make a positive
         impact in a rapidly changing world.
       </p>
+      <div class="manager-profile" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+        <img src="assets/IMG-20250726-WA0016.jpg" alt="Jatashankar Pal, Manager" style="width:100px;height:100px;border-radius:50%;object-fit:cover;" />
+        <div>
+          <h3 style="margin:0;">Jatashankar Pal</h3>
+          <p style="margin:0;">Manager</p>
+        </div>
+      </div>
+      <div class="principal-profile" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
+        <img src="assets/IMG-20250726-WA0017.jpg" alt="Principal" style="width:100px;height:100px;border-radius:50%;object-fit:cover;" />
+        <div>
+          <h3 style="margin:0;">Principal</h3>
+          <p style="margin:0;">Principal</p>
+        </div>
+      </div>
       <ul>
         <li>CBSE Affiliation with accredited standards</li>
         <li>Modern campus with smart classrooms, libraries, science labs, and sports facilities</li>
@@ -141,12 +155,32 @@
     <section class="section" id="gallery" tabindex="-1" aria-labelledby="gallery-heading">
       <h2 id="gallery-heading">Gallery</h2>
       <div class="gallery" role="list" aria-label="School photo gallery">
-        <img src="assets/gallery1.jpg" alt="Students at Annual Day Celebration" tabindex="0" role="listitem" />
-        <img src="assets/gallery2.jpg" alt="Science Lab Activities" tabindex="0" role="listitem" />
-        <img src="assets/gallery3.jpg" alt="Football Team in Action" tabindex="0" role="listitem" />
-        <img src="assets/gallery4.jpg" alt="Art and Craft Workshop" tabindex="0" role="listitem" />
-        <img src="assets/gallery5.jpg" alt="Library Reading Session" tabindex="0" role="listitem" />
-        <img src="assets/gallery6.jpg" alt="Cultural Fest Performances" tabindex="0" role="listitem" />
+        <a href="#" data-img="assets/gallery7.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery7.jpg" alt="Science experiments in the school lab" />
+        </a>
+        <a href="#" data-img="assets/gallery8.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery8.jpg" alt="School activity or event" />
+        </a>
+        <a href="#" data-img="assets/gallery9.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery9.jpg" alt="School activity or event" />
+        </a>
+        <a href="#" data-img="assets/gallery10.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery10.jpg" alt="School activity or event" />
+        </a>
+        <a href="#" data-img="assets/gallery11.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery11.jpg" alt="School activity or event" />
+        </a>
+        <a href="#" data-img="assets/gallery12.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery12.jpg" alt="School activity or event" />
+        </a>
+        <a href="#" data-img="assets/gallery13.jpg" tabindex="0" role="listitem" class="gallery-link">
+          <img src="assets/gallery13.jpg" alt="School activity or event" />
+        </a>
+      </div>
+      <!-- Modal for image viewing -->
+      <div id="imgModal" class="modal" aria-modal="true" role="dialog" tabindex="-1" style="display:none;">
+        <span class="close" id="modalClose" tabindex="0" aria-label="Close image modal">&times;</span>
+        <img class="modal-content" id="modalImg" alt="Gallery image enlarged" />
       </div>
     </section>
 
