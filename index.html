@@ -751,6 +751,24 @@
           // Load contact data
           await loadSettingsData('contact', updateContactSection);
           
+          // Load FAQ data
+          const faqCache = localStorage.getItem('faqData');
+          const faqCacheTime = parseInt(localStorage.getItem('faqCacheTime'));
+          
+          if (faqCache && await shouldUseCache('faq', faqCacheTime, now, CACHE_DURATION)) {
+            console.log('Using cached FAQ data');
+            updateFaqSection(JSON.parse(faqCache));
+          } else {
+            console.log('Fetching fresh FAQ data');
+            const faqSnapshot = await db.collection('faq').get();
+            const faqData = faqSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+            
+            localStorage.setItem('faqData', JSON.stringify(faqData));
+            localStorage.setItem('faqCacheTime', now.toString());
+            
+            updateFaqSection(faqData);
+          }
+          
         } catch (error) {
           console.log('Error loading dynamic content, using static fallback:', error);
         }
@@ -1091,6 +1109,61 @@
         }
       }
       
+      function updateFaqSection(faqData) {
+        const faqList = document.querySelector('.faq-list');
+        if (faqList && faqData.length > 0) {
+          // Sort FAQ data by order field
+          const sortedFaqData = faqData.sort((a, b) => (a.order || 0) - (b.order || 0));
+          
+          faqList.innerHTML = sortedFaqData.map((faq, index) => {
+            const safeQuestion = (faq.question || '').replace(/"/g, '&quot;');
+            const safeAnswer = (faq.answer || '').replace(/"/g, '&quot;');
+            const faqId = `faq${index + 1}`;
+            const btnId = `${faqId}-btn`;
+            
+            return `
+            <li class="faq-item">
+              <button class="faq-question" aria-expanded="false" aria-controls="${faqId}" id="${btnId}">
+                ${safeQuestion}
+              </button>
+              <div class="faq-answer" id="${faqId}" role="region" aria-labelledby="${btnId}">
+                ${safeAnswer}
+              </div>
+            </li>
+          `;
+          }).join('');
+          
+          // Reinitialize FAQ event listeners for dynamically loaded content
+          initializeFaqEventListeners();
+        }
+      }
+      
+      function initializeFaqEventListeners() {
+        const faqButtons = document.querySelectorAll(".faq-question");
+        faqButtons.forEach((btn) => {
+          // Remove existing event listeners to avoid duplicates
+          btn.replaceWith(btn.cloneNode(true));
+        });
+        
+        // Re-query after cloning
+        const newFaqButtons = document.querySelectorAll(".faq-question");
+        newFaqButtons.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const expanded = btn.getAttribute("aria-expanded") === "true";
+            // Collapse all others
+            newFaqButtons.forEach((otherBtn) => {
+              if (otherBtn !== btn) {
+                otherBtn.setAttribute("aria-expanded", "false");
+                otherBtn.parentElement.classList.remove("open");
+              }
+            });
+            // Toggle current
+            btn.setAttribute("aria-expanded", String(!expanded));
+            btn.parentElement.classList.toggle("open", !expanded);
+          });
+        });
+      }
+      
       function updateAcademicsSection(academicsData) {
         const academicsSection = document.getElementById('academics');
         if (academicsSection && academicsData) {
@@ -1158,6 +1231,8 @@
         localStorage.removeItem('school-infoCacheTime');
         localStorage.removeItem('contactData');
         localStorage.removeItem('contactCacheTime');
+        localStorage.removeItem('faqData');
+        localStorage.removeItem('faqCacheTime');
         console.log('All cache cleared! Reload the page to see fresh data.');
       };
     });
