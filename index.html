@@ -680,6 +680,23 @@
     </div>
   </div>
 
+  <!-- Notice Detail Modal -->
+  <div class="notice-modal" id="notice-modal">
+    <div class="notice-modal-content">
+      <div class="notice-modal-header">
+        <h3 id="notice-modal-title">Notice Details</h3>
+        <button class="notice-modal-close" onclick="closeNoticeModal()">✕</button>
+      </div>
+      <div class="notice-modal-body" id="notice-modal-body">
+        <!-- Notice details will be loaded here -->
+      </div>
+      <div class="notice-modal-footer">
+        <button onclick="closeNoticeModal()" class="cta-button secondary">Close</button>
+        <button onclick="goToNoticeBoard()" class="cta-button primary">View All Notices</button>
+      </div>
+    </div>
+  </div>
+
   <section class="hero" id="hero" role="banner" aria-label="Welcome to Vikas Public School">
     <div class="hero-content">
       <h1 class="hero-title">Excellence in Education, Empowering Future Leaders</h1>
@@ -2136,18 +2153,47 @@
           const categoryIcon = getCategoryIcon(notice.category);
           
           return `
-            <div class="notice-item">
+            <div class="notice-item-panel ${notice.category}" data-notice-id="${notice.id}" style="cursor: pointer;">
               <div class="notice-item-header">
                 <span class="notice-category ${notice.category}">${categoryIcon} ${notice.category}</span>
                 <span class="notice-date">${formattedDate}</span>
               </div>
               <div class="notice-title">${notice.title}</div>
               <div class="notice-description">${notice.description}</div>
+              <div class="notice-action">
+                <small style="color: var(--primary-color); font-weight: 500;">Click to read more →</small>
+              </div>
             </div>
           `;
         }).join('');
         
         content.innerHTML = noticesHtml;
+        
+        // Add click event listeners to notice items in panel (different class than main notices)
+        const noticeItems = content.querySelectorAll('.notice-item-panel[data-notice-id]');
+        console.log('Found notice items in panel:', noticeItems.length);
+        
+        // Add a simple test click
+        content.addEventListener('click', function(e) {
+          console.log('Click detected in notice panel content:', e.target);
+          const noticeItem = e.target.closest('.notice-item-panel');
+          if (noticeItem) {
+            console.log('Clicked on notice item:', noticeItem);
+            const noticeId = noticeItem.getAttribute('data-notice-id');
+            console.log('Notice ID:', noticeId);
+            if (noticeId) {
+              showNoticeDetails(noticeId);
+            }
+          }
+        });
+        
+        noticeItems.forEach(item => {
+          item.addEventListener('click', function() {
+            const noticeId = this.getAttribute('data-notice-id');
+            console.log('Clicking notice in panel:', noticeId);
+            showNoticeDetails(noticeId);
+          });
+        });
       }
 
       function getCategoryIcon(category) {
@@ -2173,6 +2219,71 @@
         }
       }
 
+      // Show notice details in modal
+      function showNoticeDetails(noticeId) {
+        console.log('showNoticeDetails called with:', noticeId);
+        console.log('Available notices:', window.noticeState.notices);
+        
+        const notice = window.noticeState.notices.find(n => n.id === noticeId);
+        if (!notice) {
+          console.log('Notice not found:', noticeId);
+          return;
+        }
+
+        console.log('Found notice:', notice);
+        const modal = document.getElementById('notice-modal');
+        const modalBody = document.getElementById('notice-modal-body');
+        const modalTitle = document.getElementById('notice-modal-title');
+
+        if (!modal || !modalBody || !modalTitle) {
+          console.log('Modal elements not found');
+          return;
+        }
+
+        modalTitle.textContent = 'Notice Details';
+
+        const categoryIcon = getCategoryIcon(notice.category);
+        const formattedDate = formatNoticeDate(notice.date);
+        
+        modalBody.innerHTML = `
+          <div class="notice-modal-category ${notice.category}">${categoryIcon} ${notice.category}</div>
+          <div class="notice-modal-date">📅 ${formattedDate}</div>
+          <div class="notice-modal-title">${notice.title}</div>
+          <div class="notice-modal-description">${notice.description}</div>
+          ${notice.validUntil ? `<div style="margin-top: 1rem; padding: 1rem; background: var(--border-light); border-radius: 8px; font-size: 0.9rem; color: var(--text-secondary);">
+            <strong>📍 Valid Until:</strong> ${formatNoticeDate(notice.validUntil)}
+          </div>` : ''}
+        `;
+
+        modal.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        console.log('Modal should be visible now');
+      }
+
+      // Close notice modal
+      function closeNoticeModal() {
+        const modal = document.getElementById('notice-modal');
+        modal.classList.remove('show');
+        document.body.style.overflow = '';
+      }
+
+      // Navigate to notice board section
+      function goToNoticeBoard() {
+        closeNoticeModal();
+        toggleNoticePanel(); // Close notice panel if open
+        
+        // Scroll to events section (which contains the notice board)
+        const noticesSection = document.getElementById('events');
+        if (noticesSection) {
+          noticesSection.scrollIntoView({ behavior: 'smooth' });
+          
+          // Update active navigation
+          setTimeout(() => {
+            updateActiveNavigation('events');
+          }, 500);
+        }
+      }
+
       // Close panel when clicking outside
       document.addEventListener('click', function(event) {
         const panel = document.getElementById('notice-panel');
@@ -2184,6 +2295,25 @@
             !bellIcon.contains(event.target) &&
             !viewAllBtn.contains(event.target)) {
           toggleNoticePanel();
+        }
+
+        // Close notice modal when clicking outside
+        const modal = document.getElementById('notice-modal');
+        const modalContent = document.querySelector('.notice-modal-content');
+        
+        if (modal && modal.classList.contains('show') && 
+            modalContent && !modalContent.contains(event.target)) {
+          closeNoticeModal();
+        }
+      });
+
+      // Close modal with Escape key
+      document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+          const modal = document.getElementById('notice-modal');
+          if (modal && modal.classList.contains('show')) {
+            closeNoticeModal();
+          }
         }
       });
 
