@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website Functionality Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .test-result { margin: 5px 0; }
+        button { margin: 5px; padding: 10px 15px; }
+        #test-results { max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>Vikas Public School - Website Functionality Tests</h1>
+    
+    <div class="test-section">
+        <h2>Quick Tests</h2>
+        <button onclick="testBasicFunctionality()">Test Basic Functionality</button>
+        <button onclick="testSEOElements()">Test SEO Elements</button>
+        <button onclick="testResponsiveness()">Test Responsiveness</button>
+        <button onclick="testImages()">Test Images</button>
+        <button onclick="runAllTests()">Run All Tests</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('test-results');
+            const className = type === 'pass' ? 'pass' : type === 'fail' ? 'fail' : type === 'warning' ? 'warning' : '';
+            results.innerHTML += `<div class="test-result ${className}">${new Date().toLocaleTimeString()}: ${message}</div>`;
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function testBasicFunctionality() {
+            log('Testing Basic Functionality...', 'info');
+            
+            // Test if main website is accessible
+            fetch('/')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ Main website accessible', 'pass');
+                        return response.text();
+                    } else {
+                        log(`❌ Main website not accessible (${response.status})`, 'fail');
+                    }
+                })
+                .then(html => {
+                    if (html) {
+                        // Test for key elements
+                        if (html.includes('Vikas Public School')) {
+                            log('✅ School name found', 'pass');
+                        } else {
+                            log('❌ School name not found', 'fail');
+                        }
+                        
+                        if (html.includes('nav') && html.includes('header')) {
+                            log('✅ Navigation structure present', 'pass');
+                        } else {
+                            log('❌ Navigation structure missing', 'fail');
+                        }
+                        
+                        if (html.includes('main.js') && html.includes('style.css')) {
+                            log('✅ External files referenced', 'pass');
+                        } else {
+                            log('❌ External files not properly referenced', 'fail');
+                        }
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error testing basic functionality: ${error.message}`, 'fail');
+                });
+        }
+
+        function testSEOElements() {
+            log('Testing SEO Elements...', 'info');
+            
+            fetch('/')
+                .then(response => response.text())
+                .then(html => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    
+                    // Test meta tags
+                    const title = doc.querySelector('title');
+                    if (title && title.textContent.includes('Vikas Public School')) {
+                        log('✅ Title tag present and contains school name', 'pass');
+                    } else {
+                        log('❌ Title tag missing or incomplete', 'fail');
+                    }
+                    
+                    const description = doc.querySelector('meta[name="description"]');
+                    if (description && description.content.length > 50) {
+                        log('✅ Meta description present and adequate length', 'pass');
+                    } else {
+                        log('❌ Meta description missing or too short', 'fail');
+                    }
+                    
+                    const ogTitle = doc.querySelector('meta[property="og:title"]');
+                    if (ogTitle) {
+                        log('✅ Open Graph title present', 'pass');
+                    } else {
+                        log('❌ Open Graph title missing', 'fail');
+                    }
+                    
+                    const structuredData = doc.querySelector('script[type="application/ld+json"]');
+                    if (structuredData) {
+                        try {
+                            JSON.parse(structuredData.textContent);
+                            log('✅ Valid JSON-LD structured data found', 'pass');
+                        } catch (e) {
+                            log('❌ Invalid JSON-LD structured data', 'fail');
+                        }
+                    } else {
+                        log('❌ No structured data found', 'fail');
+                    }
+                    
+                    const canonical = doc.querySelector('link[rel="canonical"]');
+                    if (canonical) {
+                        log('✅ Canonical URL present', 'pass');
+                    } else {
+                        log('❌ Canonical URL missing', 'fail');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error testing SEO elements: ${error.message}`, 'fail');
+                });
+            
+            // Test robots.txt
+            fetch('/robots.txt')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ robots.txt accessible', 'pass');
+                        return response.text();
+                    } else {
+                        log('❌ robots.txt not accessible', 'fail');
+                    }
+                })
+                .then(text => {
+                    if (text && text.includes('Sitemap:')) {
+                        log('✅ robots.txt contains sitemap reference', 'pass');
+                    } else {
+                        log('⚠️ robots.txt missing sitemap reference', 'warning');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error testing robots.txt: ${error.message}`, 'fail');
+                });
+            
+            // Test sitemap.xml
+            fetch('/sitemap.xml')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ sitemap.xml accessible', 'pass');
+                        return response.text();
+                    } else {
+                        log('❌ sitemap.xml not accessible', 'fail');
+                    }
+                })
+                .then(text => {
+                    if (text && text.includes('<urlset')) {
+                        log('✅ sitemap.xml has valid XML structure', 'pass');
+                    } else {
+                        log('❌ sitemap.xml invalid structure', 'fail');
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error testing sitemap.xml: ${error.message}`, 'fail');
+                });
+        }
+
+        function testResponsiveness() {
+            log('Testing Responsiveness...', 'info');
+            
+            // Test CSS file
+            fetch('/css/style.css')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ CSS file accessible', 'pass');
+                        return response.text();
+                    } else {
+                        log('❌ CSS file not accessible', 'fail');
+                    }
+                })
+                .then(css => {
+                    if (css) {
+                        if (css.includes('@media')) {
+                            log('✅ Media queries found in CSS', 'pass');
+                        } else {
+                            log('⚠️ No media queries found - may not be responsive', 'warning');
+                        }
+                        
+                        if (css.includes('flex') || css.includes('grid')) {
+                            log('✅ Modern layout methods (flexbox/grid) detected', 'pass');
+                        } else {
+                            log('⚠️ Modern layout methods not detected', 'warning');
+                        }
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error testing CSS: ${error.message}`, 'fail');
+                });
+        }
+
+        function testImages() {
+            log('Testing Images...', 'info');
+            
+            const imagesToTest = [
+                '/assets/logo.png',
+                '/assets/school.jpg',
+                '/assets/faculty1.jpg',
+                '/assets/gallery7.jpg'
+            ];
+            
+            imagesToTest.forEach(imagePath => {
+                fetch(imagePath)
+                    .then(response => {
+                        if (response.ok) {
+                            log(`✅ Image accessible: ${imagePath}`, 'pass');
+                        } else {
+                            log(`❌ Image not accessible: ${imagePath}`, 'fail');
+                        }
+                    })
+                    .catch(error => {
+                        log(`❌ Error testing image ${imagePath}: ${error.message}`, 'fail');
+                    });
+            });
+        }
+
+        function runAllTests() {
+            log('=== Starting Comprehensive Test Suite ===', 'info');
+            document.getElementById('test-results').innerHTML = '';
+            
+            setTimeout(() => testBasicFunctionality(), 100);
+            setTimeout(() => testSEOElements(), 500);
+            setTimeout(() => testResponsiveness(), 1000);
+            setTimeout(() => testImages(), 1500);
+            setTimeout(() => {
+                log('=== Test Suite Complete ===', 'info');
+                log('Check results above. Green = Pass, Red = Fail, Orange = Warning', 'info');
+            }, 3000);
+        }
+
+        // Test manifest.json
+        function testPWA() {
+            log('Testing PWA Features...', 'info');
+            
+            fetch('/manifest.json')
+                .then(response => {
+                    if (response.ok) {
+                        log('✅ manifest.json accessible', 'pass');
+                        return response.json();
+                    } else {
+                        log('❌ manifest.json not accessible', 'fail');
+                    }
+                })
+                .then(manifest => {
+                    if (manifest) {
+                        if (manifest.name && manifest.short_name) {
+                            log('✅ Manifest has required name fields', 'pass');
+                        } else {
+                            log('❌ Manifest missing required name fields', 'fail');
+                        }
+                        
+                        if (manifest.icons && manifest.icons.length > 0) {
+                            log('✅ Manifest has icons defined', 'pass');
+                        } else {
+                            log('❌ Manifest missing icons', 'fail');
+                        }
+                    }
+                })
+                .catch(error => {
+                    log(`❌ Error testing manifest.json: ${error.message}`, 'fail');
+                });
+        }
+
+        // Auto-run basic test on load
+        window.addEventListener('load', () => {
+            log('Website Test Page Loaded', 'info');
+            log('Click buttons above to run specific tests', 'info');
+        });
+    </script>
+</body>
+</html>
