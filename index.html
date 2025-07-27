@@ -4,6 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Vikas Public School</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="alternate icon" href="assets/favicon.svg">
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
     rel="stylesheet"
@@ -736,6 +739,9 @@
           // Load about section data
           await loadSettingsData('about', updateAboutSection);
           
+          // Load academics section data
+          await loadSettingsData('academics', updateAcademicsSection);
+          
           // Load school info data
           await loadSettingsData('school-info', updateSchoolInfoSection);
           
@@ -1078,6 +1084,28 @@
         }
       }
       
+      function updateAcademicsSection(academicsData) {
+        const academicsSection = document.getElementById('academics');
+        if (academicsSection && academicsData) {
+          // Update description
+          const descriptionP = academicsSection.querySelector('p');
+          if (descriptionP && academicsData.description) {
+            descriptionP.textContent = academicsData.description;
+          }
+          
+          // Update the list items
+          const list = academicsSection.querySelector('ul');
+          if (list) {
+            list.innerHTML = `
+              <li><strong>Curriculum:</strong> ${academicsData.curriculum || 'CBSE syllabus from Nursery to Class XII.'}</li>
+              <li><strong>Special Programs:</strong> ${academicsData.programs || 'STEM initiatives, Coding clubs, Language enrichment.'}</li>
+              <li><strong>Assessment:</strong> ${academicsData.assessment || 'Continuous Evaluation, Project Based Learning, Olympiads preparation.'}</li>
+              <li><strong>Extra-Curricular:</strong> ${academicsData.extracurricular || 'Art, Music, Dance, Debate, and Sports to nurture talents.'}</li>
+            `;
+          }
+        }
+      }
+      
       // Helper function to clear cache for testing (call from browser console)
       window.clearDynamicContentCache = function() {
         localStorage.removeItem('facultyData');
@@ -1092,6 +1120,8 @@
         localStorage.removeItem('heroCacheTime');
         localStorage.removeItem('aboutData');
         localStorage.removeItem('aboutCacheTime');
+        localStorage.removeItem('academicsData');
+        localStorage.removeItem('academicsCacheTime');
         localStorage.removeItem('school-infoData');
         localStorage.removeItem('school-infoCacheTime');
         localStorage.removeItem('contactData');

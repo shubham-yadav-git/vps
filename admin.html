@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Admin Panel - Static Data Editor</title>
+  <title>Vikas Public School - Admin Dashboard</title>
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="alternate icon" href="assets/favicon.svg">
   <!-- Firebase SDKs - Optimized for Spark Plan -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -620,7 +623,7 @@
     <nav class="sidebar" id="sidebar">
       <div class="sidebar-header">
         <div class="logo">VP</div>
-        <h1>Admin Panel</h1>
+        <h1>VPS Admin</h1>
       </div>
 
       <div class="nav-section">
@@ -640,6 +643,10 @@
         <a class="nav-item" onclick="showSection('events')" id="nav-events">
           <span class="icon">📅</span>
           Events & News
+        </a>
+        <a class="nav-item" onclick="showSection('academics')" id="nav-academics">
+          <span class="icon">📚</span>
+          Academics
         </a>
         <a class="nav-item" onclick="showSection('hero')" id="nav-hero">
           <span class="icon">🏠</span>
@@ -779,6 +786,13 @@
     let galleryData = [];
     let testimonialsData = [];
     let eventsData = [];
+    let academicsData = {
+      description: 'At Vikas Public School, we offer a comprehensive curriculum that nurtures academic excellence and critical thinking skills.',
+      curriculum: 'CBSE syllabus from Nursery to Class XII.',
+      programs: 'STEM initiatives, Coding clubs, Language enrichment.',
+      assessment: 'Continuous Evaluation, Project Based Learning, Olympiads preparation.',
+      extracurricular: 'Art, Music, Dance, Debate, and Sports to nurture talents.'
+    };
     let heroData = { title: 'Vikas Public School', subtitle: 'Excellence in Education', backgroundImage: '' };
     let aboutData = { 
       content: 'Vikas Public School, established in 2004, is committed to nurturing young minds through holistic education. Our mission is to foster intellectual curiosity, critical thinking, and responsible citizenship through a dynamic curriculum and dedicated faculty.',
@@ -864,6 +878,7 @@
         'gallery': 'Gallery Management', 
         'testimonials': 'Testimonials Management',
         'events': 'Events & News Management',
+        'academics': 'Academics Management',
         'hero': 'Homepage Hero',
         'about': 'About Section',
         'school-info': 'School Information',
@@ -896,6 +911,9 @@
           break;
         case 'events':
           renderEventsSection();
+          break;
+        case 'academics':
+          renderAcademicsSection();
           break;
         case 'hero':
           renderHeroSection();
@@ -998,6 +1016,60 @@
       `;
       document.getElementById('content-area').innerHTML = content;
       renderTable('events');
+    }
+
+    // Academics section renderer
+    function renderAcademicsSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Academics Information</h2>
+          </div>
+          <div class="card-content">
+            <div class="form-group">
+              <label class="form-label">Section Description</label>
+              <textarea class="form-input" rows="3" id="academics-description" 
+                        placeholder="Brief description about the academic program">${academicsData.description || ''}</textarea>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Curriculum</label>
+              <input type="text" class="form-input" id="academics-curriculum" 
+                     value="${academicsData.curriculum || ''}" 
+                     placeholder="e.g., CBSE syllabus from Nursery to Class XII">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Special Programs</label>
+              <input type="text" class="form-input" id="academics-programs" 
+                     value="${academicsData.programs || ''}" 
+                     placeholder="e.g., STEM initiatives, Coding clubs, Language enrichment">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Assessment Methods</label>
+              <input type="text" class="form-input" id="academics-assessment" 
+                     value="${academicsData.assessment || ''}" 
+                     placeholder="e.g., Continuous Evaluation, Project Based Learning, Olympiads preparation">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Extra-Curricular Activities</label>
+              <input type="text" class="form-input" id="academics-extracurricular" 
+                     value="${academicsData.extracurricular || ''}" 
+                     placeholder="e.g., Art, Music, Dance, Debate, and Sports">
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="saveAcademicsData()">
+                <span class="icon">💾</span>
+                Save Academics Information
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
     }
 
     // Hero section renderer
@@ -1294,6 +1366,17 @@
       aboutData[field] = value;
       saveData('about', aboutData);
       showSuccessIndicator('about-update', `About ${field} updated`);
+    }
+
+    function saveAcademicsData() {
+      academicsData.description = document.getElementById('academics-description').value;
+      academicsData.curriculum = document.getElementById('academics-curriculum').value;
+      academicsData.programs = document.getElementById('academics-programs').value;
+      academicsData.assessment = document.getElementById('academics-assessment').value;
+      academicsData.extracurricular = document.getElementById('academics-extracurricular').value;
+      
+      saveData('academics', academicsData);
+      showSuccessIndicator('academics-save', 'Academics information updated successfully');
     }
 
     function updateLeadershipData(index, field, value) {
@@ -1644,6 +1727,26 @@
         }
       }).catch(err => {
         console.error('Error loading contact data:', err);
+      });
+
+      // Load academics data
+      db.collection('settings').doc('academics').get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          academicsData.description = data.description || academicsData.description;
+          academicsData.curriculum = data.curriculum || academicsData.curriculum;
+          academicsData.programs = data.programs || academicsData.programs;
+          academicsData.assessment = data.assessment || academicsData.assessment;
+          academicsData.extracurricular = data.extracurricular || academicsData.extracurricular;
+          console.log('Academics data loaded:', academicsData);
+          
+          // Re-render academics section if it's currently active
+          if (currentSection === 'academics') {
+            renderAcademicsSection();
+          }
+        }
+      }).catch(err => {
+        console.error('Error loading academics data:', err);
       });
     }
 
