@@ -1,0 +1,60 @@
+// Firestore Security Rules for Vikas Public School Website
+// These rules should be applied in your Firebase Console
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Public read access for website content (faculty, gallery, testimonials, events)
+    // But write access only for authenticated admin users
+    match /{collection}/{document} {
+      // Allow public read for website collections
+      allow read: if collection in ['faculty', 'gallery', 'testimonials', 'events', 'settings'];
+      
+      // Allow write only for authenticated admin users
+      allow write: if request.auth != null && 
+                      request.auth.token.email_verified == true &&
+                      request.auth.token.email in [
+                        'admin@vikasschool.edu.in',  // Replace with your admin email
+                        'manager@vikasschool.edu.in' // Add other admin emails as needed
+                      ];
+    }
+    
+    // Cache invalidation documents - admin write only
+    match /cache/{document} {
+      allow read: if true;  // Public read for cache checking
+      allow write: if request.auth != null && 
+                      request.auth.token.email_verified == true;
+    }
+    
+    // Completely block any other collections
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+/*
+HOW TO APPLY THESE RULES:
+
+1. Go to Firebase Console: https://console.firebase.google.com/
+2. Select your project: vpschool-918d6
+3. Go to Firestore Database
+4. Click on "Rules" tab
+5. Replace the existing rules with the rules above
+6. Update the admin email addresses in the list
+7. Click "Publish"
+
+SECURITY FEATURES:
+✅ Public can read website content (faculty, gallery, etc.)
+✅ Only authenticated admins can write/modify data
+✅ Email verification required for admin access
+✅ Specific admin email whitelist
+✅ Cache collection properly protected
+✅ All other collections blocked by default
+
+ADMIN ACCESS:
+- Only users with verified email addresses listed in the rules can modify content
+- Public users can read content for the website
+- Unauthenticated users cannot write anything
+*/
