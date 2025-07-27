@@ -197,6 +197,294 @@
       opacity: 1;
       transform: translateY(0);
     }
+
+    /* Floating Notice Board Widget */
+    .notice-board-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      border-radius: 50%;
+      box-shadow: 0 4px 20px rgba(79, 70, 229, 0.3);
+      z-index: 999;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.5rem;
+      border: none;
+      overflow: hidden;
+    }
+
+    .notice-board-widget:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 25px rgba(79, 70, 229, 0.4);
+    }
+
+    .notice-board-widget.expanded {
+      width: 320px;
+      height: auto;
+      border-radius: 16px;
+      flex-direction: column;
+      align-items: stretch;
+      max-height: 400px;
+    }
+
+    .notice-widget-header {
+      display: none;
+      padding: 1rem;
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      cursor: pointer;
+      user-select: none;
+      font-weight: 600;
+      border-radius: 16px 16px 0 0;
+      flex-shrink: 0;
+    }
+
+    .notice-board-widget.expanded .notice-widget-header {
+      display: flex;
+      align-items: center;
+    }
+
+    .notice-widget-fab-icon {
+      display: block;
+      animation: pulse 2s infinite;
+    }
+
+    .notice-board-widget.expanded .notice-widget-fab-icon {
+      display: none;
+    }
+
+    .notice-widget-header:hover {
+      background: linear-gradient(135deg, #4338ca, #6d28d9);
+    }
+
+    .notice-icon {
+      font-size: 1.2rem;
+      margin-right: 0.5rem;
+    }
+
+    .notice-title {
+      flex: 1;
+      font-size: 1rem;
+    }
+
+    .notice-count {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 0.25rem 0.5rem;
+      border-radius: 12px;
+      font-size: 0.875rem;
+      margin-right: 0.5rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .notice-toggle {
+      font-size: 0.875rem;
+      transition: transform 0.3s ease;
+    }
+
+    .notice-widget-content {
+      display: none;
+      max-height: 300px;
+      overflow-y: auto;
+      background: white;
+      border-radius: 0 0 16px 16px;
+      flex: 1;
+    }
+
+    .notice-board-widget.expanded .notice-widget-content {
+      display: block;
+    }
+
+    .notice-widget-loading {
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--text-secondary);
+      font-style: italic;
+      font-size: 0.875rem;
+    }
+
+    .notice-item {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border-light);
+      transition: background-color 0.2s ease;
+    }
+
+    .notice-item:hover {
+      background-color: #f8fafc;
+    }
+
+    .notice-item:last-child {
+      border-bottom: none;
+    }
+
+    .notice-category {
+      display: inline-block;
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.4rem;
+    }
+
+    .notice-category.urgent {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .notice-category.academic {
+      background: #dbeafe;
+      color: #2563eb;
+    }
+
+    .notice-category.events {
+      background: #d1fae5;
+      color: #059669;
+    }
+
+    .notice-category.general {
+      background: #f3e8ff;
+      color: #7c3aed;
+    }
+
+    .notice-title-text {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 0.25rem;
+      font-size: 0.85rem;
+      line-height: 1.3;
+    }
+
+    .notice-date {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.4rem;
+    }
+
+    .notice-description {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .notice-widget-footer {
+      padding: 0.75rem;
+      text-align: center;
+      border-top: 1px solid var(--border-light);
+      background: #f8fafc;
+      border-radius: 0 0 16px 16px;
+      flex-shrink: 0;
+    }
+
+    .view-all-notices {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      display: inline-block;
+    }
+
+    .view-all-notices:hover {
+      background: var(--primary);
+      color: white;
+      text-decoration: none;
+    }
+
+    /* Notice badge on FAB */
+    .notice-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background: #ef4444;
+      color: white;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.2rem 0.4rem;
+      border-radius: 10px;
+      min-width: 18px;
+      text-align: center;
+      border: 2px solid white;
+      animation: pulse 2s infinite;
+    }
+
+    .notice-badge:empty {
+      display: none;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .notice-board-widget {
+        bottom: 15px;
+        right: 15px;
+        width: 50px;
+        height: 50px;
+        font-size: 1.3rem;
+      }
+      
+      .notice-board-widget.expanded {
+        width: calc(100vw - 30px);
+        right: 15px;
+        bottom: 15px;
+      }
+      
+      .notice-widget-content {
+        max-height: 250px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .notice-board-widget {
+        width: 45px;
+        height: 45px;
+        font-size: 1.2rem;
+      }
+      
+      .notice-board-widget.expanded {
+        width: calc(100vw - 20px);
+        right: 10px;
+      }
+    }
+
+    /* Navigation Notice Badge */
+    .nav-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: white;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 10px;
+      margin-left: 0.5rem;
+      min-width: 20px;
+      text-align: center;
+      animation: pulse 2s infinite;
+    }
+
+    .nav-badge:empty {
+      display: none;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
   </style>
   <!-- Include fontawesome icons for social -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
@@ -363,23 +651,34 @@
     </div>
   </header>
 
-  <!-- Breadcrumbs for SEO -->
-  <nav class="breadcrumbs" aria-label="Breadcrumb navigation">
-    <div class="container">
-      <ol itemscope itemtype="https://schema.org/BreadcrumbList">
-        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <a itemprop="item" href="/">
-            <span itemprop="name">Home</span>
-          </a>
-          <meta itemprop="position" content="1" />
-        </li>
-        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-          <span itemprop="name" class="current">Vikas Public School</span>
-          <meta itemprop="position" content="2" />
-        </li>
-      </ol>
+  <!-- Notice Ticker Bar -->
+  <div class="notice-ticker-bar" id="notice-ticker-bar">
+    <div class="notice-ticker-container">
+      <div class="notice-bell-icon" onclick="toggleNoticePanel()">
+        <div class="bell-icon">🔔</div>
+        <div class="notice-count-badge" id="notice-count-badge">0</div>
+      </div>
+      <div class="notice-ticker-content">
+        <div class="notice-ticker-text" id="notice-ticker-text">
+          <span class="ticker-item">📌 Loading latest notices...</span>
+        </div>
+      </div>
+      <div class="notice-view-all" onclick="toggleNoticePanel()">
+        View All
+      </div>
     </div>
-  </nav>
+  </div>
+
+  <!-- Notice Panel (Collapsible) -->
+  <div class="notice-panel" id="notice-panel">
+    <div class="notice-panel-header">
+      <h3>📌 School Notice Board</h3>
+      <button class="notice-panel-close" onclick="toggleNoticePanel()">✕</button>
+    </div>
+    <div class="notice-panel-content" id="notice-panel-content">
+      <div class="notice-loading">Loading notices...</div>
+    </div>
+  </div>
 
   <section class="hero" id="hero" role="banner" aria-label="Welcome to Vikas Public School">
     <div class="hero-content">
@@ -1327,16 +1626,33 @@
         if (heroElement && heroData) {
           // Update hero text
           if (heroData.title || heroData.subtitle) {
-            const title = heroData.title || 'Vikas Public School';
-            const subtitle = heroData.subtitle || 'Excellence in Education';
-            heroElement.textContent = `${title} - ${subtitle}`;
+            const heroTitle = heroElement.querySelector('.hero-title');
+            const heroSubtitle = heroElement.querySelector('.hero-subtitle');
+            
+            if (heroTitle && heroData.title) {
+              heroTitle.textContent = heroData.title;
+            }
+            if (heroSubtitle && heroData.subtitle) {
+              heroSubtitle.textContent = heroData.subtitle;
+            }
           }
           
-          // Update background image if provided
-          if (heroData.backgroundImage) {
-            heroElement.style.backgroundImage = `url(${heroData.backgroundImage})`;
-            heroElement.style.backgroundSize = 'cover';
-            heroElement.style.backgroundPosition = 'center';
+          // Handle background image with theme blending
+          if (heroData.backgroundImage && heroData.backgroundImage.trim() !== '') {
+            console.log('Applying custom hero image with theme blending');
+            
+            // Set the CSS custom property for the ::before pseudo-element
+            heroElement.style.setProperty('--hero-bg-image', `url(${heroData.backgroundImage})`);
+            
+            // Add class to trigger CSS theme blending
+            heroElement.classList.add('has-custom-image');
+            
+          } else {
+            console.log('Using default hero styling');
+            
+            // Reset to default styling when no custom image
+            heroElement.classList.remove('has-custom-image');
+            heroElement.style.removeProperty('--hero-bg-image');
           }
         }
       }
@@ -1639,6 +1955,284 @@
         localStorage.removeItem('faqCacheTime');
         console.log('All cache cleared! Reload the page to see fresh data.');
       };
+
+      // Notice Ticker Bar & Panel Functionality
+      window.noticeState = {
+        panelOpen: false,
+        notices: [],
+        isLoaded: false
+      };
+
+      function toggleNoticePanel() {
+        const panel = document.getElementById('notice-panel');
+        
+        window.noticeState.panelOpen = !window.noticeState.panelOpen;
+        
+        if (window.noticeState.panelOpen) {
+          panel.classList.add('open');
+          
+          // Load notices if not already loaded
+          if (!window.noticeState.isLoaded) {
+            loadNoticesData();
+          }
+        } else {
+          panel.classList.remove('open');
+        }
+      }
+
+      async function loadNoticesData() {
+        try {
+          window.noticeState.isLoaded = true;
+          
+          // Use the same Firebase data that the main page uses
+          const cachedEventsData = localStorage.getItem('eventsData');
+          const cachedTime = localStorage.getItem('eventsCacheTime');
+          const now = Date.now();
+          const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes cache
+          
+          let eventsData = [];
+          
+          if (cachedEventsData && cachedTime && (now - parseInt(cachedTime)) < CACHE_DURATION) {
+            eventsData = JSON.parse(cachedEventsData);
+          } else if (typeof firebase !== 'undefined' && firebase.firestore) {
+            try {
+              const db = firebase.firestore();
+              const snapshot = await db.collection('events').orderBy('date', 'desc').limit(20).get();
+              eventsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+              
+              // Cache the data
+              localStorage.setItem('eventsData', JSON.stringify(eventsData));
+              localStorage.setItem('eventsCacheTime', now.toString());
+            } catch (error) {
+              console.warn('Firebase error for notices, using sample data:', error);
+              eventsData = getSampleNoticesData();
+            }
+          } else {
+            eventsData = getSampleNoticesData();
+          }
+          
+          // Filter and sort notices (show only recent and active ones)
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); // Set to start of day for proper comparison
+          console.log('Today\'s date (start of day):', today.toISOString());
+          
+          const activeNotices = eventsData.filter(notice => {
+            if (notice.validUntil && notice.validUntil.trim() !== '') {
+              const validUntilDate = new Date(notice.validUntil);
+              validUntilDate.setHours(23, 59, 59, 999); // Set to end of day
+              const isValid = validUntilDate >= today;
+              console.log(`Notice "${notice.title}": validUntil=${notice.validUntil}, parsed date=${validUntilDate.toISOString()}, isValid=${isValid}`);
+              return isValid;
+            }
+            console.log(`Notice "${notice.title}": no validUntil or empty, including`);
+            return true;
+          });
+          
+          console.log(`Total notices: ${eventsData.length}, Active notices: ${activeNotices.length}`);
+          console.log('Active notices:', activeNotices.map(n => n.title));
+          
+          window.noticeState.notices = activeNotices;
+          updateNoticeTicker(activeNotices);
+          renderNoticePanel(activeNotices);
+          
+        } catch (error) {
+          console.error('Error loading notices:', error);
+          const tickerText = document.getElementById('notice-ticker-text');
+          tickerText.innerHTML = '<span class="ticker-item">📌 Error loading notices</span>';
+        }
+      }
+
+      function getSampleNoticesData() {
+        return [
+          {
+            id: '1',
+            title: 'Mid-term Examination Schedule Released',
+            date: '2025-07-27',
+            validUntil: '2025-09-30',
+            category: 'urgent',
+            description: 'Mid-term examinations for all classes will commence from September 15, 2025. Students must prepare according to the detailed schedule available in the admissions section.'
+          },
+          {
+            id: '2',
+            title: 'Annual Sports Day - August 15, 2025',
+            date: '2025-07-25',
+            validUntil: '',
+            category: 'events',
+            description: 'Join us for a day full of sportsmanship and fun activities for all students. Participation forms available at the sports department.'
+          },
+          {
+            id: '3',
+            title: 'Science Exhibition - September 10, 2025',
+            date: '2025-07-20',
+            validUntil: '',
+            category: 'academic',
+            description: 'A platform for young innovators to showcase their projects and experiments. Registration deadline: August 25, 2025.'
+          },
+          {
+            id: '4',
+            title: 'Parent-Teacher Meeting - October 5, 2025',
+            date: '2025-07-18',
+            validUntil: '',
+            category: 'general',
+            description: 'Discuss your child\'s progress and participate in school development feedback sessions. Meeting timings: 9 AM to 4 PM.'
+          },
+          {
+            id: '5',
+            title: 'Holiday Notice - Independence Day',
+            date: '2025-07-27',
+            validUntil: '2025-08-15',
+            category: 'urgent',
+            description: 'School will remain closed on August 15, 2025, in observance of Independence Day. Regular classes will resume on August 16, 2025.'
+          }
+        ];
+      }
+
+      function updateNoticeTicker(notices) {
+        const tickerText = document.getElementById('notice-ticker-text');
+        const countBadge = document.getElementById('notice-count-badge');
+        
+        console.log(`updateNoticeTicker called with ${notices.length} notices`);
+        console.log('countBadge element:', countBadge);
+        
+        if (!countBadge) {
+          console.error('notice-count-badge element not found!');
+          return;
+        }
+        
+        if (notices.length === 0) {
+          tickerText.innerHTML = '<span class="ticker-item">📌 No active notices at this time</span>';
+          countBadge.textContent = '0';
+          countBadge.classList.remove('show');
+          console.log('Set badge to 0, removed show class');
+          return;
+        }
+        
+        // Update count badge
+        countBadge.textContent = notices.length;
+        countBadge.classList.add('show');
+        console.log(`Set badge count to: ${notices.length}, added show class`);
+        console.log('Badge classes:', countBadge.classList.toString());
+        
+        // Create ticker items
+        const tickerItems = notices.map(notice => {
+          const categoryIcon = getCategoryIcon(notice.category);
+          const urgentClass = notice.category === 'urgent' ? ' urgent' : '';
+          return `<span class="ticker-item${urgentClass}">${categoryIcon} ${notice.title}</span>`;
+        }).join('');
+        
+        tickerText.innerHTML = tickerItems;
+      }
+
+      function renderNoticePanel(notices) {
+        const content = document.getElementById('notice-panel-content');
+        
+        if (notices.length === 0) {
+          content.innerHTML = '<div class="notice-loading">No active notices at this time</div>';
+          return;
+        }
+        
+        const noticesHtml = notices.map(notice => {
+          const formattedDate = formatNoticeDate(notice.date);
+          const categoryIcon = getCategoryIcon(notice.category);
+          
+          return `
+            <div class="notice-item">
+              <div class="notice-item-header">
+                <span class="notice-category ${notice.category}">${categoryIcon} ${notice.category}</span>
+                <span class="notice-date">${formattedDate}</span>
+              </div>
+              <div class="notice-title">${notice.title}</div>
+              <div class="notice-description">${notice.description}</div>
+            </div>
+          `;
+        }).join('');
+        
+        content.innerHTML = noticesHtml;
+      }
+
+      function getCategoryIcon(category) {
+        const icons = {
+          urgent: '🚨',
+          academic: '📚',
+          events: '🎉',
+          general: '📋'
+        };
+        return icons[category] || '📌';
+      }
+
+      function formatNoticeDate(dateString) {
+        try {
+          const date = new Date(dateString);
+          return date.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+          });
+        } catch (error) {
+          return dateString;
+        }
+      }
+
+      // Close panel when clicking outside
+      document.addEventListener('click', function(event) {
+        const panel = document.getElementById('notice-panel');
+        const bellIcon = document.querySelector('.notice-bell-icon');
+        const viewAllBtn = document.querySelector('.notice-view-all');
+        
+        if (window.noticeState.panelOpen && 
+            !panel.contains(event.target) && 
+            !bellIcon.contains(event.target) &&
+            !viewAllBtn.contains(event.target)) {
+          toggleNoticePanel();
+        }
+      });
+
+      // Initialize notice system on page load
+      function initializeNoticeSystem() {
+        // Check if DOM elements exist before loading
+        const tickerBar = document.getElementById('notice-ticker-bar');
+        const countBadge = document.getElementById('notice-count-badge');
+        
+        if (!tickerBar || !countBadge) {
+          console.warn('Notice system DOM elements not ready, retrying in 100ms');
+          setTimeout(initializeNoticeSystem, 100);
+          return;
+        }
+        
+        // Calculate and set header height for sticky positioning
+        adjustNoticeTickerPosition();
+        
+        console.log('Notice system initializing - DOM elements found');
+        loadNoticesData();
+      }
+
+      // Function to adjust notice ticker position based on header height
+      function adjustNoticeTickerPosition() {
+        const header = document.querySelector('header');
+        const tickerBar = document.getElementById('notice-ticker-bar');
+        
+        if (header && tickerBar) {
+          const headerHeight = header.offsetHeight;
+          console.log('Calculated header height:', headerHeight + 'px');
+          
+          // Set CSS custom property for header height
+          document.documentElement.style.setProperty('--calculated-header-height', headerHeight + 'px');
+          
+          // Apply the calculated height to the ticker bar (directly below header)
+          tickerBar.style.top = headerHeight + 'px';
+        }
+      }
+
+      // Recalculate on window resize
+      window.addEventListener('resize', adjustNoticeTickerPosition);
+
+      // Initialize notice system when page loads
+      setTimeout(() => {
+        initializeNoticeSystem();
+      }, 1000);
+
+      // Make toggle function globally available
+      window.toggleNoticePanel = toggleNoticePanel;
     });
   </script>
 
