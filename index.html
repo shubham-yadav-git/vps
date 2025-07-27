@@ -1455,22 +1455,61 @@
       }
       
       function updateEventsSection(eventsData) {
-        const eventsList = document.querySelector('.events-list');
-        if (eventsList && eventsData.length > 0) {
-          eventsList.innerHTML = eventsData.map(event => {
-            const safeTitle = (event.title || 'Event').replace(/"/g, '&quot;');
-            const safeDate = (event.date || '').replace(/"/g, '&quot;');
-            const safeDescription = (event.description || '').replace(/"/g, '&quot;');
+        const noticesList = document.querySelector('.notices-list');
+        if (noticesList && eventsData.length > 0) {
+          noticesList.innerHTML = eventsData.map(notice => {
+            const safeTitle = (notice.title || 'Notice').replace(/"/g, '&quot;');
+            const safeDate = (notice.date || '').replace(/"/g, '&quot;');
+            const safeValidUntil = (notice.validUntil || '').replace(/"/g, '&quot;');
+            const safeDescription = (notice.description || '').replace(/"/g, '&quot;');
+            const category = notice.category || 'general';
+            
+            // Format dates for display
+            const displayDate = safeDate ? new Date(safeDate).toLocaleDateString('en-US', { 
+              year: 'numeric', month: 'long', day: 'numeric' 
+            }) : '';
+            const displayValidUntil = safeValidUntil ? new Date(safeValidUntil).toLocaleDateString('en-US', { 
+              year: 'numeric', month: 'long', day: 'numeric' 
+            }) : '';
+            
+            // Get category badge info
+            const badges = {
+              urgent: { icon: 'fas fa-exclamation-triangle', text: 'Urgent', class: 'urgent-badge' },
+              academic: { icon: 'fas fa-graduation-cap', text: 'Academic', class: 'academic-badge' },
+              events: { icon: 'fas fa-calendar-alt', text: 'Event', class: 'events-badge' },
+              general: { icon: 'fas fa-info-circle', text: 'General', class: 'general-badge' }
+            };
+            const badge = badges[category] || badges.general;
             
             return `
-            <li class="event-item">
-              <div class="event-info">
-                <h3>${safeTitle}${safeDate ? ' - ' + safeDate : ''}</h3>
+            <li class="notice-item ${category}" data-category="${category}">
+              <div class="notice-badge ${badge.class}">
+                <i class="${badge.icon}"></i> ${badge.text}
+              </div>
+              <div class="notice-content">
+                <h3>${safeTitle}</h3>
+                <div class="notice-meta">
+                  <span class="notice-date">
+                    <i class="fas fa-calendar"></i> Posted: ${displayDate}
+                  </span>
+                  ${displayValidUntil ? `
+                  <span class="notice-valid">
+                    <i class="fas fa-clock"></i> Valid until: ${displayValidUntil}
+                  </span>
+                  ` : ''}
+                </div>
                 <p>${safeDescription}</p>
               </div>
             </li>
           `;
           }).join('');
+          
+          // Re-initialize notice board filtering after updating content
+          setTimeout(() => {
+            if (window.initializeNoticeBoard) {
+              window.initializeNoticeBoard();
+            }
+          }, 100);
         }
       }
       

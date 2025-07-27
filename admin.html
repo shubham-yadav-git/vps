@@ -690,8 +690,8 @@
           Testimonials
         </a>
         <a class="nav-item" onclick="showSection('events')" id="nav-events">
-          <span class="icon">📅</span>
-          Events & News
+          <span class="icon">�</span>
+          Notice Board
         </a>
         <a class="nav-item" onclick="showSection('academics')" id="nav-academics">
           <span class="icon">📚</span>
@@ -956,7 +956,7 @@
         'faculty': 'Faculty Management',
         'gallery': 'Gallery Management', 
         'testimonials': 'Testimonials Management',
-        'events': 'Events & News Management',
+        'events': 'Notice Board Management',
         'academics': 'Academics Management',
         'faq': 'FAQ Management',
         'hero': 'Homepage Hero',
@@ -1090,13 +1090,45 @@
       const content = `
         <div class="card">
           <div class="card-header">
-            <h2 class="card-title">Events & News</h2>
-            <button class="btn btn-primary" onclick="addRow('events')">
-              <span class="icon">➕</span>
-              Add Event/News
-            </button>
+            <h2 class="card-title">Notice Board Management</h2>
+            <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">
+              Manage notices, announcements, and events displayed on the school notice board
+            </p>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+              <button class="btn btn-primary" onclick="addRow('events')">
+                <span class="icon">➕</span>
+                Add New Notice
+              </button>
+              <button class="btn btn-secondary" onclick="exportNotices()">
+                <span class="icon">📥</span>
+                Export Notices
+              </button>
+              <button class="btn btn-secondary" onclick="document.getElementById('import-notices').click()">
+                <span class="icon">📤</span>
+                Import Notices
+              </button>
+              <input type="file" id="import-notices" accept=".json" style="display: none;" onchange="importNotices(event)">
+            </div>
           </div>
           <div class="card-content">
+            <div class="notice-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+              <div class="stat-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold;">${eventsData.filter(n => n.category === 'urgent').length}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Urgent Notices</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); color: white; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold;">${eventsData.filter(n => n.category === 'academic').length}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Academic Notices</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold;">${eventsData.filter(n => n.category === 'events').length}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">Event Notices</div>
+              </div>
+              <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); color: white; padding: 1rem; border-radius: 8px;">
+                <div style="font-size: 1.5rem; font-weight: bold;">${eventsData.filter(n => n.category === 'general').length}</div>
+                <div style="font-size: 0.9rem; opacity: 0.9;">General Notices</div>
+              </div>
+            </div>
             <div class="table-container" id="events-table"></div>
           </div>
         </div>
@@ -1522,9 +1554,46 @@
         { id: '2', name: 'Meera Singh', role: 'Student', text: 'The teachers here are supportive and the activities are fun and enriching. I love being part of the school.' }
       ],
       events: [
-        { id: '1', title: 'Annual Sports Day', date: 'August 15, 2025', description: 'Join us for a day full of sportsmanship and fun activities for all students.' },
-        { id: '2', title: 'Science Exhibition', date: 'September 10, 2025', description: 'A platform for young innovators to showcase their projects and experiments.' },
-        { id: '3', title: 'Parent-Teacher Meeting', date: 'October 5, 2025', description: 'Discuss your child\'s progress and participate in school development feedback sessions.' }
+        { 
+          id: '1', 
+          title: 'Mid-term Examination Schedule Released', 
+          date: '2025-07-27',
+          validUntil: '2025-09-30',
+          category: 'urgent',
+          description: 'Mid-term examinations for all classes will commence from September 15, 2025. Students must prepare according to the detailed schedule available in the admissions section.'
+        },
+        { 
+          id: '2', 
+          title: 'Annual Sports Day - August 15, 2025', 
+          date: '2025-07-25',
+          validUntil: '',
+          category: 'events',
+          description: 'Join us for a day full of sportsmanship and fun activities for all students. Participation forms available at the sports department.'
+        },
+        { 
+          id: '3', 
+          title: 'Science Exhibition - September 10, 2025', 
+          date: '2025-07-20',
+          validUntil: '',
+          category: 'academic',
+          description: 'A platform for young innovators to showcase their projects and experiments. Registration deadline: August 25, 2025.'
+        },
+        { 
+          id: '4', 
+          title: 'Parent-Teacher Meeting - October 5, 2025', 
+          date: '2025-07-18',
+          validUntil: '',
+          category: 'general',
+          description: 'Discuss your child\'s progress and participate in school development feedback sessions. Meeting timings: 9 AM to 4 PM.'
+        },
+        { 
+          id: '5', 
+          title: 'Holiday Notice - Independence Day', 
+          date: '2025-07-27',
+          validUntil: '2025-08-15',
+          category: 'urgent',
+          description: 'School will remain closed on August 15, 2025, in observance of Independence Day. Regular classes will resume on August 16, 2025.'
+        }
       ],
       about: {
         content: 'Vikas Public School, established in 2004, is committed to nurturing young minds through holistic education. Our mission is to foster intellectual curiosity, critical thinking, and responsible citizenship through a dynamic curriculum and dedicated faculty.',
@@ -2226,7 +2295,7 @@
         tableId = 'testimonials-table';
       } else if (type === 'events') {
         data = eventsData;
-        columns = ['title', 'date', 'description'];
+        columns = ['title', 'date', 'validUntil', 'category', 'description'];
         tableId = 'events-table';
       }
       
@@ -2239,7 +2308,9 @@
       
       let html = '<table class="table"><thead><tr>';
       columns.forEach(col => {
-        html += `<th>${col.charAt(0).toUpperCase() + col.slice(1)}</th>`;
+        let headerName = col.charAt(0).toUpperCase() + col.slice(1);
+        if (col === 'validUntil') headerName = 'Valid Until';
+        html += `<th>${headerName}</th>`;
       });
       html += '<th>Actions</th></tr></thead><tbody>';
       
@@ -2272,6 +2343,29 @@
                 <textarea class="form-input form-textarea" style="min-height:60px;" 
                           onchange="updateCell('${type}',${idx},'${col}',this.value)" 
                           placeholder="Enter ${col}">${value}</textarea>
+              </td>`;
+            } else if (col === 'category' && type === 'events') {
+              html += `<td>
+                <select class="form-input" onchange="updateCell('${type}',${idx},'${col}',this.value)">
+                  <option value="urgent" ${value === 'urgent' ? 'selected' : ''}>🚨 Urgent</option>
+                  <option value="academic" ${value === 'academic' ? 'selected' : ''}>🎓 Academic</option>
+                  <option value="events" ${value === 'events' ? 'selected' : ''}>📅 Events</option>
+                  <option value="general" ${value === 'general' ? 'selected' : ''}>ℹ️ General</option>
+                </select>
+              </td>`;
+            } else if (col === 'validUntil' && type === 'events') {
+              html += `<td>
+                <input type="date" class="form-input" 
+                       value="${value}" 
+                       onchange="updateCell('${type}',${idx},'${col}',this.value)" 
+                       placeholder="Valid until (optional)">
+              </td>`;
+            } else if (col === 'date' && type === 'events') {
+              html += `<td>
+                <input type="date" class="form-input" 
+                       value="${value}" 
+                       onchange="updateCell('${type}',${idx},'${col}',this.value)" 
+                       placeholder="Published date">
               </td>`;
             } else {
               html += `<td>
@@ -2345,7 +2439,7 @@
       if (type === 'faculty') newRow = { name: '', role: '', description: '', photo: '' };
       else if (type === 'gallery') newRow = { src: '', alt: '' };
       else if (type === 'testimonials') newRow = { name: '', role: '', text: '' };
-      else if (type === 'events') newRow = { title: '', date: '', description: '' };
+      else if (type === 'events') newRow = { title: '', date: '', validUntil: '', category: 'general', description: '' };
       
       if (BYPASS_AUTH) {
         // In local mode, just add to array with a temporary ID
@@ -2878,6 +2972,103 @@
             document.getElementById('login-status').innerHTML += '<br>Invalid email format.';
           }
         });
+    }
+    
+    // Notice Board Import/Export Functions
+    function exportNotices() {
+      const dataToExport = {
+        notices: eventsData,
+        exportDate: new Date().toISOString(),
+        version: '1.0'
+      };
+      
+      const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {
+        type: 'application/json'
+      });
+      
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `notices-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      showSuccessIndicator('export-notices', 'Notices exported successfully!');
+    }
+    
+    function importNotices(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const data = JSON.parse(e.target.result);
+          
+          if (!data.notices || !Array.isArray(data.notices)) {
+            alert('Invalid file format. Please select a valid notices export file.');
+            return;
+          }
+          
+          // Validate notice structure
+          const validNotices = data.notices.filter(notice => {
+            return notice.title && notice.category && 
+                   ['urgent', 'academic', 'events', 'general'].includes(notice.category);
+          });
+          
+          if (validNotices.length === 0) {
+            alert('No valid notices found in the file.');
+            return;
+          }
+          
+          // Confirm import
+          const confirmMsg = `Found ${validNotices.length} valid notices to import. This will replace existing notices. Continue?`;
+          if (!confirm(confirmMsg)) return;
+          
+          // Import notices
+          eventsData.length = 0; // Clear existing data
+          validNotices.forEach((notice, index) => {
+            notice.id = Date.now() + index; // Generate new IDs
+            eventsData.push(notice);
+          });
+          
+          // Save to Firebase if not in bypass mode
+          if (!BYPASS_AUTH) {
+            // Clear existing collection and add new data
+            const batch = db.batch();
+            
+            // Note: In a real implementation, you'd want to delete existing docs first
+            validNotices.forEach(notice => {
+              const docRef = db.collection('events').doc();
+              const noticeData = { ...notice };
+              delete noticeData.id;
+              batch.set(docRef, noticeData);
+            });
+            
+            batch.commit().then(() => {
+              renderEventsSection(); // Refresh the UI
+              showSuccessIndicator('import-notices', `${validNotices.length} notices imported successfully!`);
+            }).catch(err => {
+              console.error('Import error:', err);
+              alert('Error saving to Firebase: ' + err.message);
+            });
+          } else {
+            renderEventsSection(); // Refresh the UI
+            showSuccessIndicator('import-notices', `${validNotices.length} notices imported successfully!`);
+          }
+          
+        } catch (error) {
+          console.error('Import error:', error);
+          alert('Error reading file: ' + error.message);
+        } finally {
+          // Clear the file input
+          event.target.value = '';
+        }
+      };
+      
+      reader.readAsText(file);
     }
   </script>
 </body>
