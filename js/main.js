@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize section highlighting
   initializeSectionHighlighting();
   
+  // Initialize dynamic breadcrumbs
+  initializeDynamicBreadcrumbs();
+  
   // Initialize reading progress
   initializeReadingProgress();
   
@@ -534,4 +537,87 @@ function initializeGalleryModal() {
   
   // Make attachGalleryEvents globally available for Firebase updates
   window.attachGalleryEvents = attachGalleryEvents;
+}
+
+// Dynamic Breadcrumb Navigation System
+function initializeDynamicBreadcrumbs() {
+  const breadcrumbsNav = document.querySelector('.breadcrumbs');
+  if (!breadcrumbsNav) return;
+
+  // Section mapping for breadcrumbs
+  const sectionMap = {
+    'hero': { name: 'Home', parent: null },
+    'about': { name: 'About Us', parent: 'hero' },
+    'features': { name: 'Why Choose Us', parent: 'about' },
+    'academics': { name: 'Academics', parent: 'about' },
+    'admissions': { name: 'Admissions', parent: 'academics' },
+    'infrastructure': { name: 'Infrastructure', parent: 'about' },
+    'gallery': { name: 'Gallery', parent: 'infrastructure' },
+    'achievements': { name: 'Achievements', parent: 'about' },
+    'events': { name: 'Events & News', parent: 'achievements' },
+    'contact': { name: 'Contact Us', parent: 'hero' }
+  };
+
+  let currentSection = 'hero';
+
+  function updateBreadcrumbs(sectionId) {
+    if (!sectionMap[sectionId] || currentSection === sectionId) return;
+    currentSection = sectionId;
+
+    const section = sectionMap[sectionId];
+    const breadcrumbsList = breadcrumbsNav.querySelector('ol');
+    
+    // Clear existing breadcrumbs except home
+    breadcrumbsList.innerHTML = `
+      <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="#hero" onclick="document.getElementById('hero').scrollIntoView({behavior: 'smooth'})">
+          <span itemprop="name">🏠 Home</span>
+        </a>
+        <meta itemprop="position" content="1" />
+      </li>
+    `;
+
+    // Add current section if not home
+    if (sectionId !== 'hero') {
+      const sectionElement = document.getElementById(sectionId);
+      const sectionTitle = sectionElement?.querySelector('h2')?.textContent || section.name;
+      
+      breadcrumbsList.innerHTML += `
+        <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+          <span itemprop="name" class="current">📍 ${sectionTitle}</span>
+          <meta itemprop="position" content="2" />
+        </li>
+      `;
+    }
+  }
+
+  // Monitor scroll and update breadcrumbs
+  let scrollTimeout;
+  window.addEventListener('scroll', function() {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      const sections = document.querySelectorAll('section, .hero');
+      const scrollPosition = window.pageYOffset;
+      let activeSection = 'hero';
+
+      if (scrollPosition < 300) {
+        activeSection = 'hero';
+      } else {
+        sections.forEach(section => {
+          const sectionTop = section.offsetTop - 120;
+          const sectionHeight = section.offsetHeight;
+          const sectionId = section.getAttribute('id');
+          
+          if (sectionId && scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+            activeSection = sectionId;
+          }
+        });
+      }
+
+      updateBreadcrumbs(activeSection);
+    }, 100);
+  }, { passive: true });
+
+  // Initial update
+  updateBreadcrumbs('hero');
 }
