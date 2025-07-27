@@ -680,23 +680,6 @@
     </div>
   </div>
 
-  <!-- Notice Detail Modal -->
-  <div class="notice-modal" id="notice-modal">
-    <div class="notice-modal-content">
-      <div class="notice-modal-header">
-        <h3 id="notice-modal-title">Notice Details</h3>
-        <button class="notice-modal-close" onclick="closeNoticeModal()">✕</button>
-      </div>
-      <div class="notice-modal-body" id="notice-modal-body">
-        <!-- Notice details will be loaded here -->
-      </div>
-      <div class="notice-modal-footer">
-        <button onclick="closeNoticeModal()" class="cta-button secondary">Close</button>
-        <button onclick="goToNoticeBoard()" class="cta-button primary">View All Notices</button>
-      </div>
-    </div>
-  </div>
-
   <section class="hero" id="hero" role="banner" aria-label="Welcome to Vikas Public School">
     <div class="hero-content">
       <h1 class="hero-title">Excellence in Education, Empowering Future Leaders</h1>
@@ -2152,17 +2135,41 @@
           const formattedDate = formatNoticeDate(notice.date);
           const categoryIcon = getCategoryIcon(notice.category);
           
+          // Create truncated versions for display
+          const maxTitleLength = 80;
+          const maxDescriptionLength = 120;
+          
+          const titleTruncated = notice.title.length > maxTitleLength;
+          const descriptionTruncated = notice.description.length > maxDescriptionLength;
+          const showReadMore = titleTruncated || descriptionTruncated;
+          
+          const displayTitle = titleTruncated ? notice.title.substring(0, maxTitleLength) + '...' : notice.title;
+          const displayDescription = descriptionTruncated ? notice.description.substring(0, maxDescriptionLength) + '...' : notice.description;
+          
           return `
-            <div class="notice-item-panel ${notice.category}" data-notice-id="${notice.id}" style="cursor: pointer;">
+            <div class="notice-item-panel ${notice.category}" data-notice-id="${notice.id}" data-expanded="false">
               <div class="notice-item-header">
                 <span class="notice-category ${notice.category}">${categoryIcon} ${notice.category}</span>
                 <span class="notice-date">${formattedDate}</span>
               </div>
-              <div class="notice-title">${notice.title}</div>
-              <div class="notice-description">${notice.description}</div>
-              <div class="notice-action">
-                <small style="color: var(--primary-color); font-weight: 500;">Click to read more →</small>
-              </div>
+              <div class="notice-title" data-full-title="${notice.title.replace(/"/g, '&quot;')}">${displayTitle}</div>
+              <div class="notice-description" data-full-description="${notice.description.replace(/"/g, '&quot;')}">${displayDescription}</div>
+              ${showReadMore ? `
+                <div class="notice-action">
+                  <button class="notice-read-more-btn">
+                    <span>Read more</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                      <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                  <button class="notice-read-less-btn" style="display: none;">
+                    <span>Read less</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                      <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
+              ` : ''}
             </div>
           `;
         }).join('');
@@ -2173,27 +2180,126 @@
         const noticeItems = content.querySelectorAll('.notice-item-panel[data-notice-id]');
         console.log('Found notice items in panel:', noticeItems.length);
         
-        // Add a simple test click
+        // Add click event handlers for expansion only
         content.addEventListener('click', function(e) {
           console.log('Click detected in notice panel content:', e.target);
-          const noticeItem = e.target.closest('.notice-item-panel');
-          if (noticeItem) {
-            console.log('Clicked on notice item:', noticeItem);
-            const noticeId = noticeItem.getAttribute('data-notice-id');
-            console.log('Notice ID:', noticeId);
-            if (noticeId) {
-              showNoticeDetails(noticeId);
+          
+          // Check if clicked on read more or read less button (only if visible)
+          const readMoreBtn = e.target.closest('.notice-read-more-btn');
+          const readLessBtn = e.target.closest('.notice-read-less-btn');
+          
+          // Only respond to clicks on visible buttons
+          if (readMoreBtn && readMoreBtn.style.display !== 'none') {
+            e.stopPropagation();
+            e.preventDefault();
+            const noticeItem = readMoreBtn.closest('.notice-item-panel');
+            if (noticeItem) {
+              console.log('Read more button clicked');
+              window.toggleNoticeExpansion(noticeItem);
             }
+            return;
           }
+          
+          if (readLessBtn && readLessBtn.style.display !== 'none') {
+            e.stopPropagation();
+            e.preventDefault();
+            const noticeItem = readLessBtn.closest('.notice-item-panel');
+            if (noticeItem) {
+              console.log('Read less button clicked');
+              window.toggleNoticeExpansion(noticeItem);
+            }
+            return;
+          }
+          
+          // No modal opening - cards only expand/collapse
+          // Users can read full content by clicking "Read more"
         });
+      }
+
+      // Function to toggle notice expansion - moved outside renderNoticePanel
+      window.toggleNoticeExpansion = function(noticeItem) {
+        const titleEl = noticeItem.querySelector('.notice-title');
+        const descriptionEl = noticeItem.querySelector('.notice-description');
+        const readMoreBtn = noticeItem.querySelector('.notice-read-more-btn');
+        const readLessBtn = noticeItem.querySelector('.notice-read-less-btn');
         
-        noticeItems.forEach(item => {
-          item.addEventListener('click', function() {
-            const noticeId = this.getAttribute('data-notice-id');
-            console.log('Clicking notice in panel:', noticeId);
-            showNoticeDetails(noticeId);
-          });
-        });
+        // Check if currently showing full content by comparing with stored full content
+        const currentTitle = titleEl.textContent;
+        const currentDescription = descriptionEl.textContent;
+        const fullTitle = titleEl.dataset.fullTitle;
+        const fullDescription = descriptionEl.dataset.fullDescription;
+        
+        const isCurrentlyExpanded = (currentTitle === fullTitle && currentDescription === fullDescription);
+        
+        console.log('Current state check:');
+        console.log('Current title:', currentTitle);
+        console.log('Full title:', fullTitle);
+        console.log('Current description:', currentDescription);
+        console.log('Full description:', fullDescription);
+        console.log('Is currently expanded:', isCurrentlyExpanded);
+        
+        if (isCurrentlyExpanded) {
+          // Currently showing full content - collapse to truncated
+          const maxTitleLength = 80;
+          const maxDescriptionLength = 120;
+          
+          const titleTruncated = fullTitle.length > maxTitleLength;
+          const descriptionTruncated = fullDescription.length > maxDescriptionLength;
+          
+          const newTitle = titleTruncated ? fullTitle.substring(0, maxTitleLength) + '...' : fullTitle;
+          const newDescription = descriptionTruncated ? fullDescription.substring(0, maxDescriptionLength) + '...' : fullDescription;
+          
+          console.log('Setting new title:', newTitle);
+          console.log('Setting new description:', newDescription);
+          
+          titleEl.textContent = newTitle;
+          descriptionEl.textContent = newDescription;
+          
+          // Force a reflow to ensure DOM updates
+          titleEl.offsetHeight;
+          descriptionEl.offsetHeight;
+          
+          noticeItem.classList.remove('expanded');
+          noticeItem.dataset.expanded = 'false';
+          if (readMoreBtn) {
+            readMoreBtn.style.display = 'inline-flex';
+            console.log('Showing read more button');
+          }
+          if (readLessBtn) {
+            readLessBtn.style.display = 'none';
+            console.log('Hiding read less button');
+          }
+          
+          console.log('After update - Title:', titleEl.textContent);
+          console.log('After update - Description:', descriptionEl.textContent);
+          console.log('Collapsed to truncated view');
+        } else {
+          // Currently showing truncated content - expand to full
+          console.log('Setting full title:', fullTitle);
+          console.log('Setting full description:', fullDescription);
+          
+          titleEl.textContent = fullTitle;
+          descriptionEl.textContent = fullDescription;
+          
+          // Force a reflow to ensure DOM updates
+          titleEl.offsetHeight;
+          descriptionEl.offsetHeight;
+          
+          noticeItem.classList.add('expanded');
+          noticeItem.dataset.expanded = 'true';
+          if (readMoreBtn) {
+            readMoreBtn.style.display = 'none';
+            console.log('Hiding read more button');
+          }
+          if (readLessBtn) {
+            readLessBtn.style.display = 'inline-flex';
+            console.log('Showing read less button');
+          }
+          
+          console.log('After update - Title:', titleEl.textContent);
+          console.log('After update - Description:', descriptionEl.textContent);
+          console.log('Expanded to full view');
+        }
       }
 
       function getCategoryIcon(category) {
