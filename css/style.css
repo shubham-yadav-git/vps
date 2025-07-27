@@ -495,7 +495,7 @@ header {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 1);
 }
 
 .hero-pattern {
@@ -1303,13 +1303,20 @@ header {
 }
 
 .faculty-photo {
-  width: 80px;
-  height: 80px;
+  width: 80px !important;
+  height: 80px !important;
+  min-width: 80px !important;
+  min-height: 80px !important;
+  max-width: 80px !important;
+  max-height: 80px !important;
   border-radius: 50%;
   object-fit: cover;
+  object-position: center;
   border: 3px solid var(--primary-color);
   float: none;
   margin-right: 0;
+  display: block;
+  flex-shrink: 0;
 }
 
 .faculty-info h3 {
@@ -1622,13 +1629,14 @@ header {
 }
 
 .testimonial-item::before {
-  content: '"';
+  content: '❝';
   position: absolute;
-  top: 10px;
-  left: 20px;
-  font-size: 4rem;
-  color: rgba(255, 255, 255, 0.3);
+  top: 15px;
+  left: 25px;
+  font-size: 3rem;
+  color: rgba(255, 255, 255, 0.6);
   line-height: 1;
+  font-family: Georgia, serif;
 }
 
 .testimonial-info h3 {
@@ -2113,8 +2121,8 @@ main {
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(79, 70, 229, 0.45) 0%, 
-    rgba(124, 58, 237, 0.35) 100%
+    rgba(79, 70, 229, 0.15) 0%, 
+    rgba(124, 58, 237, 0.15) 100%
   );
   z-index: -1;
 }
