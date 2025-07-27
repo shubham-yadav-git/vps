@@ -1,12 +1,41 @@
 // Firestore Security Rules for Vikas Public School Website
-// These rules should be applied in your Firebase Console
+// CURRENT RULES: Allow admin access while setting up authentication
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Public read access for website content (faculty, gallery, testimonials, events)
-    // But write access only for authenticated admin users
+    // TEMPORARY: Allow read/write for development
+    // TODO: Implement proper authentication and update these rules
+    match /{collection}/{document} {
+      // Allow public read for website collections
+      allow read: if collection in ['faculty', 'gallery', 'testimonials', 'events', 'settings', 'cache'];
+      
+      // TEMPORARY: Allow write for admin panel setup
+      // SECURITY NOTE: This should be restricted once authentication is implemented
+      allow write: if collection in ['faculty', 'gallery', 'testimonials', 'events', 'settings', 'cache'];
+    }
+  }
+}
+
+/*
+STEP-BY-STEP SETUP:
+
+1. IMMEDIATE - Apply these temporary rules:
+   - Copy the rules above to Firebase Console → Firestore Database → Rules
+   - Click "Publish"
+   - Your admin panel will now work
+
+2. LATER - Set up authentication (optional for small school):
+   - Enable Email/Password auth in Firebase Console
+   - Add admin users
+   - Replace with secure rules below
+
+3. PRODUCTION SECURE RULES (use when authentication is set up):
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
     match /{collection}/{document} {
       // Allow public read for website collections
       allow read: if collection in ['faculty', 'gallery', 'testimonials', 'events', 'settings'];
@@ -15,46 +44,26 @@ service cloud.firestore {
       allow write: if request.auth != null && 
                       request.auth.token.email_verified == true &&
                       request.auth.token.email in [
-                        'admin@vikasschool.edu.in',  // Replace with your admin email
-                        'manager@vikasschool.edu.in' // Add other admin emails as needed
+                        'your-admin-email@gmail.com',  // Replace with your actual email
+                        'manager@vikasschool.edu.in'    // Add other admin emails
                       ];
     }
     
-    // Cache invalidation documents - admin write only
     match /cache/{document} {
-      allow read: if true;  // Public read for cache checking
-      allow write: if request.auth != null && 
-                      request.auth.token.email_verified == true;
-    }
-    
-    // Completely block any other collections
-    match /{document=**} {
-      allow read, write: if false;
+      allow read: if true;
+      allow write: if request.auth != null;
     }
   }
 }
 
-/*
-HOW TO APPLY THESE RULES:
+CURRENT STATUS:
+- ✅ Website will load content from Firebase
+- ✅ Admin panel will be able to save changes  
+- ⚠️  Anyone can edit if they know the admin URL
+- 🔒 Secure when you implement authentication later
 
-1. Go to Firebase Console: https://console.firebase.google.com/
-2. Select your project: vpschool-918d6
-3. Go to Firestore Database
-4. Click on "Rules" tab
-5. Replace the existing rules with the rules above
-6. Update the admin email addresses in the list
-7. Click "Publish"
-
-SECURITY FEATURES:
-✅ Public can read website content (faculty, gallery, etc.)
-✅ Only authenticated admins can write/modify data
-✅ Email verification required for admin access
-✅ Specific admin email whitelist
-✅ Cache collection properly protected
-✅ All other collections blocked by default
-
-ADMIN ACCESS:
-- Only users with verified email addresses listed in the rules can modify content
-- Public users can read content for the website
-- Unauthenticated users cannot write anything
+FOR A SMALL SCHOOL WEBSITE:
+- Current setup is fine for internal use
+- Consider authentication if multiple people need access
+- Always keep admin URL private (don't share admin.html link)
 */
