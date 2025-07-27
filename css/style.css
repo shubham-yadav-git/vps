@@ -2438,7 +2438,7 @@ main {
   font-weight: 700;
   font-family: 'Playfair Display', serif;
   line-height: 1.2;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.5);
   z-index: 2;
 }
 
@@ -2466,8 +2466,9 @@ main {
   right: 0;
   bottom: 0;
   background: linear-gradient(135deg, 
-    rgba(79, 70, 229, 0.15) 0%, 
-    rgba(124, 58, 237, 0.15) 100%
+    rgba(79, 70, 229, 0.7) 0%, 
+    rgba(124, 58, 237, 0.7) 50%,
+    rgba(0, 0, 0, 0.5) 100%
   );
   z-index: -1;
 }
