@@ -1095,138 +1095,327 @@ header {
   box-shadow: var(--shadow-xl);
 }
 
-/* About Section Specific Styles */
+/* Modern About Section Styles */
 .section#about {
-  text-align: left;
-}
-
-.section#about > p {
-  text-align: justify;
-  line-height: 1.8;
-  margin-bottom: 2.5rem;
-  font-size: 1.05rem;
-}
-
-.mission-vision {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  margin: 3rem 0;
-}
-
-.mission-box,
-.vision-box {
-  background: var(--surface-elevated);
-  padding: 2.5rem;
-  border-radius: var(--border-radius);
-  box-shadow: var(--shadow-md);
-  transition: var(--transition);
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 4rem 0;
   position: relative;
   overflow: hidden;
-  border: 1px solid var(--border);
 }
 
-.mission-box:hover,
-.vision-box:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
-}
-
-.mission-box h3,
-.vision-box h3 {
-  color: var(--primary-color);
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  font-family: 'Playfair Display', serif;
-  position: relative;
-  padding-bottom: 1rem;
-}
-
-.mission-box h3::after,
-.vision-box h3::after {
+.section#about::before {
   content: '';
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="%23e2e8f0" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="%23cbd5e1" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.about-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.about-header {
+  text-align: center;
+  margin-bottom: 4rem;
+}
+
+.about-header h2 {
+  font-size: 3rem;
+  font-weight: 700;
+  background: var(--gradient-primary);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.about-intro {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+  max-width: 800px;
+  margin: 0 auto;
+  font-weight: 400;
+}
+
+.about-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+/* Leadership Section */
+.leadership-section h3,
+.highlights-section h3 {
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2rem;
+  text-align: center;
+  position: relative;
+}
+
+.leadership-section h3::after,
+.highlights-section h3::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   width: 60px;
   height: 3px;
   background: var(--gradient-primary);
   border-radius: 2px;
 }
 
-.mission-box p,
-.vision-box p {
-  color: var(--text-secondary);
-  line-height: 1.8;
-  margin: 0;
-  font-size: 1.05rem;
-  text-align: left;
+.leadership-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
 }
 
-.mission-box::before,
-.vision-box::before {
+.profile-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-light);
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
-  width: 100%;
+  right: 0;
   height: 4px;
   background: var(--gradient-primary);
 }
 
-.section#about .manager-profile,
-.section#about .principal-profile {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin: 2rem 0;
-  padding: 2rem;
-  background: var(--surface-elevated);
-  border-radius: var(--border-radius-lg);
-  border: 1px solid var(--border);
-  transition: var(--transition);
-  box-shadow: var(--shadow-sm);
+.profile-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.section#about .manager-profile:hover,
-.section#about .principal-profile:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--primary-light);
+.profile-image {
+  text-align: center;
+  margin-bottom: 1.5rem;
 }
 
-.section#about .manager-profile img,
-.section#about .principal-profile img {
-  width: 90px;
-  height: 90px;
+.profile-image img {
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
-  border: 3px solid var(--primary-light);
-  box-shadow: var(--shadow-md);
-  flex-shrink: 0;
+  border: 4px solid var(--primary-light);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.2);
+  transition: all 0.3s ease;
 }
 
-.section#about .manager-profile div,
-.section#about .principal-profile div {
-  flex: 1;
-  min-width: 0; /* Prevents flex item overflow */
+.profile-card:hover .profile-image img {
+  transform: scale(1.05);
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.3);
 }
 
-.section#about .manager-profile h3,
-.section#about .principal-profile h3 {
-  margin: 0 0 0.5rem 0;
-  color: var(--text-primary);
-  font-size: 1.2rem;
+.profile-info {
+  text-align: center;
+}
+
+.profile-info h4 {
+  font-size: 1.4rem;
   font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
 }
 
-.section#about .manager-profile p,
-.section#about .principal-profile p {
-  margin: 0;
-  color: var(--text-secondary);
+.profile-info .position {
   font-size: 1rem;
   font-weight: 500;
+  color: var(--primary-color);
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.profile-info .description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Highlights Section */
+.highlights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.highlight-card {
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  border: 1px solid var(--border-light);
+  position: relative;
+}
+
+.highlight-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.12);
+}
+
+.highlight-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.highlight-card h4 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.highlight-card p {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+/* Call to Action */
+.about-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.cta-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  min-width: 160px;
+}
+
+.cta-button.primary {
+  background: var(--gradient-primary);
+  color: white;
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+.cta-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(79, 70, 229, 0.4);
+}
+
+.cta-button.secondary {
+  background: white;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.cta-button.secondary:hover {
+  background: var(--primary-color);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.3);
+}
+
+/* Mobile Responsive for About Section */
+@media (max-width: 768px) {
+  .section#about {
+    padding: 3rem 0;
+  }
+  
+  .about-container {
+    padding: 0 1rem;
+  }
+  
+  .about-header h2 {
+    font-size: 2.5rem;
+  }
+  
+  .about-intro {
+    font-size: 1.1rem;
+  }
+  
+  .about-content {
+    gap: 3rem;
+  }
+  
+  .leadership-grid,
+  .highlights-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .profile-card {
+    padding: 2rem;
+  }
+  
+  .highlight-card {
+    padding: 1.5rem;
+  }
+  
+  .about-actions {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .cta-button {
+    width: 100%;
+    max-width: 280px;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-header h2 {
+    font-size: 2rem;
+  }
+  
+  .about-intro {
+    font-size: 1rem;
+  }
+  
+  .profile-image img {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .highlight-icon {
+    font-size: 2.5rem;
+  }
 }
 
 /* Modern Button Styles - Admin Panel Theme */
@@ -2785,6 +2974,29 @@ main {
     flex-direction: column;
     text-align: center;
   }
+
+  /* Contact section mobile responsiveness */
+  .section#contact address {
+    padding: 1.5rem;
+  }
+
+  .section#contact address p {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0.75rem 0;
+  }
+
+  .section#contact address strong {
+    min-width: auto;
+    margin-bottom: 0.25rem;
+  }
+
+  .section#contact address a {
+    word-break: break-all;
+    font-size: 0.9rem;
+    line-height: 1.4;
+  }
 }
 
 @media (max-width: 480px) {
@@ -2807,6 +3019,39 @@ main {
   .header-container {
     padding: 1rem;
   }
+
+  /* Contact section for very small screens */
+  .section#contact {
+    padding: 1.5rem 1rem;
+  }
+
+  .section#contact address {
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .section#contact address p {
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+  }
+
+  .section#contact address a {
+    font-size: 0.85rem;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* Form adjustments for small screens */
+  form {
+    padding: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  form input,
+  form textarea,
+  form select {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
 
 /* Active navigation highlighting */
@@ -2818,34 +3063,124 @@ main {
   margin: 0 -1rem;
 }
 
-/* Floating Action Button */
+/* Floating Action Buttons - Constrained within viewport */
 .refresh-fab {
   position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 56px;
-  height: 56px;
+  bottom: 100px;
+  right: 15px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: #1a237e;
+  background: var(--secondary-color);
   color: white;
   border: none;
-  box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+  box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
   cursor: pointer;
-  font-size: 20px;
+  font-size: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s ease;
   z-index: 1000;
   opacity: 0.8;
+  /* Ensure button stays within viewport */
+  right: max(15px, min(15px, calc(100vw - 63px))); /* 48px width + 15px margin */
+  bottom: max(100px, min(100px, calc(100vh - 148px))); /* 48px height + 100px from bottom */
 }
 
 .refresh-fab:hover {
   opacity: 1;
-  transform: scale(1.1);
-  box-shadow: 0 6px 16px rgba(26, 35, 126, 0.4);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(5, 150, 105, 0.4);
 }
 
 .refresh-fab:active {
   transform: scale(0.95);
+}
+
+.back-to-top {
+  position: fixed;
+  bottom: 15px;
+  right: 15px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+  cursor: pointer;
+  font-size: 20px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  opacity: 0.9;
+  /* Ensure button stays within viewport */
+  right: max(15px, min(15px, calc(100vw - 71px))); /* 56px width + 15px margin */
+  bottom: max(15px, min(15px, calc(100vh - 71px))); /* 56px height + 15px from bottom */
+}
+
+.back-to-top:hover {
+  opacity: 1;
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+}
+
+.back-to-top:active {
+  transform: scale(0.95);
+}
+
+/* Mobile responsive adjustments for floating buttons */
+@media (max-width: 768px) {
+  .refresh-fab {
+    bottom: 85px;
+    right: 10px;
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+    right: max(10px, min(10px, calc(100vw - 54px)));
+    bottom: max(85px, min(85px, calc(100vh - 129px)));
+  }
+  
+  .back-to-top {
+    bottom: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    font-size: 18px;
+    right: max(10px, min(10px, calc(100vw - 60px)));
+    bottom: max(10px, min(10px, calc(100vh - 60px)));
+  }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+  .refresh-fab {
+    bottom: 80px;
+    right: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 12px;
+    right: max(8px, min(8px, calc(100vw - 48px)));
+    bottom: max(80px, min(80px, calc(100vh - 120px)));
+  }
+  
+  .back-to-top {
+    bottom: 8px;
+    right: 8px;
+    width: 46px;
+    height: 46px;
+    font-size: 16px;
+    right: max(8px, min(8px, calc(100vw - 54px)));
+    bottom: max(8px, min(8px, calc(100vh - 54px)));
+  }
+}
+
+/* Prevent floating buttons from interfering with content */
+@media (max-width: 320px) {
+  .refresh-fab, .back-to-top {
+    display: none; /* Hide on very small screens to prevent interference */
+  }
 }

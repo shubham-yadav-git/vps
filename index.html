@@ -213,37 +213,81 @@
 
   <main>
     <section class="section" id="about" tabindex="-1">
-      <h2>About Us</h2>
-      <p>
-        Vikas Public School, established in 2004, is committed to nurturing young minds through
-        holistic education. Our mission is to foster intellectual curiosity, critical thinking,
-        and responsible citizenship through a dynamic curriculum and dedicated faculty. We
-        strive to create lifelong learners and compassionate leaders, ready to make a positive
-        impact in a rapidly changing world.
-      </p>
-      <div class="manager-profile" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-        <img src="assets/IMG-20250726-WA0016.jpg" alt="Jatashankar Pal, Manager" style="width:100px;height:100px;border-radius:50%;object-fit:cover;" />
-        <div>
-          <h3 style="margin:0;">Jatashankar Pal</h3>
-          <p style="margin:0;">Manager</p>
+      <div class="about-container">
+        <div class="about-header">
+          <h2>About Us</h2>
+          <p class="about-intro">
+            Vikas Public School, established in 2004, is committed to nurturing young minds through
+            holistic education. Our mission is to foster intellectual curiosity, critical thinking,
+            and responsible citizenship through a dynamic curriculum and dedicated faculty.
+          </p>
         </div>
-      </div>
-      <div class="principal-profile" style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;">
-        <img src="assets/IMG-20250726-WA0017.jpg" alt="Principal" style="width:100px;height:100px;border-radius:50%;object-fit:cover;" />
-        <div>
-          <h3 style="margin:0;">Principal</h3>
-          <p style="margin:0;">Principal</p>
+
+        <div class="about-content">
+          <!-- Leadership Section -->
+          <div class="leadership-section">
+            <h3>Our Leadership</h3>
+            <div class="leadership-grid">
+              <div class="profile-card manager-profile">
+                <div class="profile-image">
+                  <img src="assets/IMG-20250726-WA0016.jpg" alt="Jatashankar Pal, Manager" />
+                </div>
+                <div class="profile-info">
+                  <h4>Jatashankar Pal</h4>
+                  <p class="position">Manager</p>
+                  <p class="description">Leading the institution with vision and dedication to excellence in education.</p>
+                </div>
+              </div>
+              
+              <div class="profile-card principal-profile">
+                <div class="profile-image">
+                  <img src="assets/IMG-20250726-WA0017.jpg" alt="Principal" />
+                </div>
+                <div class="profile-info">
+                  <h4>Principal</h4>
+                  <p class="position">Principal</p>
+                  <p class="description">Committed to fostering academic excellence and character development.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Highlights Section -->
+          <div class="highlights-section">
+            <h3>What Makes Us Special</h3>
+            <div class="highlights-grid">
+              <div class="highlight-card">
+                <div class="highlight-icon">🏛️</div>
+                <h4>CBSE Affiliation</h4>
+                <p>Accredited standards ensuring quality education</p>
+              </div>
+              
+              <div class="highlight-card">
+                <div class="highlight-icon">🏫</div>
+                <h4>Modern Campus</h4>
+                <p>Smart classrooms, libraries, science labs, and sports facilities</p>
+              </div>
+              
+              <div class="highlight-card">
+                <div class="highlight-icon">🎯</div>
+                <h4>Holistic Development</h4>
+                <p>Focus on academics, co-curricular activities, and personal growth</p>
+              </div>
+              
+              <div class="highlight-card">
+                <div class="highlight-icon">🛡️</div>
+                <h4>Safe Environment</h4>
+                <p>Inclusive and secure learning atmosphere for all students</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Call to Action -->
+          <div class="about-actions">
+            <a href="#admissions" class="cta-button primary">Explore Admissions</a>
+            <a href="#contact" class="cta-button secondary">Contact Us</a>
+          </div>
         </div>
-      </div>
-      <ul>
-        <li>CBSE Affiliation with accredited standards</li>
-        <li>Modern campus with smart classrooms, libraries, science labs, and sports facilities</li>
-        <li>Focus on academics, co-curricular activities, and personal development</li>
-        <li>Safe and inclusive learning environment</li>
-      </ul>
-      <div class="buttons">
-        <a href="#admissions">Admissions</a>
-        <a href="#contact">Contact Us</a>
       </div>
     </section>
 
@@ -904,37 +948,71 @@
       function updateAboutSection(aboutData) {
         const aboutSection = document.getElementById('about');
         if (aboutSection && aboutData) {
-          // Find the main content paragraph (first p tag)
-          const mainParagraph = aboutSection.querySelector('p');
-          if (mainParagraph && aboutData.content) {
-            mainParagraph.textContent = aboutData.content;
+          // Update about intro content
+          const aboutIntro = aboutSection.querySelector('.about-intro');
+          if (aboutIntro && aboutData.content) {
+            aboutIntro.textContent = aboutData.content;
           }
           
-          // Add mission and vision if they exist
-          let existingMissionVision = aboutSection.querySelector('.mission-vision');
-          if (existingMissionVision) {
-            existingMissionVision.remove();
+          // Update leadership profiles
+          if (aboutData.leadership && Array.isArray(aboutData.leadership)) {
+            aboutData.leadership.forEach((leader, index) => {
+              const profileCard = aboutSection.querySelector(`.${leader.id}-profile`);
+              if (profileCard) {
+                // Update image
+                const img = profileCard.querySelector('img');
+                if (img && leader.image) {
+                  img.src = leader.image;
+                  img.alt = `${leader.name}, ${leader.position}`;
+                }
+                
+                // Update name
+                const nameElement = profileCard.querySelector('h4');
+                if (nameElement && leader.name) {
+                  nameElement.textContent = leader.name;
+                }
+                
+                // Update position
+                const positionElement = profileCard.querySelector('.position');
+                if (positionElement && leader.position) {
+                  positionElement.textContent = leader.position;
+                }
+                
+                // Update description
+                const descriptionElement = profileCard.querySelector('.description');
+                if (descriptionElement && leader.description) {
+                  descriptionElement.textContent = leader.description;
+                }
+              }
+            });
           }
           
-          if (aboutData.mission || aboutData.vision) {
-            const missionVisionDiv = document.createElement('div');
-            missionVisionDiv.className = 'mission-vision';
-            missionVisionDiv.style.marginTop = '1rem';
-            
-            let content = '';
-            if (aboutData.mission) {
-              content += `<div style="margin-bottom: 1rem;"><strong>Mission:</strong> ${aboutData.mission}</div>`;
-            }
-            if (aboutData.vision) {
-              content += `<div><strong>Vision:</strong> ${aboutData.vision}</div>`;
-            }
-            
-            missionVisionDiv.innerHTML = content;
-            
-            // Insert after the main paragraph
-            if (mainParagraph) {
-              mainParagraph.parentNode.insertBefore(missionVisionDiv, mainParagraph.nextSibling);
-            }
+          // Update highlights
+          if (aboutData.highlights && Array.isArray(aboutData.highlights)) {
+            const highlightCards = aboutSection.querySelectorAll('.highlight-card');
+            aboutData.highlights.forEach((highlight, index) => {
+              if (highlightCards[index]) {
+                const card = highlightCards[index];
+                
+                // Update icon
+                const iconElement = card.querySelector('.highlight-icon');
+                if (iconElement && highlight.icon) {
+                  iconElement.textContent = highlight.icon;
+                }
+                
+                // Update title
+                const titleElement = card.querySelector('h4');
+                if (titleElement && highlight.title) {
+                  titleElement.textContent = highlight.title;
+                }
+                
+                // Update description
+                const descElement = card.querySelector('p');
+                if (descElement && highlight.description) {
+                  descElement.textContent = highlight.description;
+                }
+              }
+            });
           }
         }
       }
@@ -1026,40 +1104,9 @@
   <!-- Floating Refresh Button -->
   <button 
     id="refresh-fab" 
+    class="refresh-fab"
     onclick="forceRefreshContent()" 
     title="Refresh content (Ctrl+Shift+R)"
-    style="
-      position: fixed;
-      bottom: 90px;
-      right: 20px;
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background: var(--secondary-color);
-      color: white;
-      border: none;
-      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
-      cursor: pointer;
-      font-size: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      z-index: 1000;
-      opacity: 0.8;
-    "
-    onmouseover="
-      this.style.opacity='1';
-      this.style.transform='scale(1.1)';
-      this.style.boxShadow='0 6px 16px rgba(5, 150, 105, 0.4)';
-    "
-    onmouseout="
-      this.style.opacity='0.8';
-      this.style.transform='scale(1)';
-      this.style.boxShadow='0 4px 12px rgba(5, 150, 105, 0.3)';
-    "
-    onmousedown="this.style.transform='scale(0.95)'"
-    onmouseup="this.style.transform='scale(1.1)'"
   >
     🔄
   </button>
@@ -1067,40 +1114,9 @@
   <!-- Back to Top Button -->
   <button 
     id="back-to-top" 
+    class="back-to-top"
     onclick="scrollToTop()" 
     title="Back to top"
-    style="
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: var(--primary-color);
-      color: white;
-      border: none;
-      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-      cursor: pointer;
-      font-size: 20px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      z-index: 1000;
-      opacity: 0.9;
-    "
-    onmouseover="
-      this.style.opacity='1';
-      this.style.transform='scale(1.1)';
-      this.style.boxShadow='0 6px 16px rgba(79, 70, 229, 0.4)';
-    "
-    onmouseout="
-      this.style.opacity='0.9';
-      this.style.transform='scale(1)';
-      this.style.boxShadow='0 4px 12px rgba(79, 70, 229, 0.3)';
-    "
-    onmousedown="this.style.transform='scale(0.95)'"
-    onmouseup="this.style.transform='scale(1.1)'"
   >
     ⬆️
   </button>
