@@ -12,22 +12,22 @@
   <style>
     /* Modern Global Styles */
     :root {
-      --primary-color: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #a5b4fc;
-      --secondary-color: #f59e0b;
-      --accent-color: #10b981;
-      --background: #fafbfc;
-      --surface: #ffffff;
+      --primary-color: #4f46e5;
+      --primary-dark: #3730a3;
+      --primary-light: #e0e7ff;
+      --secondary-color: #059669;
+      --accent-color: #dc2626;
+      --background: #fefefe;
+      --surface: #fdfdfd;
       --surface-elevated: #ffffff;
-      --text-primary: #1f2937;
-      --text-secondary: #6b7280;
-      --text-muted: #9ca3af;
-      --border: #e5e7eb;
-      --border-light: #f3f4f6;
-      --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      --gradient-accent: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --text-primary: #1e293b;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --border-light: #f1f5f9;
+      --gradient-primary: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+      --gradient-secondary: linear-gradient(135deg, #059669 0%, #047857 100%);
+      --gradient-accent: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
@@ -56,7 +56,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      background: rgba(255, 255, 255, 0.95);
+      background: rgba(254, 254, 254, 0.95);
       backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border-light);
       transition: var(--transition);
@@ -148,42 +148,66 @@
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
+  <!-- Reading Progress Bar -->
+  <div id="reading-progress" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--primary-color);
+    z-index: 9999;
+    transition: width 0.3s ease;
+  "></div>
+  
   <header>
-    <img
-      src="assets/logo.png"
-      alt="Vikas Public School Logo"
-      aria-hidden="false"
-      aria-label="School Logo"
-    />
-    <h1>Vikas Public School</h1>
-    <div
-      class="hamburger"
-      role="button"
-      aria-label="Toggle navigation menu"
-      aria-expanded="false"
-      tabindex="0"
-      onclick="toggleMenu()"
-      onkeypress="event.key === 'Enter' && toggleMenu()"
-    >
-      &#9776;
+    <div class="header-container">
+      <div class="logo-section">
+        <img
+          src="assets/logo.png"
+          alt="Vikas Public School Logo"
+          class="logo-img"
+          aria-hidden="false"
+          aria-label="School Logo"
+        />
+        <div class="logo-text">
+          <h1 class="school-name">Vikas Public School</h1>
+          <p class="school-tagline">Excellence in Education</p>
+        </div>
+      </div>
+      
+      <nav class="main-nav" aria-label="Primary navigation" id="main-nav">
+        <ul class="nav-menu">
+          <li><a href="#hero" class="nav-link">Home</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+          <li><a href="#academics" class="nav-link">Academics</a></li>
+          <li><a href="#faculty" class="nav-link">Faculty</a></li>
+          <li><a href="#events" class="nav-link">Events</a></li>
+          <li><a href="#gallery" class="nav-link">Gallery</a></li>
+          <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
+          <li><a href="#faq" class="nav-link">FAQ</a></li>
+          <li><a href="#admissions" class="nav-link">Admissions</a></li>
+          <li><a href="#contact" class="nav-link">Contact</a></li>
+        </ul>
+      </nav>
+      
+      <div class="header-actions">
+        <button
+          class="hamburger"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          onclick="toggleMenu()"
+          onkeypress="event.key === 'Enter' && toggleMenu()"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </div>
-    <nav aria-label="Primary navigation">
-      <ul id="menu">
-        <li><a href="#" tabindex="0">Home</a></li>
-        <li><a href="#about" tabindex="0">About</a></li>
-        <li><a href="#academics" tabindex="0">Academics</a></li>
-        <li><a href="#faculty" tabindex="0">Faculty</a></li>
-        <li><a href="#events" tabindex="0">Events</a></li>
-        <li><a href="#gallery" tabindex="0">Gallery</a></li>
-        <li><a href="#testimonials" tabindex="0">Testimonials</a></li>
-        <li><a href="#faq" tabindex="0">FAQ</a></li>
-        <li><a href="#admissions" tabindex="0">Admissions</a></li>
-        <li><a href="#contact" tabindex="0">Contact</a></li>
-      </ul>
-    </nav>
   </header>
 
-  <div class="hero" role="banner" aria-label="Welcome message">
+  <div class="hero" id="hero" role="banner" aria-label="Welcome message">
     Excellence in Education, Empowering Future Leaders
   </div>
 
@@ -976,17 +1000,17 @@
     title="Refresh content (Ctrl+Shift+R)"
     style="
       position: fixed;
-      bottom: 20px;
+      bottom: 90px;
       right: 20px;
-      width: 56px;
-      height: 56px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: #1a237e;
+      background: var(--secondary-color);
       color: white;
       border: none;
-      box-shadow: 0 4px 12px rgba(26, 35, 126, 0.3);
+      box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
       cursor: pointer;
-      font-size: 20px;
+      font-size: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -997,17 +1021,58 @@
     onmouseover="
       this.style.opacity='1';
       this.style.transform='scale(1.1)';
-      this.style.boxShadow='0 6px 16px rgba(26, 35, 126, 0.4)';
+      this.style.boxShadow='0 6px 16px rgba(5, 150, 105, 0.4)';
     "
     onmouseout="
       this.style.opacity='0.8';
       this.style.transform='scale(1)';
-      this.style.boxShadow='0 4px 12px rgba(26, 35, 126, 0.3)';
+      this.style.boxShadow='0 4px 12px rgba(5, 150, 105, 0.3)';
     "
     onmousedown="this.style.transform='scale(0.95)'"
     onmouseup="this.style.transform='scale(1.1)'"
   >
     🔄
+  </button>
+
+  <!-- Back to Top Button -->
+  <button 
+    id="back-to-top" 
+    onclick="scrollToTop()" 
+    title="Back to top"
+    style="
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      cursor: pointer;
+      font-size: 20px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      z-index: 1000;
+      opacity: 0.9;
+    "
+    onmouseover="
+      this.style.opacity='1';
+      this.style.transform='scale(1.1)';
+      this.style.boxShadow='0 6px 16px rgba(79, 70, 229, 0.4)';
+    "
+    onmouseout="
+      this.style.opacity='0.9';
+      this.style.transform='scale(1)';
+      this.style.boxShadow='0 4px 12px rgba(79, 70, 229, 0.3)';
+    "
+    onmousedown="this.style.transform='scale(0.95)'"
+    onmouseup="this.style.transform='scale(1.1)'"
+  >
+    ⬆️
   </button>
 
 </body>
