@@ -338,7 +338,7 @@
           <li><a href="#about" class="nav-link">About</a></li>
           <li><a href="#academics" class="nav-link">Academics</a></li>
           <li><a href="#faculty" class="nav-link">Faculty</a></li>
-          <li><a href="#events" class="nav-link">Events</a></li>
+          <li><a href="#events" class="nav-link">Notice Board</a></li>
           <li><a href="#gallery" class="nav-link">Gallery</a></li>
           <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
           <li><a href="#faq" class="nav-link">FAQ</a></li>
@@ -516,27 +516,117 @@
     </section>
 
     <section class="section" id="events" tabindex="-1" aria-labelledby="events-heading">
-      <h2 id="events-heading">Events & News</h2>
-      <ul class="events-list" aria-live="polite">
-        <li class="event-item">
-          <div class="event-info">
+      <h2 id="events-heading">Notice Board & Events</h2>
+      
+      <!-- Notice Category Filters -->
+      <div class="notice-filters">
+        <button class="filter-btn active" data-filter="all" aria-label="Show all notices">
+          <i class="fas fa-list"></i> All
+        </button>
+        <button class="filter-btn" data-filter="urgent" aria-label="Show urgent notices">
+          <i class="fas fa-exclamation-triangle"></i> Urgent
+        </button>
+        <button class="filter-btn" data-filter="academic" aria-label="Show academic notices">
+          <i class="fas fa-graduation-cap"></i> Academic
+        </button>
+        <button class="filter-btn" data-filter="events" aria-label="Show event notices">
+          <i class="fas fa-calendar-alt"></i> Events
+        </button>
+        <button class="filter-btn" data-filter="general" aria-label="Show general notices">
+          <i class="fas fa-info-circle"></i> General
+        </button>
+      </div>
+
+      <!-- Notice Board List -->
+      <ul class="notices-list" aria-live="polite">
+        <li class="notice-item urgent" data-category="urgent">
+          <div class="notice-badge urgent-badge">
+            <i class="fas fa-exclamation-triangle"></i> Urgent
+          </div>
+          <div class="notice-content">
+            <h3>Mid-term Examination Schedule Released</h3>
+            <div class="notice-meta">
+              <span class="notice-date">
+                <i class="fas fa-calendar"></i> Posted: July 27, 2025
+              </span>
+              <span class="notice-valid">
+                <i class="fas fa-clock"></i> Valid until: September 30, 2025
+              </span>
+            </div>
+            <p>Mid-term examinations for all classes will commence from September 15, 2025. Students must prepare according to the detailed schedule available in the admissions section.</p>
+          </div>
+        </li>
+        
+        <li class="notice-item events" data-category="events">
+          <div class="notice-badge events-badge">
+            <i class="fas fa-calendar-alt"></i> Event
+          </div>
+          <div class="notice-content">
             <h3>Annual Sports Day - August 15, 2025</h3>
-            <p>Join us for a day full of sportsmanship and fun activities for all students.</p>
+            <div class="notice-meta">
+              <span class="notice-date">
+                <i class="fas fa-calendar"></i> Posted: July 25, 2025
+              </span>
+            </div>
+            <p>Join us for a day full of sportsmanship and fun activities for all students. Participation forms available at the sports department.</p>
           </div>
         </li>
-        <li class="event-item">
-          <div class="event-info">
+        
+        <li class="notice-item academic" data-category="academic">
+          <div class="notice-badge academic-badge">
+            <i class="fas fa-graduation-cap"></i> Academic
+          </div>
+          <div class="notice-content">
             <h3>Science Exhibition - September 10, 2025</h3>
-            <p>A platform for young innovators to showcase their projects and experiments.</p>
+            <div class="notice-meta">
+              <span class="notice-date">
+                <i class="fas fa-calendar"></i> Posted: July 20, 2025
+              </span>
+            </div>
+            <p>A platform for young innovators to showcase their projects and experiments. Registration deadline: August 25, 2025.</p>
           </div>
         </li>
-        <li class="event-item">
-          <div class="event-info">
+        
+        <li class="notice-item general" data-category="general">
+          <div class="notice-badge general-badge">
+            <i class="fas fa-info-circle"></i> General
+          </div>
+          <div class="notice-content">
             <h3>Parent-Teacher Meeting - October 5, 2025</h3>
-            <p>Discuss your child's progress and participate in school development feedback sessions.</p>
+            <div class="notice-meta">
+              <span class="notice-date">
+                <i class="fas fa-calendar"></i> Posted: July 18, 2025
+              </span>
+            </div>
+            <p>Discuss your child's progress and participate in school development feedback sessions. Meeting timings: 9 AM to 4 PM.</p>
+          </div>
+        </li>
+        
+        <li class="notice-item urgent" data-category="urgent">
+          <div class="notice-badge urgent-badge">
+            <i class="fas fa-exclamation-triangle"></i> Urgent
+          </div>
+          <div class="notice-content">
+            <h3>Holiday Notice - Independence Day</h3>
+            <div class="notice-meta">
+              <span class="notice-date">
+                <i class="fas fa-calendar"></i> Posted: July 27, 2025
+              </span>
+              <span class="notice-valid">
+                <i class="fas fa-clock"></i> Valid until: August 15, 2025
+              </span>
+            </div>
+            <p>School will remain closed on August 15, 2025, in observance of Independence Day. Regular classes will resume on August 16, 2025.</p>
           </div>
         </li>
       </ul>
+      
+      <!-- View More Button -->
+      <div class="notice-actions">
+        <button class="cta-button secondary" onclick="loadMoreNotices()">
+          <i class="fas fa-plus"></i> Load More Notices
+        </button>
+      </div>
     </section>
 
     <section class="section" id="gallery" tabindex="-1" aria-labelledby="gallery-heading">
@@ -769,7 +859,7 @@
           <ul>
             <li><a href="assets/admission-form.html">Admission Form</a></li>
             <li><a href="#faq">FAQ</a></li>
-            <li><a href="#events">School Events</a></li>
+            <li><a href="#events">Notice Board</a></li>
             <li><a href="#testimonials">Testimonials</a></li>
           </ul>
         </div>

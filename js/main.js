@@ -49,6 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize reading progress
   initializeReadingProgress();
   
+  // Initialize Notice Board
+  initializeNoticeBoard();
+  
   // Close menu when clicking outside
   document.addEventListener('click', function(event) {
     const nav = document.getElementById("main-nav");
@@ -621,3 +624,89 @@ function initializeDynamicBreadcrumbs() {
   // Initial update
   updateBreadcrumbs('hero');
 }
+
+// Notice Board Functionality
+function initializeNoticeBoard() {
+  const filterButtons = document.querySelectorAll('.filter-btn');
+  const noticeItems = document.querySelectorAll('.notice-item');
+
+  // Add click event listeners to filter buttons
+  filterButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const filter = this.getAttribute('data-filter');
+      
+      // Update active button
+      filterButtons.forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
+      
+      // Filter notices
+      filterNotices(filter, noticeItems);
+      
+      // Announce filter change for screen readers
+      const announcement = filter === 'all' 
+        ? 'Showing all notices' 
+        : `Showing ${filter} notices`;
+      announceToScreenReader(announcement);
+    });
+
+    // Add keyboard navigation
+    button.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.click();
+      }
+    });
+  });
+}
+
+function filterNotices(filter, noticeItems) {
+  noticeItems.forEach(item => {
+    const category = item.getAttribute('data-category');
+    
+    if (filter === 'all' || category === filter) {
+      item.style.display = 'block';
+      item.classList.remove('hidden');
+      // Add animation
+      setTimeout(() => {
+        item.style.opacity = '1';
+        item.style.transform = 'translateY(0)';
+      }, 50);
+    } else {
+      item.style.opacity = '0';
+      item.style.transform = 'translateY(20px)';
+      setTimeout(() => {
+        item.style.display = 'none';
+        item.classList.add('hidden');
+      }, 300);
+    }
+  });
+}
+
+function loadMoreNotices() {
+  // This function can be enhanced to load more notices from Firebase
+  // For now, it shows a message
+  const announcement = 'Loading more notices...';
+  announceToScreenReader(announcement);
+  
+  // Simulate loading - replace with actual Firebase call
+  setTimeout(() => {
+    announceToScreenReader('No more notices to load');
+  }, 1000);
+}
+
+function announceToScreenReader(message) {
+  const announcement = document.createElement('div');
+  announcement.setAttribute('aria-live', 'polite');
+  announcement.setAttribute('aria-atomic', 'true');
+  announcement.className = 'sr-only';
+  announcement.textContent = message;
+  
+  document.body.appendChild(announcement);
+  
+  setTimeout(() => {
+    document.body.removeChild(announcement);
+  }, 1000);
+}
+
+// Global function for the Load More button
+window.loadMoreNotices = loadMoreNotices;
