@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found - Vikas Public School</title>
+    <meta name="description" content="The page you're looking for cannot be found. Return to Vikas Public School homepage.">
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+    <link rel="canonical" href="https://vikaspublicschool.edu/">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8fafc;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            color: #1e293b;
+        }
+        .error-container {
+            max-width: 600px;
+            padding: 2rem;
+        }
+        .error-code {
+            font-size: 6rem;
+            font-weight: bold;
+            color: #4f46e5;
+            margin-bottom: 1rem;
+        }
+        .error-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        .error-message {
+            font-size: 1.1rem;
+            color: #64748b;
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+            margin: 0.5rem;
+            transition: background 0.3s ease;
+        }
+        .btn:hover {
+            background: #3730a3;
+        }
+        .btn-secondary {
+            background: #64748b;
+        }
+        .btn-secondary:hover {
+            background: #475569;
+        }
+        .logo {
+            margin-bottom: 2rem;
+        }
+        .logo img {
+            max-width: 120px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="logo">
+            <img src="assets/logo.png" alt="Vikas Public School Logo">
+        </div>
+        <div class="error-code">404</div>
+        <h1 class="error-title">Page Not Found</h1>
+        <p class="error-message">
+            Sorry, we couldn't find the page you're looking for. 
+            The page may have been moved, deleted, or you might have entered an incorrect URL.
+        </p>
+        <div class="error-actions">
+            <a href="/" class="btn">Return Home</a>
+            <a href="#contact" class="btn btn-secondary">Contact Us</a>
+        </div>
+    </div>
+    
+    <script>
+        // Track 404 errors (if you have analytics)
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'page_view', {
+                page_title: '404 Error',
+                page_location: window.location.href
+            });
+        }
+    </script>
+</body>
+</html>

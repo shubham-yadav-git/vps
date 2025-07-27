@@ -1,0 +1,64 @@
+{
+  "name": "Vikas Public School - Excellence in Education",
+  "short_name": "VPS",
+  "description": "Premier educational institution offering quality education since 2004. Admissions open for 2025-26.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["education", "school", "learning"],
+  "icons": [
+    {
+      "src": "assets/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Admissions",
+      "short_name": "Apply",
+      "description": "Apply for admission to Vikas Public School",
+      "url": "/#admissions",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Contact",
+      "short_name": "Contact",
+      "description": "Contact Vikas Public School",
+      "url": "/#contact",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Gallery",
+      "short_name": "Gallery",
+      "description": "View school gallery",
+      "url": "/#gallery",
+      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/school.jpg",
+      "sizes": "1280x720",
+      "type": "image/jpeg",
+      "platform": "wide",
+      "label": "Vikas Public School Homepage"
+    }
+  ]
+}
