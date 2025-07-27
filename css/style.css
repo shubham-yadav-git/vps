@@ -206,7 +206,8 @@ header {
   flex: 1 1 auto;
   justify-content: flex-start;
   z-index: 10;
-  margin-left: 0.5rem; /* Reduced from 1rem to 0.5rem for tighter spacing */
+  padding-left: 3rem; /* Added padding for better spacing */
+  margin-left: 0rem; /* Reduced from 1rem to 0.5rem for tighter spacing */
 }
 
 /* Enhanced Navigation scroll indicators with context awareness */
