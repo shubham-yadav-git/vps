@@ -66,7 +66,7 @@
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap"
     rel="stylesheet"
   />
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/style.css?v=1.1" />
   <style>
     /* Modern Global Styles */
     :root {
@@ -682,11 +682,21 @@
 
   <section class="hero" id="hero" role="banner" aria-label="Welcome to Vikas Public School">
     <div class="hero-content">
-      <h1 class="hero-title">Excellence in Education, Empowering Future Leaders</h1>
-      <p class="hero-subtitle">Quality education since 2004 - Nurturing young minds for a brighter tomorrow</p>
-      <div class="hero-actions">
-        <a href="#admissions" class="cta-button primary" aria-label="Learn about admissions process">Apply for Admission</a>
-        <a href="#about" class="cta-button secondary" aria-label="Learn more about our school">Learn More</a>
+      <div class="hero-skeleton">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-subtitle"></div>
+        <div class="skeleton-buttons">
+          <div class="skeleton-button"></div>
+          <div class="skeleton-button"></div>
+        </div>
+      </div>
+      <div class="hero-actual-content" style="display: none;">
+        <h1 class="hero-title"></h1>
+        <p class="hero-subtitle"></p>
+        <div class="hero-actions">
+          <a href="#admissions" class="cta-button primary" aria-label="Learn about admissions process">Apply for Admission</a>
+          <a href="#about" class="cta-button secondary" aria-label="Learn more about our school">Learn More</a>
+        </div>
       </div>
     </div>
   </section>
@@ -1195,7 +1205,7 @@
     </div>
   </footer>
 
-  <script src="js/main.js"></script>
+  <script src="js/main.js?v=1.1"></script>
   
   <!-- Google Analytics 4 (Replace GA_MEASUREMENT_ID with your actual ID) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
@@ -1249,6 +1259,58 @@
   
   <!-- Firebase Configuration - Free Tier Optimized -->
   <script>
+    // IMMEDIATE execution to clear any cached content
+    (function() {
+      // Force clear hero content immediately when script loads
+      window.addEventListener('DOMContentLoaded', function() {
+        const heroTitle = document.querySelector('.hero-title');
+        const heroSubtitle = document.querySelector('.hero-subtitle');
+        
+        // Force clear any content
+        if (heroTitle) {
+          heroTitle.textContent = '';
+          heroTitle.innerHTML = '';
+        }
+        if (heroSubtitle) {
+          heroSubtitle.textContent = '';
+          heroSubtitle.innerHTML = '';
+        }
+      });
+    })();
+
+    // Simple hero initialization
+    document.addEventListener('DOMContentLoaded', function() {
+      // Clear and set content immediately
+      const heroTitle = document.querySelector('.hero-title');
+      const heroSubtitle = document.querySelector('.hero-subtitle');
+      const heroSkeleton = document.querySelector('.hero-skeleton');
+      const heroActualContent = document.querySelector('.hero-actual-content');
+      
+      // Force clear first
+      if (heroTitle) {
+        heroTitle.textContent = '';
+        setTimeout(() => {
+          heroTitle.textContent = 'Excellence in Education, Empowering Future Leaders';
+        }, 50);
+      }
+      if (heroSubtitle) {
+        heroSubtitle.textContent = '';
+        setTimeout(() => {
+          heroSubtitle.textContent = 'Quality education since 2004 - Nurturing young minds for a brighter tomorrow';
+        }, 50);
+      }
+      
+      // Show content after brief skeleton display
+      setTimeout(() => {
+        if (heroSkeleton) {
+          heroSkeleton.style.display = 'none';
+        }
+        if (heroActualContent) {
+          heroActualContent.classList.add('loaded');
+        }
+      }, 300);
+    });
+    
     // Wait for DOM to be fully loaded before running Firebase code
     document.addEventListener('DOMContentLoaded', function() {
       // Firebase configuration for free tier
@@ -1284,6 +1346,8 @@
           loadDynamicContent();
         } catch (error) {
           console.log('Firebase not available, using static content');
+          // Initialize hero section with fallback content when Firebase is not available
+          updateHeroSection(null);
         }
       }
       
@@ -1466,11 +1530,15 @@
               
               updateFunction(data);
             } else {
-              console.log(`No ${type} data found in database`);
+              console.log(`No ${type} data found in database, using fallback`);
+              // Still call the update function with null/undefined data to handle fallbacks
+              updateFunction(null);
             }
           }
         } catch (error) {
-          console.log(`Error loading ${type} data:`, error);
+          console.log(`Error loading ${type} data, using fallback:`, error);
+          // Call update function with null data to handle fallbacks
+          updateFunction(null);
         }
       }
       
@@ -1623,34 +1691,38 @@
       // Update functions for admin panel sections
       function updateHeroSection(heroData) {
         const heroElement = document.querySelector('.hero');
-        if (heroElement && heroData) {
-          // Update hero text
-          if (heroData.title || heroData.subtitle) {
-            const heroTitle = heroElement.querySelector('.hero-title');
-            const heroSubtitle = heroElement.querySelector('.hero-subtitle');
-            
-            if (heroTitle && heroData.title) {
-              heroTitle.textContent = heroData.title;
-            }
-            if (heroSubtitle && heroData.subtitle) {
-              heroSubtitle.textContent = heroData.subtitle;
-            }
+        if (heroElement) {
+          const heroSkeleton = heroElement.querySelector('.hero-skeleton');
+          const heroActualContent = heroElement.querySelector('.hero-actual-content');
+          const heroTitle = heroElement.querySelector('.hero-title');
+          const heroSubtitle = heroElement.querySelector('.hero-subtitle');
+          
+          // Set content
+          if (heroTitle) {
+            heroTitle.textContent = (heroData && heroData.title) 
+              ? heroData.title 
+              : 'Excellence in Education, Empowering Future Leaders';
           }
           
-          // Handle background image with theme blending
-          if (heroData.backgroundImage && heroData.backgroundImage.trim() !== '') {
-            console.log('Applying custom hero image with theme blending');
-            
-            // Set the CSS custom property for the ::before pseudo-element
+          if (heroSubtitle) {
+            heroSubtitle.textContent = (heroData && heroData.subtitle) 
+              ? heroData.subtitle 
+              : 'Quality education since 2004 - Nurturing young minds for a brighter tomorrow';
+          }
+          
+          // Hide skeleton and show content
+          if (heroSkeleton) {
+            heroSkeleton.style.display = 'none';
+          }
+          if (heroActualContent) {
+            heroActualContent.classList.add('loaded');
+          }
+          
+          // Handle background image
+          if (heroData && heroData.backgroundImage && heroData.backgroundImage.trim() !== '') {
             heroElement.style.setProperty('--hero-bg-image', `url(${heroData.backgroundImage})`);
-            
-            // Add class to trigger CSS theme blending
             heroElement.classList.add('has-custom-image');
-            
           } else {
-            console.log('Using default hero styling');
-            
-            // Reset to default styling when no custom image
             heroElement.classList.remove('has-custom-image');
             heroElement.style.removeProperty('--hero-bg-image');
           }
