@@ -124,7 +124,7 @@ function scrollToTop() {
   });
 }
 
-// Navigation scroll indicators
+// Enhanced Navigation scroll indicators with page context awareness
 function initializeNavScrollIndicators() {
   const navMenu = document.querySelector('.nav-menu');
   const mainNav = document.querySelector('.main-nav');
@@ -137,23 +137,33 @@ function initializeNavScrollIndicators() {
     const clientWidth = navMenu.clientWidth;
     const maxScroll = scrollWidth - clientWidth;
     
-    // Show left indicator if we can scroll left
-    if (scrollLeft > 5) {
+    // Get page scroll position for context awareness
+    const pageScrollPosition = window.pageYOffset;
+    const pageHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const isAtTop = pageScrollPosition < 200; // At top of page
+    const isAtBottom = pageScrollPosition > pageHeight - 200; // Near bottom of page
+    
+    // Context-aware indicator logic
+    // Show left indicator if we can scroll left AND not at bottom of page
+    if (scrollLeft > 5 && !isAtBottom) {
       mainNav.classList.add('scrollable-left');
     } else {
       mainNav.classList.remove('scrollable-left');
     }
     
-    // Show right indicator if we can scroll right
-    if (scrollLeft < maxScroll - 5) {
+    // Show right indicator if we can scroll right AND not at top of page
+    if (scrollLeft < maxScroll - 5 && !isAtTop) {
       mainNav.classList.add('scrollable-right');
     } else {
       mainNav.classList.remove('scrollable-right');
     }
   }
   
-  // Update indicators on scroll
+  // Update indicators on navigation scroll
   navMenu.addEventListener('scroll', updateScrollIndicators, { passive: true });
+  
+  // Update indicators on page scroll for context awareness
+  window.addEventListener('scroll', updateScrollIndicators, { passive: true });
   
   // Update indicators on resize
   window.addEventListener('resize', () => {
@@ -175,18 +185,30 @@ function initializeSectionHighlighting() {
     let currentSection = '';
     const scrollPosition = window.pageYOffset;
     
-    // Check if we're at the top (hero section)
-    if (scrollPosition < 200) {
+    // Check if we're at the top (hero section) - expanded range for better detection
+    if (scrollPosition < 300) {
       currentSection = 'hero';
     } else {
       // Find the current section based on scroll position
       sections.forEach(section => {
-        const sectionTop = section.offsetTop - 150;
+        const sectionTop = section.offsetTop - 120; // Reduced offset for earlier triggering
         const sectionHeight = section.offsetHeight;
         const sectionId = section.getAttribute('id');
         
         if (sectionId && scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
           currentSection = sectionId;
+        }
+      });
+    }
+    
+    // Fallback: if no section detected and we're not at top, use the first visible section
+    if (!currentSection && scrollPosition >= 300) {
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionId = section.getAttribute('id');
+        
+        if (sectionId && scrollPosition >= sectionTop - 200) {
+          if (!currentSection) currentSection = sectionId;
         }
       });
     }
@@ -202,30 +224,61 @@ function initializeSectionHighlighting() {
       }
     });
     
-    // Auto-scroll navigation to show active item
+    // Auto-scroll navigation to show active item with a small delay for smoother experience
     if (activeLink && navMenu) {
-      autoScrollNavigation(activeLink);
+      // Use setTimeout to debounce rapid scroll events
+      clearTimeout(window.navScrollTimeout);
+      window.navScrollTimeout = setTimeout(() => {
+        autoScrollNavigation(activeLink);
+      }, 50);
     }
   }
   
   function autoScrollNavigation(activeLink) {
-    // Only auto-scroll on larger screens where horizontal scrolling might be needed
-    if (window.innerWidth > 900 && navMenu.scrollWidth > navMenu.clientWidth) {
+    // Auto-scroll navigation for all screen sizes where horizontal scrolling might be needed
+    if (navMenu.scrollWidth > navMenu.clientWidth) {
       const navMenuRect = navMenu.getBoundingClientRect();
       const activeLinkRect = activeLink.getBoundingClientRect();
+      const activeHref = activeLink.getAttribute('href');
       
-      // Calculate if the active link is outside the visible area
-      const leftOffset = activeLinkRect.left - navMenuRect.left;
-      const rightOffset = activeLinkRect.right - navMenuRect.right;
-      
-      // Scroll the navigation if the active link is not fully visible
-      if (leftOffset < 0) {
-        // Active link is to the left of visible area
-        navMenu.scrollLeft += leftOffset - 20; // Add 20px padding
-      } else if (rightOffset > 0) {
-        // Active link is to the right of visible area
-        navMenu.scrollLeft += rightOffset + 20; // Add 20px padding
+      // Special handling for Home (hero) section - ensure it's visible but not hidden under logo
+      if (activeHref === '#hero') {
+        // Calculate minimum scroll to show Home link properly
+        const homeLink = activeLink;
+        const homeLinkRect = homeLink.getBoundingClientRect();
+        const navMenuLeft = navMenuRect.left;
+        
+        // If Home link is partially hidden on the left, scroll just enough to show it
+        if (homeLinkRect.left < navMenuLeft + 50) { // 50px buffer from logo
+          navMenu.scrollTo({
+            left: Math.max(0, navMenu.scrollLeft - (navMenuLeft + 60 - homeLinkRect.left)),
+            behavior: 'smooth'
+          });
+        }
+        return;
       }
+      
+      // Special handling for Contact (last item) - scroll to end
+      if (activeHref === '#contact') {
+        navMenu.scrollTo({
+          left: navMenu.scrollWidth - navMenu.clientWidth,
+          behavior: 'smooth'
+        });
+        return;
+      }
+      
+      // For middle items, center them in the navigation
+      const navMenuCenter = navMenuRect.width / 2;
+      const activeLinkCenter = activeLinkRect.left - navMenuRect.left + (activeLinkRect.width / 2);
+      
+      // Calculate how much we need to scroll to center the active link
+      const scrollOffset = activeLinkCenter - navMenuCenter;
+      
+      // Smooth scroll the navigation menu
+      navMenu.scrollTo({
+        left: navMenu.scrollLeft + scrollOffset,
+        behavior: 'smooth'
+      });
     }
   }
   
@@ -239,11 +292,23 @@ function initializeSectionHighlighting() {
     }
   }
   
+  // Enhanced throttled scroll handler for smoother navigation updates
+  let scrollTimeout;
+  function handleScroll() {
+    throttledHighlightSection();
+    
+    // Also update after scrolling stops for accuracy
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      highlightCurrentSection();
+    }, 150);
+  }
+  
   // Initial highlight
   highlightCurrentSection();
   
-  // Update on scroll with throttling for better performance
-  window.addEventListener('scroll', throttledHighlightSection, { passive: true });
+  // Update on scroll with enhanced throttling for better performance
+  window.addEventListener('scroll', handleScroll, { passive: true });
   
   // Update on resize to recalculate positions
   window.addEventListener('resize', () => {
