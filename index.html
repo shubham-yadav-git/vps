@@ -141,7 +141,7 @@
     }
   </style>
   <!-- Include fontawesome icons for social -->
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous" defer></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
   <!-- Firebase SDKs - Free Tier Optimized -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -337,9 +337,13 @@
         </a>
       </div>
       <!-- Modal for image viewing -->
-      <div id="imgModal" class="modal" aria-modal="true" role="dialog" tabindex="-1" style="display:none;">
-        <span class="close" id="modalClose" tabindex="0" aria-label="Close image modal">&times;</span>
-        <img class="modal-content" id="modalImg" alt="Gallery image enlarged" />
+      <div class="gallery-modal" aria-modal="true" role="dialog" tabindex="-1">
+        <span class="close-modal" tabindex="0" aria-label="Close image modal">&times;</span>
+        <span class="modal-prev" aria-label="Previous image">&#10094;</span>
+        <span class="modal-next" aria-label="Next image">&#10095;</span>
+        <div class="modal-content">
+          <img src="" alt="Gallery image enlarged">
+        </div>
       </div>
     </section>
 
@@ -481,17 +485,17 @@
   <footer>
     <div class="footer-container">
       <div class="social-icons" aria-label="Social media links">
-        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" tabindex="0">
-          <i class="fab fa-facebook"></i>
+        <a href="https://facebook.com" target="_blank" rel="noopener" aria-label="Facebook" class="facebook" tabindex="0">
+          <i class="fab fa-facebook-f"></i>
         </a>
-        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter" tabindex="0">
+        <a href="https://twitter.com" target="_blank" rel="noopener" aria-label="Twitter" class="twitter" tabindex="0">
           <i class="fab fa-twitter"></i>
         </a>
-        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram" tabindex="0">
+        <a href="https://instagram.com" target="_blank" rel="noopener" aria-label="Instagram" class="instagram" tabindex="0">
           <i class="fab fa-instagram"></i>
         </a>
-        <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn" tabindex="0">
-          <i class="fab fa-linkedin"></i>
+        <a href="https://linkedin.com" target="_blank" rel="noopener" aria-label="LinkedIn" class="linkedin" tabindex="0">
+          <i class="fab fa-linkedin-in"></i>
         </a>
       </div>
       <div class="quick-links" aria-label="Quick links">
