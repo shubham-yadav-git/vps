@@ -660,6 +660,10 @@
 
       <div class="nav-section">
         <div class="nav-section-title">Settings</div>
+        <a class="nav-item" onclick="showSection('logo')" id="nav-logo">
+          <span class="icon">🖼️</span>
+          School Logo
+        </a>
         <a class="nav-item" onclick="showSection('school-info')" id="nav-school-info">
           <span class="icon">🏫</span>
           School Info
@@ -839,6 +843,11 @@
         }
       ]
     };
+    let logoData = {
+      logoUrl: 'assets/logo.png',
+      schoolName: 'Vikas Public School',
+      tagline: 'Excellence in Education'
+    };
     let schoolInfoData = { name: 'Vikas Public School', address: '', phone: '', email: '' };
     let contactData = { address: '', phone: '', email: '', hours: '' };
 
@@ -881,6 +890,7 @@
         'academics': 'Academics Management',
         'hero': 'Homepage Hero',
         'about': 'About Section',
+        'logo': 'School Logo Management',
         'school-info': 'School Information',
         'contact': 'Contact Details'
       };
@@ -920,6 +930,9 @@
           break;
         case 'about':
           renderAboutSection();
+          break;
+        case 'logo':
+          renderLogoSection();
           break;
         case 'school-info':
           renderSchoolInfoSection();
@@ -1219,6 +1232,71 @@
       document.getElementById('content-area').innerHTML = content;
     }
 
+    // Logo section renderer
+    function renderLogoSection() {
+      const content = `
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">School Logo Management</h2>
+          </div>
+          <div class="card-content">
+            <div class="alert alert-info" style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+              <strong>🎨 Logo Guidelines:</strong> For best results, use a square logo (1:1 ratio) in PNG format. 
+              The logo will be automatically resized to fit the header design. Recommended size: 200x200px or larger.
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Current Logo</label>
+              <div class="current-logo" style="margin-bottom: 15px; padding: 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-elevated);">
+                <img src="${logoData.logoUrl || 'assets/logo.png'}" alt="Current School Logo" 
+                     style="width: 80px; height: 80px; object-fit: contain; border: 2px solid var(--primary-color); border-radius: 8px;">
+                <p style="font-size: 0.875rem; color: var(--text-secondary); margin: 0.5rem 0 0 0;">Current Logo</p>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Upload New Logo</label>
+              <div class="alert alert-info" style="background: #e8f4fd; border: 1px solid #bee5eb; padding: 10px; border-radius: 6px; margin-bottom: 10px; font-size: 14px;">
+                <strong>📸 Firebase Optimized:</strong> Images are automatically compressed to under 700KB for Firebase compatibility while maintaining quality.
+              </div>
+              <input type="file" class="form-input" accept="image/*" id="logo-upload" 
+                     onchange="handleLogoUpload(this)" style="margin-bottom: 10px;">
+              <small style="color: var(--text-secondary); font-size: 0.75rem;">Supported: JPG, PNG, GIF (Max 5MB) | Best format: PNG with transparent background</small>
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">Or Enter Logo URL</label>
+              <input type="text" class="form-input" id="logo-url" 
+                     value="${(logoData.logoUrl || '').replace(/"/g, '&quot;')}" 
+                     placeholder="Enter logo image URL" onchange="updateLogoData('logoUrl', this.value)">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">School Name</label>
+              <input type="text" class="form-input" id="school-name" 
+                     value="${(logoData.schoolName || '').replace(/"/g, '&quot;')}" 
+                     placeholder="School Name" onchange="updateLogoData('schoolName', this.value)">
+            </div>
+            
+            <div class="form-group">
+              <label class="form-label">School Tagline</label>
+              <input type="text" class="form-input" id="school-tagline" 
+                     value="${(logoData.tagline || '').replace(/"/g, '&quot;')}" 
+                     placeholder="School Tagline" onchange="updateLogoData('tagline', this.value)">
+            </div>
+            
+            <div class="form-actions">
+              <button class="btn btn-primary" onclick="saveLogoData()">
+                <span class="icon">💾</span>
+                Save Logo Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('content-area').innerHTML = content;
+    }
+
     // School info section renderer
     function renderSchoolInfoSection() {
       const content = `
@@ -1379,6 +1457,119 @@
       showSuccessIndicator('academics-save', 'Academics information updated successfully');
     }
 
+    function updateLogoData(field, value) {
+      logoData[field] = value;
+      saveData('logo', logoData);
+      showSuccessIndicator('logo-update', `Logo ${field} updated`);
+      
+      // Update the main website immediately if it's the logo URL
+      if (field === 'logoUrl') {
+        updateMainLogo();
+      }
+    }
+
+    function saveLogoData() {
+      logoData.logoUrl = document.getElementById('logo-url').value;
+      logoData.schoolName = document.getElementById('school-name').value;
+      logoData.tagline = document.getElementById('school-tagline').value;
+      
+      saveData('logo', logoData);
+      showSuccessIndicator('logo-save', 'Logo information updated successfully');
+      updateMainLogo();
+    }
+
+    async function handleLogoUpload(input) {
+      console.log('handleLogoUpload called:', input.files);
+      
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        console.log('File selected:', file.name, file.size, file.type);
+        
+        // Validate file size (5MB limit)
+        if (file.size > 5 * 1024 * 1024) {
+          alert('File size too large. Please choose a file under 5MB.');
+          return;
+        }
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          alert('Please select a valid image file.');
+          return;
+        }
+        
+        try {
+          showSuccessIndicator('logo-upload', 'Uploading logo...');
+          console.log('Starting compression process...');
+          
+          // Compress and convert to base64 using the existing function
+          compressImageIfNeeded(file, function(compressedFile) {
+            console.log('Compression callback called:', compressedFile);
+            
+            try {
+              if (!compressedFile) {
+                throw new Error('Image compression failed');
+              }
+              
+              console.log('Converting compressed file to data URL...');
+              
+              // Convert compressed file to data URL
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                try {
+                  const compressedDataUrl = e.target.result;
+                  console.log('Data URL created, length:', compressedDataUrl?.length);
+                  
+                  // Update logo data
+                  logoData.logoUrl = compressedDataUrl;
+                  const logoUrlInput = document.getElementById('logo-url');
+                  if (logoUrlInput) {
+                    logoUrlInput.value = compressedDataUrl;
+                  }
+                  
+                  console.log('Saving logo data to Firebase...');
+                  
+                  // Save to database
+                  saveData('logo', logoData);
+                  showSuccessIndicator('logo-upload', 'Logo uploaded successfully!');
+                  
+                  // Update the logo display and main website
+                  updateMainLogo();
+                  renderLogoSection(); // Re-render to show new logo
+                  
+                } catch (error) {
+                  console.error('Error converting compressed logo to data URL:', error);
+                  showSuccessIndicator('logo-upload', 'Error processing logo. Please try again.');
+                }
+              };
+              
+              reader.onerror = function(error) {
+                console.error('Error reading compressed file:', error);
+                showSuccessIndicator('logo-upload', 'Error reading compressed logo. Please try again.');
+              };
+              
+              reader.readAsDataURL(compressedFile);
+              
+            } catch (error) {
+              console.error('Error processing compressed logo:', error);
+              showSuccessIndicator('logo-upload', 'Error processing logo. Please try again.');
+            }
+          });
+          
+        } catch (error) {
+          console.error('Error uploading logo:', error);
+          showSuccessIndicator('logo-upload', 'Error uploading logo. Please try again.');
+        }
+      } else {
+        console.log('No file selected');
+      }
+    }
+
+    function updateMainLogo() {
+      // This function can be used to update the logo on the main website
+      // For now, it just logs the action since cross-frame communication would be needed
+      console.log('Logo updated:', logoData);
+    }
+
     function updateLeadershipData(index, field, value) {
       aboutData.leadership[index][field] = value;
       saveData('about', aboutData);
@@ -1518,7 +1709,7 @@
       }
       
       // For non-array data, save as a single document
-      if (collection === 'hero' || collection === 'about' || collection === 'school-info' || collection === 'contact') {
+      if (collection === 'hero' || collection === 'about' || collection === 'logo' || collection === 'academics' || collection === 'school-info' || collection === 'contact') {
         db.collection('settings').doc(collection).set(data).then(() => {
           // Invalidate cache by updating timestamp
           invalidateCache(collection);
@@ -1747,6 +1938,24 @@
         }
       }).catch(err => {
         console.error('Error loading academics data:', err);
+      });
+
+      // Load logo data
+      db.collection('settings').doc('logo').get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          logoData.logoUrl = data.logoUrl || logoData.logoUrl;
+          logoData.schoolName = data.schoolName || logoData.schoolName;
+          logoData.tagline = data.tagline || logoData.tagline;
+          console.log('Logo data loaded:', logoData);
+          
+          // Re-render logo section if it's currently active
+          if (currentSection === 'logo') {
+            renderLogoSection();
+          }
+        }
+      }).catch(err => {
+        console.error('Error loading logo data:', err);
       });
     }
 

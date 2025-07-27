@@ -742,6 +742,9 @@
           // Load academics section data
           await loadSettingsData('academics', updateAcademicsSection);
           
+          // Load logo data
+          await loadSettingsData('logo', updateLogoSection);
+          
           // Load school info data
           await loadSettingsData('school-info', updateSchoolInfoSection);
           
@@ -806,6 +809,10 @@
         localStorage.removeItem('heroCacheTime');
         localStorage.removeItem('aboutData');
         localStorage.removeItem('aboutCacheTime');
+        localStorage.removeItem('academicsData');
+        localStorage.removeItem('academicsCacheTime');
+        localStorage.removeItem('logoData');
+        localStorage.removeItem('logoCacheTime');
         localStorage.removeItem('school-infoData');
         localStorage.removeItem('school-infoCacheTime');
         localStorage.removeItem('contactData');
@@ -1106,6 +1113,29 @@
         }
       }
       
+      function updateLogoSection(logoData) {
+        if (logoData) {
+          // Update logo image
+          const logoImg = document.querySelector('.logo-img');
+          if (logoImg && logoData.logoUrl) {
+            logoImg.src = logoData.logoUrl;
+            logoImg.alt = `${logoData.schoolName || 'School'} Logo`;
+          }
+          
+          // Update school name
+          const schoolName = document.querySelector('.school-name');
+          if (schoolName && logoData.schoolName) {
+            schoolName.textContent = logoData.schoolName;
+          }
+          
+          // Update tagline
+          const tagline = document.querySelector('.school-tagline');
+          if (tagline && logoData.tagline) {
+            tagline.textContent = logoData.tagline;
+          }
+        }
+      }
+      
       // Helper function to clear cache for testing (call from browser console)
       window.clearDynamicContentCache = function() {
         localStorage.removeItem('facultyData');
@@ -1122,6 +1152,8 @@
         localStorage.removeItem('aboutCacheTime');
         localStorage.removeItem('academicsData');
         localStorage.removeItem('academicsCacheTime');
+        localStorage.removeItem('logoData');
+        localStorage.removeItem('logoCacheTime');
         localStorage.removeItem('school-infoData');
         localStorage.removeItem('school-infoCacheTime');
         localStorage.removeItem('contactData');
