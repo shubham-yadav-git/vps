@@ -52,6 +52,9 @@ document.addEventListener('DOMContentLoaded', function() {
   // Initialize Notice Board
   initializeNoticeBoard();
   
+  // Footer address will be loaded by Firebase in index.html
+  // No need for separate loading here since Firebase handles it
+  
   // Close menu when clicking outside
   document.addEventListener('click', function(event) {
     const nav = document.getElementById("main-nav");
@@ -710,3 +713,117 @@ function announceToScreenReader(message) {
 
 // Global function for the Load More button
 window.loadMoreNotices = loadMoreNotices;
+
+// School Address Database Integration using Firebase
+function loadSchoolAddress() {
+  // Check if Firebase is available (loaded from index.html)
+  if (typeof window.db !== 'undefined' && window.db) {
+    console.log('Loading school address from Firebase...');
+    
+    // Load school info from Firebase (same as admin panel structure)
+    Promise.all([
+      window.db.collection('settings').doc('school-info').get(),
+      window.db.collection('settings').doc('contact').get()
+    ]).then(([schoolInfoDoc, contactDoc]) => {
+      const schoolData = {};
+      
+      // Get school info data
+      if (schoolInfoDoc.exists) {
+        const schoolInfo = schoolInfoDoc.data();
+        schoolData.name = schoolInfo.name || 'Vikas Public School';
+        schoolData.address = schoolInfo.address || '';
+        schoolData.phone = schoolInfo.phone || '';
+        schoolData.email = schoolInfo.email || '';
+      }
+      
+      // Get contact data (can override school info)
+      if (contactDoc.exists) {
+        const contactInfo = contactDoc.data();
+        if (contactInfo.address) schoolData.address = contactInfo.address;
+        if (contactInfo.phone) schoolData.phone = contactInfo.phone;
+        if (contactInfo.email) schoolData.email = contactInfo.email;
+        schoolData.hours = contactInfo.hours || '';
+      }
+      
+      console.log('School data loaded from Firebase:', schoolData);
+      updateAddressDisplay(schoolData);
+      
+    }).catch(error => {
+      console.error('Error loading school data from Firebase:', error);
+      // Fallback to default values
+      updateAddressDisplay({
+        name: 'Vikas Public School',
+        address: 'School Address, City',
+        phone: '+91-XXXXXXXXXX',
+        email: 'info@vikaspublicschool.edu'
+      });
+    });
+  } else {
+    console.log('Firebase not available, using default address data');
+    // Fallback when Firebase is not available
+    updateAddressDisplay({
+      name: 'Vikas Public School',
+      address: 'School Address, City',
+      phone: '+91-XXXXXXXXXX',
+      email: 'info@vikaspublicschool.edu'
+    });
+  }
+}
+
+function updateAddressDisplay(addressData) {
+  const elements = {
+    address: document.getElementById('db-address'),
+    cityState: document.getElementById('db-city-state'),
+    pincode: document.getElementById('db-pincode'),
+    phone: document.getElementById('db-phone'),
+    email: document.getElementById('db-email')
+  };
+
+  // Update address elements if they exist
+  if (elements.address && addressData.address) {
+    // For Firebase data, address is stored as a complete address
+    // We'll display the full address in the address field
+    elements.address.textContent = addressData.address;
+  }
+  
+  // Hide city/state/pincode sections if using Firebase address format
+  if (elements.cityState) {
+    // If we have separate city/state data, use it; otherwise hide
+    if (addressData.city && addressData.state) {
+      elements.cityState.textContent = `${addressData.city}, ${addressData.state}`;
+    } else {
+      // Hide the city-state element if using complete address from Firebase
+      const parentBr = elements.cityState.previousElementSibling;
+      if (parentBr && parentBr.tagName === 'BR') {
+        parentBr.style.display = 'none';
+      }
+      elements.cityState.style.display = 'none';
+    }
+  }
+  
+  if (elements.pincode) {
+    if (addressData.pincode) {
+      elements.pincode.textContent = addressData.pincode;
+    } else {
+      // Hide pincode section if not available
+      const parentText = elements.pincode.parentNode;
+      if (parentText) {
+        const textNodes = Array.from(parentText.childNodes).filter(node => 
+          node.nodeType === Node.TEXT_NODE && node.textContent.includes('PIN')
+        );
+        textNodes.forEach(node => node.textContent = '');
+      }
+      elements.pincode.style.display = 'none';
+    }
+  }
+  
+  if (elements.phone && addressData.phone) {
+    elements.phone.textContent = addressData.phone;
+    elements.phone.href = `tel:${addressData.phone.replace(/[^+\d]/g, '')}`;
+  }
+  
+  if (elements.email && addressData.email) {
+    elements.email.textContent = addressData.email;
+    elements.email.href = `mailto:${addressData.email}`;
+  }
+}

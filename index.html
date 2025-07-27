@@ -1130,12 +1130,12 @@
       <div class="footer-content">
         <div class="footer-section">
           <h3>Vikas Public School</h3>
-          <p>Excellence in Education since 2004. Nurturing young minds through holistic development and innovative teaching methodologies.</p>
-          <address>
-            <strong>Address:</strong> Your School Address<br>
-            Your City, Your State - PIN Code<br>
-            <strong>Phone:</strong> <a href="tel:+91XXXXXXXXXX">+91-XXXXXXXXXX</a><br>
-            <strong>Email:</strong> <a href="mailto:info@vikaspublicschool.edu">info@vikaspublicschool.edu</a>
+          <p>Excellence in Education since 2006. Nurturing young minds through holistic development and innovative teaching methodologies.</p>
+          <address id="school-address">
+            <strong>Address:</strong> <span id="db-address">Loading address...</span><br>
+            <span id="db-city-state">Loading city, state...</span> - <span id="db-pincode">PIN</span><br>
+            <strong>Phone:</strong> <a href="tel:+91XXXXXXXXXX" id="db-phone">+91-XXXXXXXXXX</a><br>
+            <strong>Email:</strong> <a href="mailto:info@vikaspublicschool.edu" id="db-email">info@vikaspublicschool.edu</a>
           </address>
         </div>
         
@@ -1189,7 +1189,7 @@
           <a href="/terms-of-service">Terms of Service</a></p>
         </div>
         <div class="footer-meta">
-          <p>Affiliated to CBSE | Established 2004 | Quality Education for All</p>
+          <p>Affiliated to CBSE | Established 2006 | Quality Education for All</p>
         </div>
       </div>
     </div>
@@ -1740,6 +1740,9 @@
           // Update page title
           document.title = schoolData.name;
         }
+        
+        // Also update footer address from school info
+        updateFooterAddress(schoolData, 'school-info');
       }
       
       function updateContactSection(contactData) {
@@ -1767,6 +1770,65 @@
               address.innerHTML = addressHTML;
             }
           }
+        }
+        
+        // Also update footer address from contact data
+        updateFooterAddress(contactData, 'contact');
+      }
+      
+      // Helper function to update footer address from Firebase data
+      function updateFooterAddress(data, source) {
+        if (!data) return;
+        
+        console.log(`Updating footer address from ${source}:`, data);
+        
+        // Get footer address elements
+        const footerAddress = document.getElementById('db-address');
+        const footerPhone = document.getElementById('db-phone');
+        const footerEmail = document.getElementById('db-email');
+        const cityState = document.getElementById('db-city-state');
+        const pincode = document.getElementById('db-pincode');
+        
+        // Update address - Firebase stores complete address in single field
+        if (footerAddress && data.address) {
+          footerAddress.textContent = data.address;
+          console.log('Footer address updated');
+        }
+        
+        // Hide city/state/pincode for Firebase data (since address is complete)
+        if (cityState) {
+          cityState.style.display = 'none';
+          const prevBr = cityState.previousElementSibling;
+          if (prevBr && prevBr.tagName === 'BR') {
+            prevBr.style.display = 'none';
+          }
+        }
+        if (pincode) {
+          pincode.style.display = 'none';
+          // Hide the " - PIN" text
+          const parentNode = pincode.parentNode;
+          if (parentNode) {
+            const textNodes = Array.from(parentNode.childNodes);
+            textNodes.forEach(node => {
+              if (node.nodeType === Node.TEXT_NODE && node.textContent.includes('PIN')) {
+                node.textContent = '';
+              }
+            });
+          }
+        }
+        
+        // Update phone
+        if (footerPhone && data.phone) {
+          footerPhone.textContent = data.phone;
+          footerPhone.href = `tel:${data.phone.replace(/[^+\d]/g, '')}`;
+          console.log('Footer phone updated');
+        }
+        
+        // Update email
+        if (footerEmail && data.email) {
+          footerEmail.textContent = data.email;
+          footerEmail.href = `mailto:${data.email}`;
+          console.log('Footer email updated');
         }
       }
       
