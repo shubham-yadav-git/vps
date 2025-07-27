@@ -823,7 +823,7 @@
         if (facultyList && facultyData.length > 0) {
           facultyList.innerHTML = facultyData.map(faculty => {
             // Handle both regular URLs and base64 data URLs
-            const photoSrc = faculty.photo || 'assets/faculty1.jpg'; // fallback image
+            const photoSrc = faculty.photo || 'assets/default-faculty.svg'; // fallback image
             const safeName = (faculty.name || 'Faculty Member').replace(/"/g, '&quot;');
             const safeRole = (faculty.role || 'Staff').replace(/"/g, '&quot;');
             const safeDescription = (faculty.description || '').replace(/"/g, '&quot;');
@@ -831,7 +831,7 @@
             return `
             <li class="faculty-member">
               <img src="${photoSrc}" alt="${safeName}" class="faculty-photo" 
-                   onerror="this.src='assets/faculty1.jpg'; console.log('Faculty image failed to load, using fallback');" />
+                   onerror="this.src='assets/default-faculty.svg'; console.log('Faculty image failed to load, using fallback');" />
               <div class="faculty-info">
                 <h3>${safeName}</h3>
                 <p>${safeRole}${safeDescription ? ' - ' + safeDescription : ''}</p>
