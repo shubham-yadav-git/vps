@@ -6,7 +6,7 @@
   
   <!-- SEO Meta Tags -->
   <title>Vikas Public School - Excellence in Education | Top School in [Your City]</title>
-  <meta name="description" content="Vikas Public School, established in 2004, offers quality education with holistic development. Admissions open for 2025-26. Excellence in academics, sports, and character building." />
+  <meta name="description" content="Vikas Public School, established in 2006, offers quality education with holistic development. Admissions open for 2025-26. Excellence in academics, sports, and character building." />
   <meta name="keywords" content="Vikas Public School, best school, quality education, admissions 2025, CBSE school, primary education, secondary education, holistic development, experienced faculty" />
   <meta name="author" content="Vikas Public School" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
@@ -16,7 +16,7 @@
   
   <!-- Open Graph Meta Tags for Social Media -->
   <meta property="og:title" content="Vikas Public School - Excellence in Education" />
-  <meta property="og:description" content="Premier educational institution offering quality education since 2004. Nurturing young minds through holistic development and innovative teaching methods." />
+  <meta property="og:description" content="Premier educational institution offering quality education since 2006. Nurturing young minds through holistic development and innovative teaching methods." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://vikaspublicschool.edu" />
   <meta property="og:image" content="https://vikaspublicschool.edu/assets/logo.png" />
@@ -27,7 +27,7 @@
   <!-- Twitter Card Meta Tags -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Vikas Public School - Excellence in Education" />
-  <meta name="twitter:description" content="Premier educational institution offering quality education since 2004. Admissions open for 2025-26." />
+  <meta name="twitter:description" content="Premier educational institution offering quality education since 2006. Admissions open for 2025-26." />
   <meta name="twitter:image" content="https://vikaspublicschool.edu/assets/logo.png" />
   <meta name="twitter:image:alt" content="Vikas Public School Logo" />
   
@@ -496,11 +496,11 @@
     "@type": "EducationalOrganization",
     "name": "Vikas Public School",
     "alternateName": "VPS",
-    "description": "Premier educational institution offering quality education since 2004. Nurturing young minds through holistic development and innovative teaching methods.",
+    "description": "Premier educational institution offering quality education since 2006. Nurturing young minds through holistic development and innovative teaching methods.",
     "url": "https://vikaspublicschool.edu",
     "logo": "https://vikaspublicschool.edu/assets/logo.png",
     "image": "https://vikaspublicschool.edu/assets/school.jpg",
-    "foundingDate": "2004",
+    "foundingDate": "2006",
     "founder": {
       "@type": "Person",
       "name": "Jatashankar Pal"
@@ -568,7 +568,7 @@
     "logo": "https://vikaspublicschool.edu/assets/logo.png",
     "slogan": "Excellence in Education",
     "description": "Vikas Public School - Empowering Future Leaders through Quality Education",
-    "foundingDate": "2004",
+    "foundingDate": "2006",
     "address": {
       "@type": "PostalAddress",
       "streetAddress": "Your School Address",
@@ -682,7 +682,7 @@
 
   <section class="hero" id="hero" role="banner" aria-label="Welcome to Vikas Public School">
     <div class="hero-content">
-      <div class="hero-skeleton">
+      <div class="hero-skeleton" style="display: none;">
         <div class="skeleton-title"></div>
         <div class="skeleton-subtitle"></div>
         <div class="skeleton-buttons">
@@ -707,7 +707,7 @@
         <div class="about-header">
           <h2>About Us</h2>
           <p class="about-intro">
-            Vikas Public School, established in 2004, is committed to nurturing young minds through
+            Vikas Public School, established in 2006, is committed to nurturing young minds through
             holistic education. Our mission is to foster intellectual curiosity, critical thinking,
             and responsible citizenship through a dynamic curriculum and dedicated faculty.
           </p>
@@ -1259,57 +1259,58 @@
   
   <!-- Firebase Configuration - Free Tier Optimized -->
   <script>
-    // IMMEDIATE execution to clear any cached content
-    (function() {
-      // Force clear hero content immediately when script loads
-      window.addEventListener('DOMContentLoaded', function() {
-        const heroTitle = document.querySelector('.hero-title');
-        const heroSubtitle = document.querySelector('.hero-subtitle');
-        
-        // Force clear any content
-        if (heroTitle) {
-          heroTitle.textContent = '';
-          heroTitle.innerHTML = '';
-        }
-        if (heroSubtitle) {
-          heroSubtitle.textContent = '';
-          heroSubtitle.innerHTML = '';
-        }
-      });
-    })();
+    // Clear any potentially cached hero data that might be causing issues
+    localStorage.removeItem('heroData');
+    localStorage.removeItem('heroCacheTime');
+    
+    // Also clear any other cached data that might interfere
+    const keysToRemove = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('hero')) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(key => localStorage.removeItem(key));
 
-    // Simple hero initialization
-    document.addEventListener('DOMContentLoaded', function() {
-      // Clear and set content immediately
-      const heroTitle = document.querySelector('.hero-title');
-      const heroSubtitle = document.querySelector('.hero-subtitle');
-      const heroSkeleton = document.querySelector('.hero-skeleton');
-      const heroActualContent = document.querySelector('.hero-actual-content');
-      
-      // Force clear first
-      if (heroTitle) {
-        heroTitle.textContent = '';
-        setTimeout(() => {
-          heroTitle.textContent = 'Excellence in Education, Empowering Future Leaders';
-        }, 50);
-      }
-      if (heroSubtitle) {
-        heroSubtitle.textContent = '';
-        setTimeout(() => {
-          heroSubtitle.textContent = 'Quality education since 2004 - Nurturing young minds for a brighter tomorrow';
-        }, 50);
-      }
-      
-      // Show content after brief skeleton display
-      setTimeout(() => {
+    // Only show hero section when Firestore data is loaded
+    function updateHeroSection(heroData) {
+      const heroElement = document.querySelector('.hero');
+      if (heroElement) {
+        const heroSkeleton = heroElement.querySelector('.hero-skeleton');
+        const heroActualContent = heroElement.querySelector('.hero-actual-content');
+        const heroTitle = heroElement.querySelector('.hero-title');
+        const heroSubtitle = heroElement.querySelector('.hero-subtitle');
+
+        // Set content only if Firestore data is present
+        if (heroData && heroTitle && heroSubtitle) {
+          heroTitle.textContent = heroData.title || '';
+          heroSubtitle.textContent = heroData.subtitle || '';
+        }
+
+        // Hide skeleton, show actual content only if Firestore data is present
         if (heroSkeleton) {
           heroSkeleton.style.display = 'none';
         }
         if (heroActualContent) {
-          heroActualContent.classList.add('loaded');
+          if (heroData) {
+            heroActualContent.style.display = '';
+            heroActualContent.classList.add('loaded');
+          } else {
+            heroActualContent.style.display = 'none';
+          }
         }
-      }, 300);
-    });
+
+        // Handle background image
+        if (heroData && heroData.backgroundImage && heroData.backgroundImage.trim() !== '') {
+          heroElement.style.setProperty('--hero-bg-image', `url(${heroData.backgroundImage})`);
+          heroElement.classList.add('has-custom-image');
+        } else {
+          heroElement.classList.remove('has-custom-image');
+          heroElement.style.removeProperty('--hero-bg-image');
+        }
+      }
+    }
     
     // Wait for DOM to be fully loaded before running Firebase code
     document.addEventListener('DOMContentLoaded', function() {
@@ -1345,10 +1346,10 @@
           // Load dynamic content efficiently
           loadDynamicContent();
         } catch (error) {
-          console.log('Firebase not available, using static content');
-          // Initialize hero section with fallback content when Firebase is not available
-          updateHeroSection(null);
+          console.log('Firebase not available, hero section will remain hidden.');
         }
+      } else {
+        console.log('Firebase not loaded, hero section will remain hidden.');
       }
       
       // Enhanced cache checking function
@@ -1462,7 +1463,10 @@
           }
           
           // Load hero section data
-          await loadSettingsData('hero', updateHeroSection);
+          await loadSettingsData('hero', function(heroData) {
+            // Only show hero section if Firestore data is loaded
+            updateHeroSection(heroData);
+          });
           
           // Load about section data
           await loadSettingsData('about', updateAboutSection);
@@ -1689,46 +1693,6 @@
       }
       
       // Update functions for admin panel sections
-      function updateHeroSection(heroData) {
-        const heroElement = document.querySelector('.hero');
-        if (heroElement) {
-          const heroSkeleton = heroElement.querySelector('.hero-skeleton');
-          const heroActualContent = heroElement.querySelector('.hero-actual-content');
-          const heroTitle = heroElement.querySelector('.hero-title');
-          const heroSubtitle = heroElement.querySelector('.hero-subtitle');
-          
-          // Set content
-          if (heroTitle) {
-            heroTitle.textContent = (heroData && heroData.title) 
-              ? heroData.title 
-              : 'Excellence in Education, Empowering Future Leaders';
-          }
-          
-          if (heroSubtitle) {
-            heroSubtitle.textContent = (heroData && heroData.subtitle) 
-              ? heroData.subtitle 
-              : 'Quality education since 2004 - Nurturing young minds for a brighter tomorrow';
-          }
-          
-          // Hide skeleton and show content
-          if (heroSkeleton) {
-            heroSkeleton.style.display = 'none';
-          }
-          if (heroActualContent) {
-            heroActualContent.classList.add('loaded');
-          }
-          
-          // Handle background image
-          if (heroData && heroData.backgroundImage && heroData.backgroundImage.trim() !== '') {
-            heroElement.style.setProperty('--hero-bg-image', `url(${heroData.backgroundImage})`);
-            heroElement.classList.add('has-custom-image');
-          } else {
-            heroElement.classList.remove('has-custom-image');
-            heroElement.style.removeProperty('--hero-bg-image');
-          }
-        }
-      }
-      
       function updateAboutSection(aboutData) {
         const aboutSection = document.getElementById('about');
         if (aboutSection && aboutData) {
