@@ -1,4 +1,0 @@
-        <a class="nav-item" onclick="showSection('events')" id="nav-events">
-          <span class="icon">📌</span>
-          Notice Board
-        </a>
