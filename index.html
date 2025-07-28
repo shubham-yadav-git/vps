@@ -94,6 +94,53 @@
       --border-radius-lg: 16px;
       --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
+    /* Floating Refresh Button Styles */
+    .refresh-fab {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      background: var(--gradient-primary);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      box-shadow: var(--shadow-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      cursor: pointer;
+      z-index: 1001;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .refresh-fab:hover {
+      box-shadow: 0 8px 32px rgba(79, 70, 229, 0.25);
+      transform: scale(1.08);
+      background: var(--primary-dark);
+    }
+    .refresh-fab:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+    @media (max-width: 768px) {
+      .refresh-fab {
+        bottom: 70px;
+        right: 15px;
+        width: 48px;
+        height: 48px;
+        font-size: 1.5rem;
+      }
+    }
+    @media (max-width: 480px) {
+      .refresh-fab {
+        bottom: 60px;
+        right: 10px;
+        width: 42px;
+        height: 42px;
+        font-size: 1.2rem;
+      }
+    }
 
     * {
       margin: 0;
@@ -2574,11 +2621,61 @@
   <button 
     id="refresh-fab" 
     class="refresh-fab"
-    onclick="forceRefreshContent()" 
     title="Refresh content (Ctrl+Shift+R)"
+    aria-label="Refresh content"
+    tabindex="0"
   >
-    🔄
+    <i class="fas fa-sync-alt" aria-hidden="true"></i>
   </button>
+  <script>
+    function showRefreshNotification() {
+      var notification = document.createElement('div');
+      notification.style.cssText = "position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:12px 20px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);z-index:10000;font-family:inherit;font-size:14px;opacity:0;transform:translateX(100%);transition:all 0.3s ease;";
+      notification.textContent = 'Content refreshed successfully!';
+      document.body.appendChild(notification);
+      setTimeout(function() {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+      }, 100);
+      setTimeout(function() {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateX(100%)';
+        setTimeout(function() {
+          if (notification.parentNode) notification.parentNode.removeChild(notification);
+        }, 300);
+      }, 3000);
+    }
+
+    document.getElementById('refresh-fab').addEventListener('click', function() {
+      let refreshed = false;
+      if (typeof forceRefreshContent === 'function') {
+        try {
+          forceRefreshContent();
+          refreshed = true;
+        } catch (e) {
+          refreshed = false;
+        }
+      }
+      if (!refreshed) {
+        // fallback: reload page, but set flag for notification
+        localStorage.setItem('showRefreshNotification', '1');
+        location.reload();
+      } else {
+        // show notification if not already shown
+        if (typeof showUpdateNotification === 'function') {
+          showUpdateNotification('Content refreshed successfully!');
+        } else {
+          showRefreshNotification();
+        }
+      }
+    });
+
+    // Show notification after reload if flag is set
+    if (localStorage.getItem('showRefreshNotification') === '1') {
+      localStorage.removeItem('showRefreshNotification');
+      showRefreshNotification();
+    }
+  </script>
 
   <!-- Back to Top Button -->
   <button 
