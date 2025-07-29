@@ -1918,13 +1918,15 @@
       function updateEventsSection(eventsData) {
         const noticesList = document.querySelector('.notices-list');
         if (noticesList && eventsData.length > 0) {
-          noticesList.innerHTML = eventsData.map(notice => {
+          // Truncation lengths
+          const maxTitleLength = 80;
+          const maxDescriptionLength = 120;
+          noticesList.innerHTML = eventsData.map((notice, idx) => {
             const safeTitle = (notice.title || 'Notice').replace(/"/g, '&quot;');
             const safeDate = (notice.date || '').replace(/"/g, '&quot;');
             const safeValidUntil = (notice.validUntil || '').replace(/"/g, '&quot;');
             const safeDescription = (notice.description || '').replace(/"/g, '&quot;');
             const category = notice.category || 'general';
-            
             // Format dates for display
             const displayDate = safeDate ? new Date(safeDate).toLocaleDateString('en-US', { 
               year: 'numeric', month: 'long', day: 'numeric' 
@@ -1932,14 +1934,11 @@
             const displayValidUntil = safeValidUntil ? new Date(safeValidUntil).toLocaleDateString('en-US', { 
               year: 'numeric', month: 'long', day: 'numeric' 
             }) : '';
-            
             // Use category-specific badge class for color control
-            // Ensure category is a safe string for CSS class
             let safeCategory = category;
             if (!['urgent', 'academic', 'events', 'general'].includes(category)) {
               safeCategory = 'general';
             }
-            // Always use the correct badge class for general
             const badgeClass = safeCategory === 'general' ? 'notice-badge-general' : `notice-badge-${safeCategory}`;
             const badgeIconMap = {
               urgent: 'fas fa-exclamation-triangle',
@@ -1955,13 +1954,22 @@
             };
             const badgeIcon = badgeIconMap[safeCategory] || badgeIconMap.general;
             const badgeText = badgeTextMap[safeCategory] || badgeTextMap.general;
+
+            // Truncation logic
+            const titleTruncated = notice.title.length > maxTitleLength;
+            const descriptionTruncated = notice.description.length > maxDescriptionLength;
+            const showReadMore = titleTruncated || descriptionTruncated;
+            const displayTitle = titleTruncated ? notice.title.substring(0, maxTitleLength) + '...' : notice.title;
+            const displayDescription = descriptionTruncated ? notice.description.substring(0, maxDescriptionLength) + '...' : notice.description;
+            // Unique id for expand/collapse
+            const noticeId = `main-notice-${idx}`;
             return `
-            <li class="notice-item ${safeCategory}" data-category="${safeCategory}">
+            <li class="notice-item ${safeCategory}" data-category="${safeCategory}" data-notice-id="${noticeId}" data-expanded="false">
               <div class="notice-badge ${badgeClass}">
                 <i class="${badgeIcon}"></i> ${badgeText}
               </div>
               <div class="notice-content">
-                <h3>${safeTitle}</h3>
+                <h3 class="main-notice-title" data-full-title="${safeTitle}">${displayTitle}</h3>
                 <div class="notice-meta">
                   <span class="notice-date">
                     <i class="fas fa-calendar"></i> Posted: ${displayDate}
@@ -1972,14 +1980,68 @@
                   </span>
                   ` : ''}
                 </div>
-                <p>${safeDescription}</p>
+                <p class="main-notice-description" data-full-description="${safeDescription}">${displayDescription}</p>
+                ${showReadMore ? `
+                  <div class="main-notice-action">
+                    <button class="main-notice-read-more-btn" style="display:inline-flex;">
+                      <span>Read more</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                    <button class="main-notice-read-less-btn" style="display:none;">
+                      <span>Read less</span>
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                        <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                      </svg>
+                    </button>
+                  </div>
+                ` : ''}
               </div>
             </li>
           `;
           }).join('');
-          
-          // Re-initialize notice board filtering after updating content
+
+          // Add expand/collapse logic for main notice board
           setTimeout(() => {
+            const noticeItems = noticesList.querySelectorAll('.notice-item[data-notice-id]');
+            noticeItems.forEach(noticeItem => {
+              const readMoreBtn = noticeItem.querySelector('.main-notice-read-more-btn');
+              const readLessBtn = noticeItem.querySelector('.main-notice-read-less-btn');
+              const titleEl = noticeItem.querySelector('.main-notice-title');
+              const descEl = noticeItem.querySelector('.main-notice-description');
+              if (readMoreBtn) {
+                readMoreBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  // Expand to full
+                  titleEl.textContent = titleEl.dataset.fullTitle;
+                  descEl.textContent = descEl.dataset.fullDescription;
+                  noticeItem.classList.add('expanded');
+                  noticeItem.dataset.expanded = 'true';
+                  readMoreBtn.style.display = 'none';
+                  if (readLessBtn) readLessBtn.style.display = 'inline-flex';
+                });
+              }
+              if (readLessBtn) {
+                readLessBtn.addEventListener('click', function(e) {
+                  e.preventDefault();
+                  // Collapse to truncated
+                  const fullTitle = titleEl.dataset.fullTitle;
+                  const fullDesc = descEl.dataset.fullDescription;
+                  const maxTitleLength = 80;
+                  const maxDescriptionLength = 120;
+                  const newTitle = fullTitle.length > maxTitleLength ? fullTitle.substring(0, maxTitleLength) + '...' : fullTitle;
+                  const newDesc = fullDesc.length > maxDescriptionLength ? fullDesc.substring(0, maxDescriptionLength) + '...' : fullDesc;
+                  titleEl.textContent = newTitle;
+                  descEl.textContent = newDesc;
+                  noticeItem.classList.remove('expanded');
+                  noticeItem.dataset.expanded = 'false';
+                  readLessBtn.style.display = 'none';
+                  if (readMoreBtn) readMoreBtn.style.display = 'inline-flex';
+                });
+              }
+            });
+            // Re-initialize notice board filtering after updating content
             if (window.initializeNoticeBoard) {
               window.initializeNoticeBoard();
             }
