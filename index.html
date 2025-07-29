@@ -1917,6 +1917,7 @@
       
       function updateEventsSection(eventsData) {
         const noticesList = document.querySelector('.notices-list');
+
         if (noticesList && eventsData.length > 0) {
           // Truncation lengths
           const maxTitleLength = 80;
@@ -1965,6 +1966,7 @@
             const noticeId = `main-notice-${idx}`;
             return `
             <li class="notice-item ${safeCategory}" data-category="${safeCategory}" data-notice-id="${noticeId}" data-expanded="false">
+              <div class="main-notice-pin" aria-hidden="true" style="margin: 0 auto 0.3rem auto;"></div>
               <div class="notice-badge ${badgeClass}">
                 <i class="${badgeIcon}"></i> ${badgeText}
               </div>
@@ -2018,6 +2020,15 @@
                   descEl.textContent = descEl.dataset.fullDescription;
                   noticeItem.classList.add('expanded');
                   noticeItem.dataset.expanded = 'true';
+                  // Remove any max-height/height restrictions and force reflow
+                  noticeItem.style.maxHeight = 'none';
+                  noticeItem.style.height = 'auto';
+                  noticeItem.style.minHeight = 'unset';
+                  noticeItem.style.overflow = 'visible';
+                  // Force a reflow to ensure the browser recalculates layout
+                  noticeItem.offsetHeight;
+                  // Optionally, scroll into view if needed
+                  // noticeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                   readMoreBtn.style.display = 'none';
                   if (readLessBtn) readLessBtn.style.display = 'inline-flex';
                 });
@@ -2036,6 +2047,11 @@
                   descEl.textContent = newDesc;
                   noticeItem.classList.remove('expanded');
                   noticeItem.dataset.expanded = 'false';
+                  // Remove forced height/overflow/minHeight/maxHeight
+                  noticeItem.style.height = '';
+                  noticeItem.style.overflow = '';
+                  noticeItem.style.minHeight = '';
+                  noticeItem.style.maxHeight = '';
                   readLessBtn.style.display = 'none';
                   if (readMoreBtn) readMoreBtn.style.display = 'inline-flex';
                 });
