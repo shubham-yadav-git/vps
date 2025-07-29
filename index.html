@@ -1933,19 +1933,32 @@
               year: 'numeric', month: 'long', day: 'numeric' 
             }) : '';
             
-            // Get category badge info
-            const badges = {
-              urgent: { icon: 'fas fa-exclamation-triangle', text: 'Urgent', class: 'urgent-badge' },
-              academic: { icon: 'fas fa-graduation-cap', text: 'Academic', class: 'academic-badge' },
-              events: { icon: 'fas fa-calendar-alt', text: 'Event', class: 'events-badge' },
-              general: { icon: 'fas fa-info-circle', text: 'General', class: 'general-badge' }
+            // Use category-specific badge class for color control
+            // Ensure category is a safe string for CSS class
+            let safeCategory = category;
+            if (!['urgent', 'academic', 'events', 'general'].includes(category)) {
+              safeCategory = 'general';
+            }
+            // Always use the correct badge class for general
+            const badgeClass = safeCategory === 'general' ? 'notice-badge-general' : `notice-badge-${safeCategory}`;
+            const badgeIconMap = {
+              urgent: 'fas fa-exclamation-triangle',
+              academic: 'fas fa-graduation-cap',
+              events: 'fas fa-calendar-alt',
+              general: 'fas fa-info-circle'
             };
-            const badge = badges[category] || badges.general;
-            
+            const badgeTextMap = {
+              urgent: 'Urgent',
+              academic: 'Academic',
+              events: 'Event',
+              general: 'General'
+            };
+            const badgeIcon = badgeIconMap[safeCategory] || badgeIconMap.general;
+            const badgeText = badgeTextMap[safeCategory] || badgeTextMap.general;
             return `
-            <li class="notice-item ${category}" data-category="${category}">
-              <div class="notice-badge ${badge.class}">
-                <i class="${badge.icon}"></i> ${badge.text}
+            <li class="notice-item ${safeCategory}" data-category="${safeCategory}">
+              <div class="notice-badge ${badgeClass}">
+                <i class="${badgeIcon}"></i> ${badgeText}
               </div>
               <div class="notice-content">
                 <h3>${safeTitle}</h3>
@@ -2327,35 +2340,28 @@
         
         // Add click event handlers for expansion only
         content.addEventListener('click', function(e) {
-          console.log('Click detected in notice panel content:', e.target);
-          
           // Check if clicked on read more or read less button (only if visible)
           const readMoreBtn = e.target.closest('.notice-read-more-btn');
           const readLessBtn = e.target.closest('.notice-read-less-btn');
-          
           // Only respond to clicks on visible buttons
           if (readMoreBtn && readMoreBtn.style.display !== 'none') {
             e.stopPropagation();
             e.preventDefault();
             const noticeItem = readMoreBtn.closest('.notice-item-panel');
             if (noticeItem) {
-              console.log('Read more button clicked');
               window.toggleNoticeExpansion(noticeItem);
             }
             return;
           }
-          
           if (readLessBtn && readLessBtn.style.display !== 'none') {
             e.stopPropagation();
             e.preventDefault();
             const noticeItem = readLessBtn.closest('.notice-item-panel');
             if (noticeItem) {
-              console.log('Read less button clicked');
               window.toggleNoticeExpansion(noticeItem);
             }
             return;
           }
-          
           // No modal opening - cards only expand/collapse
           // Users can read full content by clicking "Read more"
         });
