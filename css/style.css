@@ -1,3 +1,112 @@
+/* Mobile: match desktop notice board layout, just smaller */
+@media (max-width: 600px) {
+  .notice-item {
+    font-size: 1rem;
+    padding: 1.1rem 0.7rem 1.5rem 0.7rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    margin-bottom: 1.2rem;
+    position: static;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+    background: #fff;
+    overflow: visible !important;
+    min-height: unset !important;
+    z-index: auto !important;
+  }
+  .notice-item.expanded {
+    overflow: visible !important;
+    min-height: unset !important;
+    z-index: auto !important;
+  }
+  .notice-item .main-notice-pin {
+    position: static !important;
+    margin: 0 auto 0.5rem auto;
+    display: block;
+    left: unset;
+    top: unset;
+    transform: none;
+    z-index: 1;
+  }
+  .notice-badge {
+    margin: 0 auto 0.5rem auto;
+    display: block;
+    font-size: 0.95rem;
+    position: static;
+    z-index: 1;
+    width: fit-content;
+  }
+  .notice-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: stretch;
+    width: 100%;
+  }
+  .main-notice-title {
+    font-size: 1.08rem;
+    margin-bottom: 0.2rem;
+    word-break: break-word;
+    text-align: left;
+    font-weight: 600;
+  }
+  .notice-meta {
+    font-size: 0.92rem;
+    margin-bottom: 0.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    text-align: left;
+  }
+  .main-notice-description {
+    font-size: 0.98rem;
+    margin-bottom: 0.5rem;
+    word-break: break-word;
+    text-align: left;
+  }
+  .main-notice-action {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.1rem;
+    width: 100%;
+  }
+  .main-notice-read-more-btn,
+  .main-notice-read-less-btn {
+    font-size: 0.92rem;
+    padding: 0.18rem 0.7rem;
+    min-width: unset;
+    min-height: unset;
+    line-height: 1.2;
+    border-radius: 6px;
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    background: #f5f5fa;
+    border: 1px solid #e0e0f0;
+    color: #4b3ca7;
+    box-shadow: none;
+    font-weight: 500;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+  }
+  /* Remove any absolute positioning for pin on mobile */
+  .notice-item .main-notice-pin,
+  .main-notice-pin-inner {
+    position: static !important;
+    left: unset !important;
+    top: unset !important;
+    transform: none !important;
+  }
+}
 /* Notice board pin: yellow center with red border/shadow (matches sample image 2) */
 /* Main notice board pin (matches panel pin, but separate class) */
 .notice-item.main-board-pin::before {
@@ -24,7 +133,7 @@
   background: #fff;
   border-radius: 50%;
   z-index: 3;
-}
+
 }
 
 /* Main Notice Board Pin (matches notice panel pin, unique class) */
