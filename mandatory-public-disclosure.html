@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandatory Public Disclosure | Vikas Public School</title>
+  <meta name="description" content="Mandatory Public Disclosure as per CBSE requirements for Vikas Public School." />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="stylesheet" href="css/style.css?v=1.1" />
+</head>
+
+<style>
+  html, body { margin: 0; padding: 0; }
+</style>
+
+  <!-- Reading Progress Bar (required for main.js) -->
+  <div id="reading-progress" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: var(--primary-color);
+    z-index: 9999;
+    transition: width 0.3s ease;
+  "></div>
+<body>
+
+
+
+  <!-- Sticky Top Bar styled like index.html navbar, but only logo and Back button -->
+  <header>
+    <div class="header-container">
+      <div class="logo-section">
+        <img src="assets/logo.png" alt="Vikas Public School Logo" class="logo-img" aria-hidden="false" aria-label="School Logo" loading="eager" fetchpriority="high" />
+        <div class="logo-text">
+          <h1 class="school-name">Vikas Public School</h1>
+          <p class="school-tagline">Excellence in Education</p>
+        </div>
+      </div>
+      <!-- No nav bar, just logo and back button -->
+      <div class="header-actions">
+        <a href="index.html#about" class="btn-modern">
+          <span style="font-size:1.1em;">&#8592;</span> Back to About
+        </a>
+      </div>
+    </div>
+  </header>
+
+
+
+
+
+  <!-- Notice Ticker Bar (copied from index.html) -->
+  <div class="notice-ticker-bar" id="notice-ticker-bar">
+    <div class="notice-ticker-container">
+      <div class="notice-bell-icon" onclick="toggleNoticePanel()">
+        <div class="bell-icon">🔔</div>
+        <div class="notice-count-badge" id="notice-count-badge">0</div>
+      </div>
+      <div class="notice-ticker-content">
+        <div class="notice-ticker-text" id="notice-ticker-text">
+          <span class="ticker-item">📌 Loading latest notices...</span>
+        </div>
+      </div>
+      <div class="notice-view-all" onclick="toggleNoticePanel()">
+        View All
+      </div>
+    </div>
+  </div>
+
+  <!-- Notice Panel (Collapsible, copied from index.html) -->
+  <div class="notice-panel" id="notice-panel">
+    <div class="notice-panel-header">
+      <h3>📌 School Notice Board</h3>
+      <button class="notice-panel-close" onclick="toggleNoticePanel()">✕</button>
+    </div>
+    <div class="notice-panel-content" id="notice-panel-content">
+      <div class="notice-loading">Loading notices...</div>
+    </div>
+  </div>
+
+
+
+  <main class="container" style="max-width: 1100px; margin: 0 auto; padding: 2rem 1rem;">
+    <h1 class="main-title" style="color: var(--primary-color);">Mandatory Public Disclosure</h1>
+    <p class="subtitle">(As per CBSE requirements)</p>
+
+    <!-- Section 1: General Information -->
+    <section class="mpd-section">
+      <h2>1. General Information</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
+          <tr><td>1</td><td>Name of the School</td><td>Vikas Public School</td></tr>
+          <tr><td>2</td><td>Affiliation Number</td><td>[Your Affiliation Number]</td></tr>
+          <tr><td>3</td><td>School Code</td><td>[Your School Code]</td></tr>
+          <tr><td>4</td><td>Complete Address</td><td>[Your Address]</td></tr>
+          <tr><td>5</td><td>Principal Name & Qualification</td><td>[Principal Name, Qualification]</td></tr>
+          <tr><td>6</td><td>School Email ID</td><td>[Your Email]</td></tr>
+          <tr><td>7</td><td>Contact Details</td><td>[Your Phone Number]</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 2: Documents and Information -->
+    <section class="mpd-section">
+      <h2>2. Documents and Information</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>SL No.</th><th>Documents/Information</th><th>Links</th></tr>
+          <tr><td>1</td><td>Copies of Affiliation/Upgradation Letter and Recent Extension of Affiliation</td><td><a href="assets/affiliation-letter.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>2</td><td>Society Registration Certificate</td><td><a href="assets/society-registration.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>3</td><td>No Objection Certificate (NOC) from State/UT</td><td><a href="assets/noc.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>4</td><td>Recognition Certificate under RTE Act</td><td><a href="assets/recognition-certificate.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>5</td><td>Building Safety Certificate</td><td><a href="assets/building-safety.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>6</td><td>Fire Safety Certificate</td><td><a href="assets/fire-safety.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>7</td><td>DEO Certificate</td><td><a href="assets/deo-certificate.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>8</td><td>Water, Health & Sanitation Certificate</td><td><a href="assets/water-health-sanitation.pdf" target="_blank">View/Download</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Section 3: Result and Staff Information (Add more sections as needed) -->
+    <section class="mpd-section">
+      <h2>3. Result and Staff Information</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>SL No.</th><th>Information</th><th>Details/Links</th></tr>
+          <tr><td>1</td><td>Result Class X</td><td><a href="assets/result-x.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>2</td><td>Result Class XII</td><td><a href="assets/result-xii.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>3</td><td>Staff Details</td><td><a href="assets/staff-details.pdf" target="_blank">View/Download</a></td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- Add more sections as per CBSE format -->
+    <section class="mpd-section">
+      <h2>4. Other Information</h2>
+      <p>For more details, please contact the school office or visit our website regularly for updates.</p>
+    </section>
+  </main>
+
+  <!-- Footer (copy from index.html for consistency) -->
+  <!-- ...existing footer code... -->
+
+  <!-- Firebase SDKs (from index.html) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <!-- Main JS -->
+  <script src="js/main.js"></script>
+
+  <!-- Firebase Config and Notice Loader (from index.html) -->
+  <script>
+    // Firebase configuration for free tier
+    const firebaseConfig = {
+      apiKey: "AIzaSyDZH0ZcGAtrILqdRdI5dIhZCUA0eAJzRpE",
+      authDomain: "vpschool-918d6.firebaseapp.com",
+      projectId: "vpschool-918d6",
+      storageBucket: "vpschool-918d6.firebasestorage.app",
+      messagingSenderId: "290237090155",
+      appId: "1:290237090155:web:90356cb12d25d5a0a8a42e",
+      measurementId: "G-02JK84S8NH"
+    };
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof firebase !== 'undefined') {
+        try {
+          firebase.initializeApp(firebaseConfig);
+          window.db = firebase.firestore();
+        } catch (e) {
+          window.db = firebase.firestore();
+        }
+      }
+      // Notice system will auto-initialize from main.js
+    });
+  </script>
+</body>
+</html>

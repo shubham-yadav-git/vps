@@ -1,3 +1,288 @@
+// ===== Notice System Initialization (from index.html) =====
+function adjustNoticeTickerPosition() {
+  const header = document.querySelector('header');
+  const tickerBar = document.getElementById('notice-ticker-bar');
+  if (header && tickerBar) {
+    const headerHeight = header.offsetHeight;
+    document.documentElement.style.setProperty('--calculated-header-height', headerHeight + 'px');
+    tickerBar.style.top = headerHeight + 'px';
+  }
+}
+
+function initializeNoticeSystem() {
+  const tickerBar = document.getElementById('notice-ticker-bar');
+  const countBadge = document.getElementById('notice-count-badge');
+  if (!tickerBar || !countBadge) {
+    setTimeout(initializeNoticeSystem, 100);
+    return;
+  }
+  adjustNoticeTickerPosition();
+  window.loadNoticesData();
+}
+
+window.addEventListener('resize', adjustNoticeTickerPosition);
+
+// Always initialize notice system after DOMContentLoaded (short delay for DOM readiness)
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(() => {
+    initializeNoticeSystem();
+  }, 500);
+});
+// ===== Notice Board System (from index.html, made global) =====
+window.noticeState = {
+  panelOpen: false,
+  notices: [],
+  isLoaded: false
+};
+
+window.toggleNoticePanel = function() {
+  const panel = document.getElementById('notice-panel');
+  window.noticeState.panelOpen = !window.noticeState.panelOpen;
+  if (window.noticeState.panelOpen) {
+    panel.classList.add('open');
+    if (!window.noticeState.isLoaded) {
+      window.loadNoticesData();
+    }
+  } else {
+    panel.classList.remove('open');
+  }
+};
+
+window.loadNoticesData = async function() {
+  try {
+    window.noticeState.isLoaded = true;
+    const cachedEventsData = localStorage.getItem('eventsData');
+    const cachedTime = localStorage.getItem('eventsCacheTime');
+    const now = Date.now();
+    const CACHE_DURATION = 10 * 60 * 1000; // 10 minutes cache
+    let eventsData = [];
+    if (cachedEventsData && cachedTime && (now - parseInt(cachedTime)) < CACHE_DURATION) {
+      eventsData = JSON.parse(cachedEventsData);
+    } else if (typeof firebase !== 'undefined' && firebase.firestore) {
+      try {
+        const db = firebase.firestore();
+        const snapshot = await db.collection('events').orderBy('date', 'desc').limit(20).get();
+        eventsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        localStorage.setItem('eventsData', JSON.stringify(eventsData));
+        localStorage.setItem('eventsCacheTime', now.toString());
+      } catch (error) {
+        eventsData = window.getSampleNoticesData();
+      }
+    } else {
+      eventsData = window.getSampleNoticesData();
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const activeNotices = eventsData.filter(notice => {
+      if (notice.validUntil && notice.validUntil.trim() !== '') {
+        const validUntilDate = new Date(notice.validUntil);
+        validUntilDate.setHours(23, 59, 59, 999);
+        return validUntilDate >= today;
+      }
+      return true;
+    });
+    window.noticeState.notices = activeNotices;
+    window.updateNoticeTicker(activeNotices);
+    window.renderNoticePanel(activeNotices);
+  } catch (error) {
+    const tickerText = document.getElementById('notice-ticker-text');
+    tickerText.innerHTML = '<span class="ticker-item">📌 Error loading notices</span>';
+  }
+};
+
+window.getSampleNoticesData = function() {
+  return [
+    {
+      id: '1',
+      title: 'Mid-term Examination Schedule Released',
+      date: '2025-07-27',
+      validUntil: '2025-09-30',
+      category: 'urgent',
+      description: 'Mid-term examinations for all classes will commence from September 15, 2025. Students must prepare according to the detailed schedule available in the admissions section.'
+    },
+    {
+      id: '2',
+      title: 'Annual Sports Day - August 15, 2025',
+      date: '2025-07-25',
+      validUntil: '',
+      category: 'events',
+      description: 'Join us for a day full of sportsmanship and fun activities for all students. Participation forms available at the sports department.'
+    },
+    {
+      id: '3',
+      title: 'Science Exhibition - September 10, 2025',
+      date: '2025-07-20',
+      validUntil: '',
+      category: 'academic',
+      description: 'A platform for young innovators to showcase their projects and experiments. Registration deadline: August 25, 2025.'
+    },
+    {
+      id: '4',
+      title: 'Parent-Teacher Meeting - October 5, 2025',
+      date: '2025-07-18',
+      validUntil: '',
+      category: 'general',
+      description: 'Discuss your child\'s progress and participate in school development feedback sessions. Meeting timings: 9 AM to 4 PM.'
+    },
+    {
+      id: '5',
+      title: 'Holiday Notice - Independence Day',
+      date: '2025-07-27',
+      validUntil: '2025-08-15',
+      category: 'urgent',
+      description: 'School will remain closed on August 15, 2025, in observance of Independence Day. Regular classes will resume on August 16, 2025.'
+    }
+  ];
+};
+
+window.updateNoticeTicker = function(notices) {
+  const tickerText = document.getElementById('notice-ticker-text');
+  const countBadge = document.getElementById('notice-count-badge');
+  if (!countBadge) return;
+  if (notices.length === 0) {
+    tickerText.innerHTML = '<span class="ticker-item">📌 No active notices at this time</span>';
+    countBadge.textContent = '0';
+    countBadge.classList.remove('show');
+    return;
+  }
+  countBadge.textContent = notices.length;
+  countBadge.classList.add('show');
+  const tickerItems = notices.map(notice => {
+    const categoryIcon = window.getCategoryIcon(notice.category);
+    const urgentClass = notice.category === 'urgent' ? ' urgent' : '';
+    return `<span class="ticker-item${urgentClass}">${categoryIcon} ${notice.title}</span>`;
+  }).join('');
+  tickerText.innerHTML = tickerItems;
+};
+
+window.renderNoticePanel = function(notices) {
+  const content = document.getElementById('notice-panel-content');
+  if (notices.length === 0) {
+    content.innerHTML = '<div class="notice-loading">No active notices at this time</div>';
+    return;
+  }
+  const noticesHtml = notices.map(notice => {
+    const formattedDate = window.formatNoticeDate(notice.date);
+    const categoryIcon = window.getCategoryIcon(notice.category);
+    const maxTitleLength = 80;
+    const maxDescriptionLength = 120;
+    const titleTruncated = notice.title.length > maxTitleLength;
+    const descriptionTruncated = notice.description.length > maxDescriptionLength;
+    const showReadMore = titleTruncated || descriptionTruncated;
+    const displayTitle = titleTruncated ? notice.title.substring(0, maxTitleLength) + '...' : notice.title;
+    const displayDescription = descriptionTruncated ? notice.description.substring(0, maxDescriptionLength) + '...' : notice.description;
+    return `
+      <div class="notice-item-panel ${notice.category}" data-notice-id="${notice.id}" data-expanded="false">
+        <div class="notice-item-header">
+          <span class="notice-category ${notice.category}">${categoryIcon} ${notice.category}</span>
+          <span class="notice-date">${formattedDate}</span>
+        </div>
+        <div class="notice-title" data-full-title="${notice.title.replace(/"/g, '&quot;')}">${displayTitle}</div>
+        <div class="notice-description" data-full-description="${notice.description.replace(/"/g, '&quot;')}">${displayDescription}</div>
+        ${showReadMore ? `
+          <div class="notice-action">
+            <button class="notice-read-more-btn">
+              <span>Read more</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+            <button class="notice-read-less-btn" style="display: none;">
+              <span>Read less</span>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                <path d="M17 7L7 17M7 17H17M7 17V7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+  }).join('');
+  content.innerHTML = noticesHtml;
+  const noticeItems = content.querySelectorAll('.notice-item-panel[data-notice-id]');
+  content.addEventListener('click', function(e) {
+    const readMoreBtn = e.target.closest('.notice-read-more-btn');
+    const readLessBtn = e.target.closest('.notice-read-less-btn');
+    if (readMoreBtn && readMoreBtn.style.display !== 'none') {
+      e.stopPropagation();
+      e.preventDefault();
+      const noticeItem = readMoreBtn.closest('.notice-item-panel');
+      if (noticeItem) {
+        window.toggleNoticeExpansion(noticeItem);
+      }
+      return;
+    }
+    if (readLessBtn && readLessBtn.style.display !== 'none') {
+      e.stopPropagation();
+      e.preventDefault();
+      const noticeItem = readLessBtn.closest('.notice-item-panel');
+      if (noticeItem) {
+        window.toggleNoticeExpansion(noticeItem);
+      }
+      return;
+    }
+  });
+};
+
+window.toggleNoticeExpansion = function(noticeItem) {
+  const titleEl = noticeItem.querySelector('.notice-title');
+  const descriptionEl = noticeItem.querySelector('.notice-description');
+  const readMoreBtn = noticeItem.querySelector('.notice-read-more-btn');
+  const readLessBtn = noticeItem.querySelector('.notice-read-less-btn');
+  const currentTitle = titleEl.textContent;
+  const currentDescription = descriptionEl.textContent;
+  const fullTitle = titleEl.dataset.fullTitle;
+  const fullDescription = descriptionEl.dataset.fullDescription;
+  const isCurrentlyExpanded = (currentTitle === fullTitle && currentDescription === fullDescription);
+  const maxTitleLength = 80;
+  const maxDescriptionLength = 120;
+  if (isCurrentlyExpanded) {
+    const titleTruncated = fullTitle.length > maxTitleLength;
+    const descriptionTruncated = fullDescription.length > maxDescriptionLength;
+    const newTitle = titleTruncated ? fullTitle.substring(0, maxTitleLength) + '...' : fullTitle;
+    const newDescription = descriptionTruncated ? fullDescription.substring(0, maxDescriptionLength) + '...' : fullDescription;
+    titleEl.textContent = newTitle;
+    descriptionEl.textContent = newDescription;
+    titleEl.offsetHeight;
+    descriptionEl.offsetHeight;
+    noticeItem.classList.remove('expanded');
+    noticeItem.dataset.expanded = 'false';
+    if (readMoreBtn) readMoreBtn.style.display = 'inline-flex';
+    if (readLessBtn) readLessBtn.style.display = 'none';
+  } else {
+    titleEl.textContent = fullTitle;
+    descriptionEl.textContent = fullDescription;
+    titleEl.offsetHeight;
+    descriptionEl.offsetHeight;
+    noticeItem.classList.add('expanded');
+    noticeItem.dataset.expanded = 'true';
+    if (readMoreBtn) readMoreBtn.style.display = 'none';
+    if (readLessBtn) readLessBtn.style.display = 'inline-flex';
+  }
+};
+
+window.getCategoryIcon = function(category) {
+  const icons = {
+    urgent: '🚨',
+    academic: '📚',
+    events: '🎉',
+    general: '📋'
+  };
+  return icons[category] || '📌';
+};
+
+window.formatNoticeDate = function(dateString) {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  } catch (error) {
+    return dateString;
+  }
+};
 // Vikas Public School JS - Enhanced mobile menu functionality
 
 // Enhanced mobile menu functionality
