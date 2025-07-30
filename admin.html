@@ -709,6 +709,10 @@
           <span class="icon">ℹ️</span>
           About Section
         </a>
+        <a class="nav-item" onclick="showSection('disclosure')" id="nav-disclosure">
+          <span class="icon">📄</span>
+          Mandatory Disclosure
+        </a>
       </div>
 
       <div class="nav-section">
@@ -920,9 +924,11 @@
     };
     let schoolInfoData = { name: 'Vikas Public School', address: '', phone: '', email: '' };
     let contactData = { address: '', phone: '', email: '', hours: '' };
+    // Disclosure data holder (global)
+    let disclosureData = {};
 
     // Current section
-    let currentSection = 'faculty';
+    let currentSection = 'disclosure'; // Set default to 'disclosure' for debugging
 
     // Mobile menu state
     let mobileMenuOpen = false;
@@ -964,6 +970,7 @@
         'logo': 'School Logo Management',
         'school-info': 'School Information',
         'contact': 'Contact Details'
+        , 'disclosure': 'Mandatory Public Disclosure'
       };
       document.getElementById('page-title').textContent = titles[section];
       
@@ -1014,6 +1021,367 @@
         case 'contact':
           renderContactSection();
           break;
+        case 'disclosure':
+          renderDisclosureSection();
+          break;
+// Mandatory Disclosure section renderer
+function renderDisclosureSection() {
+  console.log('[Disclosure] renderDisclosureSection called');
+  // Hybrid Disclosure Section Manager
+  if (!window.disclosureSections) {
+    window.disclosureSections = [
+      { id: 'general', label: 'A. General Information', enabled: true, standard: true },
+      { id: 'documents', label: 'B. Documents and Information', enabled: true, standard: true },
+      { id: 'academics', label: 'C. Result and Academics', enabled: true, standard: true },
+      { id: 'staff', label: 'D. Staff (Teaching)', enabled: true, standard: true },
+      { id: 'resultx', label: 'Result Class: X', enabled: true, standard: true },
+      { id: 'resultxii', label: 'Result Class: XII', enabled: true, standard: true },
+      { id: 'infra', label: 'E. School Infrastructure', enabled: true, standard: true }
+    ];
+  }
+  let disclosureSections = window.disclosureSections;
+  let disclosureData = window.disclosureData || {};
+  // Prefill from Firestore if not already loaded
+  if (!window._disclosureSectionsLoaded && db) {
+    window._disclosureSectionsLoaded = true;
+    document.getElementById('content-area').innerHTML = '<div style="padding:2rem;text-align:center;">Loading disclosure data...</div>';
+    console.log('[Disclosure] Fetching Firestore disclosure doc...');
+    db.collection('settings').doc('disclosure').get().then(doc => {
+      if(doc.exists) {
+        const d = doc.data();
+        console.log('[Disclosure] Firestore doc loaded:', d);
+        if(d.sections) window.disclosureSections = d.sections;
+        if(d.data) window.disclosureData = d.data;
+        window.disclosureSectionSelected = window.disclosureSectionSelected || (window.disclosureSections.find(s=>s.enabled)?.id || window.disclosureSections[0].id);
+        renderDisclosureSection();
+      } else {
+        // If doc does not exist, create it with defaults
+        console.log('[Disclosure] Firestore doc missing, creating default...');
+        db.collection('settings').doc('disclosure').set({sections: window.disclosureSections, data: {}})
+        .then(()=>{
+          window.disclosureData = {};
+          window.disclosureSectionSelected = window.disclosureSections[0].id;
+          console.log('[Disclosure] Default doc created.');
+          renderDisclosureSection();
+        });
+      }
+    }).catch(err => {
+      window._disclosureSectionsLoaded = false;
+      console.error('[Disclosure] Firestore load error:', err);
+      document.getElementById('content-area').innerHTML = '<div style="padding:2rem;text-align:center;color:red;">Failed to load disclosure data.<br>'+err.message+'<br><button class="btn btn-primary" id="retry-disclosure-load">Retry</button></div>';
+      setTimeout(()=>{
+        const retryBtn = document.getElementById('retry-disclosure-load');
+        if(retryBtn) retryBtn.onclick = ()=>{ window._disclosureSectionsLoaded = false; renderDisclosureSection(); };
+      }, 100);
+    });
+    return;
+  }
+  let selected = window.disclosureSectionSelected || (disclosureSections.find(s=>s.enabled)?.id || disclosureSections[0].id);
+  disclosureData = window.disclosureData || {};
+  // Section Manager UI
+  let managerHtml = `<div class="card" style="margin-bottom:2rem;"><div class="card-header"><h3 class="card-title">Disclosure Sections Manager</h3></div><div class="card-content"><ul style="list-style:none;padding:0;">`;
+  disclosureSections.forEach((section, idx) => {
+    managerHtml += `<li style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+      <input type="checkbox" ${section.enabled?'checked':''} data-section-idx="${idx}" class="disclosure-section-enable">
+      <span style="flex:1;">${section.label}</span>
+      <button class="btn btn-sm" data-move="up" data-section-idx="${idx}" ${idx===0?'disabled':''} title="Move Up">⬆️</button>
+      <button class="btn btn-sm" data-move="down" data-section-idx="${idx}" ${idx===disclosureSections.length-1?'disabled':''} title="Move Down">⬇️</button>
+      ${!section.standard?`<button class="btn btn-danger btn-sm" data-delete-section="${idx}" title="Delete">🗑️</button>`:''}
+    </li>`;
+  });
+  managerHtml += `</ul><button class="btn btn-primary btn-sm" id="add-custom-section">➕ Add Custom Section</button></div></div>`;
+  // Section dropdown (only enabled sections)
+  const enabledSections = disclosureSections.filter(s=>s.enabled);
+  const dropdown = `<div class="form-group" style="max-width:350px;margin-bottom:2rem;"><label class="form-label">Select Disclosure Section</label><select class="form-input" id="disclosure-section-select">${enabledSections.map(opt => `<option value="${opt.id}"${selected===opt.id?' selected':''}>${opt.label}</option>`).join('')}</select></div>`;
+  let sectionHtml = '';
+  // Standard section forms (reuse your existing logic)
+  if(selected==='general'){
+    const d = disclosureData['general'] || {};
+    sectionHtml = `<strong>A. General Information</strong><div class="form-group"><label class="form-label">School Name</label><input class="form-input" id="disclosure-school-name" placeholder="School Name" value="${d['schoolName']||''}"></div><div class="form-group"><label class="form-label">Affiliation No</label><input class="form-input" id="disclosure-affiliation-no" placeholder="Affiliation Number" value="${d['affiliationNo']||''}"></div><div class="form-group"><label class="form-label">School Code</label><input class="form-input" id="disclosure-school-code" placeholder="School Code" value="${d['schoolCode']||''}"></div><div class="form-group"><label class="form-label">Complete Address</label><input class="form-input" id="disclosure-address" placeholder="Complete Address" value="${d['address']||''}"></div><div class="form-group"><label class="form-label">Principal Name</label><input class="form-input" id="disclosure-principal-name" placeholder="Principal Name" value="${d['principalName']||''}"></div><div class="form-group"><label class="form-label">Principal Qualification</label><input class="form-input" id="disclosure-principal-qualification" placeholder="Principal Qualification" value="${d['principalQualification']||''}"></div><div class="form-group"><label class="form-label">Principal Mobile</label><input class="form-input" id="disclosure-principal-mobile" placeholder="Principal Mobile" value="${d['principalMobile']||''}"></div><div class="form-group"><label class="form-label">School Email</label><input class="form-input" id="disclosure-email" placeholder="School Email" value="${d['email']||''}"></div><div class="form-group"><label class="form-label">Contact Number</label><input class="form-input" id="disclosure-contact" placeholder="Contact Number" value="${d['contact']||''}"></div>`;
+  } else if(selected==='documents'){
+    const d = disclosureData['documents'] || {};
+    sectionHtml = `<strong>B. Documents and Information</strong><div class="form-group"><label class="form-label">Affiliation/Upgradation Letter</label><input class="form-input" id="disclosure-affiliation-letter" placeholder="URL or file" value="${d['affiliationLetter']||''}"></div><div class="form-group"><label class="form-label">Society/Trust Registration Certificate</label><input class="form-input" id="disclosure-society-registration" placeholder="URL or file" value="${d['societyRegistration']||''}"></div><div class="form-group"><label class="form-label">NOC from State/UT</label><input class="form-input" id="disclosure-noc" placeholder="URL or file" value="${d['noc']||''}"></div><div class="form-group"><label class="form-label">Recognition Certificate under RTE Act</label><input class="form-input" id="disclosure-recognition" placeholder="URL or file" value="${d['recognition']||''}"></div><div class="form-group"><label class="form-label">Building Safety Certificate</label><input class="form-input" id="disclosure-building-safety" placeholder="URL or file" value="${d['buildingSafety']||''}"></div><div class="form-group"><label class="form-label">Fire Safety Certificate</label><input class="form-input" id="disclosure-fire-safety" placeholder="URL or file" value="${d['fireSafety']||''}"></div><div class="form-group"><label class="form-label">DEO Certificate</label><input class="form-input" id="disclosure-deo-certificate" placeholder="URL or file" value="${d['deoCertificate']||''}"></div><div class="form-group"><label class="form-label">Water, Health & Sanitation Certificate</label><input class="form-input" id="disclosure-water-health" placeholder="URL or file" value="${d['waterHealth']||''}"></div>`;
+  } else if(selected==='academics'){
+    const d = disclosureData['academics'] || {};
+    sectionHtml = `<strong>C. Result and Academics</strong><div class="form-group"><label class="form-label">Fee Structure</label><input class="form-input" id="disclosure-fee-structure" placeholder="URL or file" value="${d['feeStructure']||''}"></div><div class="form-group"><label class="form-label">Academic Calendar</label><input class="form-input" id="disclosure-academic-calendar" placeholder="URL or file" value="${d['academicCalendar']||''}"></div><div class="form-group"><label class="form-label">School Management Committee</label><input class="form-input" id="disclosure-smc" placeholder="URL or file" value="${d['smc']||''}"></div><div class="form-group"><label class="form-label">PTA Members</label><input class="form-input" id="disclosure-pta" placeholder="URL or file" value="${d['pta']||''}"></div><div class="form-group"><label class="form-label">Last 3 Years Board Results</label><input class="form-input" id="disclosure-board-results" placeholder="URL or file" value="${d['boardResults']||''}"></div>`;
+  } else if(selected==='staff'){
+    const d = disclosureData['staff'] || {};
+    sectionHtml = `<strong>D. Staff (Teaching)</strong><div class="form-group"><label class="form-label">Principal Count</label><input class="form-input" id="disclosure-principal-count" placeholder="Count" value="${d['principalCount']||''}"></div><div class="form-group"><label class="form-label">Total Teachers</label><input class="form-input" id="disclosure-total-teachers" placeholder="Count" value="${d['totalTeachers']||''}"></div><div class="form-group"><label class="form-label">PGT Count</label><input class="form-input" id="disclosure-pgt-count" placeholder="Count" value="${d['pgtCount']||''}"></div><div class="form-group"><label class="form-label">TGT Count</label><input class="form-input" id="disclosure-tgt-count" placeholder="Count" value="${d['tgtCount']||''}"></div><div class="form-group"><label class="form-label">PRT Count</label><input class="form-input" id="disclosure-prt-count" placeholder="Count" value="${d['prtCount']||''}"></div><div class="form-group"><label class="form-label">Teachers Section Ratio</label><input class="form-input" id="disclosure-teacher-ratio" placeholder="Ratio" value="${d['teacherRatio']||''}"></div><div class="form-group"><label class="form-label">Special Educator</label><input class="form-input" id="disclosure-special-educator" placeholder="Details" value="${d['specialEducator']||''}"></div><div class="form-group"><label class="form-label">Counselor/Wellness Teacher</label><input class="form-input" id="disclosure-counselor" placeholder="Details" value="${d['counselor']||''}"></div>`;
+  } else if(selected==='resultx'){
+    const d = disclosureData['resultx'] || {};
+    sectionHtml = `<strong>Result Class: X</strong><div class="form-group"><label class="form-label">Year 1</label><input class="form-input" id="disclosure-x-year1" placeholder="Year" value="${d['year1']||''}"></div><div class="form-group"><label class="form-label">Registered Students</label><input class="form-input" id="disclosure-x-reg1" placeholder="Count" value="${d['reg1']||''}"></div><div class="form-group"><label class="form-label">Students Passed</label><input class="form-input" id="disclosure-x-pass1" placeholder="Count" value="${d['pass1']||''}"></div><div class="form-group"><label class="form-label">Pass Percentage</label><input class="form-input" id="disclosure-x-percent1" placeholder="%" value="${d['percent1']||''}"></div><div class="form-group"><label class="form-label">Year 2</label><input class="form-input" id="disclosure-x-year2" placeholder="Year" value="${d['year2']||''}"></div><div class="form-group"><label class="form-label">Registered Students</label><input class="form-input" id="disclosure-x-reg2" placeholder="Count" value="${d['reg2']||''}"></div><div class="form-group"><label class="form-label">Students Passed</label><input class="form-input" id="disclosure-x-pass2" placeholder="Count" value="${d['pass2']||''}"></div><div class="form-group"><label class="form-label">Pass Percentage</label><input class="form-input" id="disclosure-x-percent2" placeholder="%" value="${d['percent2']||''}"></div><div class="form-group"><label class="form-label">Year 3</label><input class="form-input" id="disclosure-x-year3" placeholder="Year" value="${d['year3']||''}"></div><div class="form-group"><label class="form-label">Registered Students</label><input class="form-input" id="disclosure-x-reg3" placeholder="Count" value="${d['reg3']||''}"></div><div class="form-group"><label class="form-label">Students Passed</label><input class="form-input" id="disclosure-x-pass3" placeholder="Count" value="${d['pass3']||''}"></div><div class="form-group"><label class="form-label">Pass Percentage</label><input class="form-input" id="disclosure-x-percent3" placeholder="%" value="${d['percent3']||''}"></div>`;
+  } else if(selected==='resultxii'){
+    const d = disclosureData['resultxii'] || {};
+    sectionHtml = `<strong>Result Class: XII</strong><div class="form-group"><label class="form-label">Year 1</label><input class="form-input" id="disclosure-xii-year1" placeholder="Year" value="${d['year1']||''}"></div><div class="form-group"><label class="form-label">Registered Students</label><input class="form-input" id="disclosure-xii-reg1" placeholder="Count" value="${d['reg1']||''}"></div><div class="form-group"><label class="form-label">Students Passed</label><input class="form-input" id="disclosure-xii-pass1" placeholder="Count" value="${d['pass1']||''}"></div><div class="form-group"><label class="form-label">Pass Percentage</label><input class="form-input" id="disclosure-xii-percent1" placeholder="%" value="${d['percent1']||''}"></div><div class="form-group"><label class="form-label">Year 2</label><input class="form-input" id="disclosure-xii-year2" placeholder="Year" value="${d['year2']||''}"></div><div class="form-group"><label class="form-label">Registered Students</label><input class="form-input" id="disclosure-xii-reg2" placeholder="Count" value="${d['reg2']||''}"></div><div class="form-group"><label class="form-label">Students Passed</label><input class="form-input" id="disclosure-xii-pass2" placeholder="Count" value="${d['pass2']||''}"></div><div class="form-group"><label class="form-label">Pass Percentage</label><input class="form-input" id="disclosure-xii-percent2" placeholder="%" value="${d['percent2']||''}"></div><div class="form-group"><label class="form-label">Year 3</label><input class="form-input" id="disclosure-xii-year3" placeholder="Year" value="${d['year3']||''}"></div><div class="form-group"><label class="form-label">Registered Students</label><input class="form-input" id="disclosure-xii-reg3" placeholder="Count" value="${d['reg3']||''}"></div><div class="form-group"><label class="form-label">Students Passed</label><input class="form-input" id="disclosure-xii-pass3" placeholder="Count" value="${d['pass3']||''}"></div><div class="form-group"><label class="form-label">Pass Percentage</label><input class="form-input" id="disclosure-xii-percent3" placeholder="%" value="${d['percent3']||''}"></div>`;
+  } else if(selected==='infra'){
+    const d = disclosureData['infra'] || {};
+    sectionHtml = `<strong>E. School Infrastructure</strong><div class="form-group"><label class="form-label">Campus Area (sq mtr)</label><input class="form-input" id="disclosure-campus-area" placeholder="Area" value="${d['campusArea']||''}"></div><div class="form-group"><label class="form-label">Classrooms (No. & Size)</label><input class="form-input" id="disclosure-classrooms" placeholder="Details" value="${d['classrooms']||''}"></div><div class="form-group"><label class="form-label">Laboratories (No. & Size)</label><input class="form-input" id="disclosure-labs" placeholder="Details" value="${d['labs']||''}"></div><div class="form-group"><label class="form-label">Internet Facility</label><input class="form-input" id="disclosure-internet" placeholder="Y/N" value="${d['internet']||''}"></div><div class="form-group"><label class="form-label">Girls Toilets</label><input class="form-input" id="disclosure-girls-toilets" placeholder="Count" value="${d['girlsToilets']||''}"></div><div class="form-group"><label class="form-label">Boys Toilets</label><input class="form-input" id="disclosure-boys-toilets" placeholder="Count" value="${d['boysToilets']||''}"></div><div class="form-group"><label class="form-label">YouTube Video Link</label><input class="form-input" id="disclosure-youtube" placeholder="URL" value="${d['youtube']||''}"></div>`;
+  } else {
+    // Custom section: allow dynamic fields and values
+    let custom = disclosureSections.find(s=>s.id===selected);
+    if (!custom.fields) custom.fields = [{label:'Name',type:'text'}];
+    const d = disclosureData[selected] || {};
+    sectionHtml = `<strong>${custom?custom.label:'Custom Section'}</strong>
+      <div id="custom-fields-list">${custom.fields.map((field, idx) => `
+        <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
+          <input class="form-input" style="flex:2;" placeholder="Field Label" value="${field.label}" data-field-idx="${idx}" data-field-type="label">
+          <select class="form-input" style="flex:1;max-width:120px;" data-field-idx="${idx}" data-field-type="type">
+            <option value="text"${field.type==='text'?' selected':''}>Text</option>
+            <option value="number"${field.type==='number'?' selected':''}>Number</option>
+            <option value="date"${field.type==='date'?' selected':''}>Date</option>
+          </select>
+          <button class="btn btn-danger btn-sm" data-remove-field="${idx}" title="Remove Field">🗑️</button>
+        </div>`).join('')}</div>
+      <button class="btn btn-primary btn-sm" id="add-custom-field">➕ Add Field</button>
+      <hr style="margin:1.5rem 0;">
+      <div id="custom-fields-values">
+        <h4 style="margin-bottom:1rem;">Enter Values</h4>
+        ${custom.fields.map((field, idx) => {
+          let inputType = field.type==='number'?'number':(field.type==='date'?'date':'text');
+          let key = field.label.replace(/\W+/g,'_').toLowerCase();
+          let val = d[key]!==undefined ? d[key] : '';
+          return `<div class="form-group"><label class="form-label">${field.label}</label><input class="form-input custom-value-input" type="${inputType}" data-value-idx="${idx}" data-value-key="${key}" value="${val}" placeholder="${field.label}"></div>`;
+        }).join('')}
+      </div>`;
+  // Save value changes for custom fields (update disclosureData)
+  if(selected && disclosureSections.find(s=>s.id===selected && !s.standard)){
+    document.querySelectorAll('.custom-value-input').forEach(input=>{
+      input.addEventListener('input',function(){
+        let key = input.getAttribute('data-value-key');
+        if(!disclosureData[selected]) disclosureData[selected] = {};
+        disclosureData[selected][key] = input.value;
+        window.disclosureData = disclosureData;
+      });
+    });
+  }
+
+  // Save button handler (save all disclosureSections and data to Firestore)
+  const saveBtn = document.querySelector('.form-actions .btn-primary');
+  if(saveBtn && db){
+    saveBtn.onclick = function(){
+      console.log('[Disclosure] Save button clicked');
+      // Gather all standard section values
+      const stdIds = ['general','documents','academics','staff','resultx','resultxii','infra'];
+      stdIds.forEach(id => {
+        const d = disclosureData[id] || {};
+        if(id==='general'){
+          d.schoolName = document.getElementById('disclosure-school-name')?.value||'';
+          d.affiliationNo = document.getElementById('disclosure-affiliation-no')?.value||'';
+          d.schoolCode = document.getElementById('disclosure-school-code')?.value||'';
+          d.address = document.getElementById('disclosure-address')?.value||'';
+          d.principalName = document.getElementById('disclosure-principal-name')?.value||'';
+          d.principalQualification = document.getElementById('disclosure-principal-qualification')?.value||'';
+          d.principalMobile = document.getElementById('disclosure-principal-mobile')?.value||'';
+          d.email = document.getElementById('disclosure-email')?.value||'';
+          d.contact = document.getElementById('disclosure-contact')?.value||'';
+        } else if(id==='documents'){
+          d.affiliationLetter = document.getElementById('disclosure-affiliation-letter')?.value||'';
+          d.societyRegistration = document.getElementById('disclosure-society-registration')?.value||'';
+          d.noc = document.getElementById('disclosure-noc')?.value||'';
+          d.recognition = document.getElementById('disclosure-recognition')?.value||'';
+          d.buildingSafety = document.getElementById('disclosure-building-safety')?.value||'';
+          d.fireSafety = document.getElementById('disclosure-fire-safety')?.value||'';
+          d.deoCertificate = document.getElementById('disclosure-deo-certificate')?.value||'';
+          d.waterHealth = document.getElementById('disclosure-water-health')?.value||'';
+        } else if(id==='academics'){
+          d.feeStructure = document.getElementById('disclosure-fee-structure')?.value||'';
+          d.academicCalendar = document.getElementById('disclosure-academic-calendar')?.value||'';
+          d.smc = document.getElementById('disclosure-smc')?.value||'';
+          d.pta = document.getElementById('disclosure-pta')?.value||'';
+          d.boardResults = document.getElementById('disclosure-board-results')?.value||'';
+        } else if(id==='staff'){
+          d.principalCount = document.getElementById('disclosure-principal-count')?.value||'';
+          d.totalTeachers = document.getElementById('disclosure-total-teachers')?.value||'';
+          d.pgtCount = document.getElementById('disclosure-pgt-count')?.value||'';
+          d.tgtCount = document.getElementById('disclosure-tgt-count')?.value||'';
+          d.prtCount = document.getElementById('disclosure-prt-count')?.value||'';
+          d.teacherRatio = document.getElementById('disclosure-teacher-ratio')?.value||'';
+          d.specialEducator = document.getElementById('disclosure-special-educator')?.value||'';
+          d.counselor = document.getElementById('disclosure-counselor')?.value||'';
+        } else if(id==='resultx'){
+          d.year1 = document.getElementById('disclosure-x-year1')?.value||'';
+          d.reg1 = document.getElementById('disclosure-x-reg1')?.value||'';
+          d.pass1 = document.getElementById('disclosure-x-pass1')?.value||'';
+          d.percent1 = document.getElementById('disclosure-x-percent1')?.value||'';
+          d.year2 = document.getElementById('disclosure-x-year2')?.value||'';
+          d.reg2 = document.getElementById('disclosure-x-reg2')?.value||'';
+          d.pass2 = document.getElementById('disclosure-x-pass2')?.value||'';
+          d.percent2 = document.getElementById('disclosure-x-percent2')?.value||'';
+          d.year3 = document.getElementById('disclosure-x-year3')?.value||'';
+          d.reg3 = document.getElementById('disclosure-x-reg3')?.value||'';
+          d.pass3 = document.getElementById('disclosure-x-pass3')?.value||'';
+          d.percent3 = document.getElementById('disclosure-x-percent3')?.value||'';
+        } else if(id==='resultxii'){
+          d.year1 = document.getElementById('disclosure-xii-year1')?.value||'';
+          d.reg1 = document.getElementById('disclosure-xii-reg1')?.value||'';
+          d.pass1 = document.getElementById('disclosure-xii-pass1')?.value||'';
+          d.percent1 = document.getElementById('disclosure-xii-percent1')?.value||'';
+          d.year2 = document.getElementById('disclosure-xii-year2')?.value||'';
+          d.reg2 = document.getElementById('disclosure-xii-reg2')?.value||'';
+          d.pass2 = document.getElementById('disclosure-xii-pass2')?.value||'';
+          d.percent2 = document.getElementById('disclosure-xii-percent2')?.value||'';
+          d.year3 = document.getElementById('disclosure-xii-year3')?.value||'';
+          d.reg3 = document.getElementById('disclosure-xii-reg3')?.value||'';
+          d.pass3 = document.getElementById('disclosure-xii-pass3')?.value||'';
+          d.percent3 = document.getElementById('disclosure-xii-percent3')?.value||'';
+        } else if(id==='infra'){
+          d.campusArea = document.getElementById('disclosure-campus-area')?.value||'';
+          d.classrooms = document.getElementById('disclosure-classrooms')?.value||'';
+          d.labs = document.getElementById('disclosure-labs')?.value||'';
+          d.internet = document.getElementById('disclosure-internet')?.value||'';
+          d.girlsToilets = document.getElementById('disclosure-girls-toilets')?.value||'';
+          d.boysToilets = document.getElementById('disclosure-boys-toilets')?.value||'';
+          d.youtube = document.getElementById('disclosure-youtube')?.value||'';
+        }
+        disclosureData[id] = d;
+      });
+      // Custom sections: already updated on input
+      window.disclosureData = disclosureData;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="icon">⏳</span> Saving...';
+      db.collection('settings').doc('disclosure').set({sections: window.disclosureSections, data: window.disclosureData}).then(()=>{
+        console.log('[Disclosure] Firestore save successful');
+        saveBtn.innerHTML = '<span class="icon">✅</span> Saved!';
+        setTimeout(()=>{
+          saveBtn.innerHTML = '<span class="icon">💾</span> Save Disclosure Data';
+          saveBtn.disabled = false;
+          window._disclosureSectionsLoaded = false;
+          renderDisclosureSection(); // force reload from Firestore
+        }, 1200);
+      }).catch(err=>{
+        console.error('[Disclosure] Firestore save error:', err);
+        saveBtn.innerHTML = '<span class="icon">❌</span> Error';
+        alert('Failed to save: '+err.message);
+        setTimeout(()=>{
+          saveBtn.innerHTML = '<span class="icon">💾</span> Save Disclosure Data';
+          saveBtn.disabled = false;
+        }, 1200);
+      });
+    };
+  }
+  }
+  const content = `
+    ${managerHtml}
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Mandatory Public Disclosure</h2>
+        <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary); font-size: 0.9rem;">Edit all CBSE-mandated disclosure data for your public page.</p>
+      </div>
+      <div class="card-content">
+        ${dropdown}
+        <div id="disclosure-section-content">${sectionHtml}</div>
+        <div class="form-actions" style="margin-top:2rem;">
+          <button class="btn btn-primary"><span class="icon">💾</span> Save Disclosure Data</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('content-area').innerHTML = content;
+  // Dropdown change
+  const sectionSelect = document.getElementById('disclosure-section-select');
+  if(sectionSelect) {
+    sectionSelect.addEventListener('change', function(e){
+      window.disclosureSectionSelected = e.target.value;
+      renderDisclosureSection();
+    });
+  }
+  // Enable/disable section
+  document.querySelectorAll('.disclosure-section-enable').forEach(cb => {
+    cb.addEventListener('change', function(e){
+      const idx = +e.target.getAttribute('data-section-idx');
+      disclosureSections[idx].enabled = e.target.checked;
+      renderDisclosureSection();
+    });
+  });
+  // Move up/down
+  document.querySelectorAll('button[data-move]').forEach(btn => {
+    btn.addEventListener('click', function(e){
+      const idx = +btn.getAttribute('data-section-idx');
+      const dir = btn.getAttribute('data-move');
+      if(dir==='up' && idx>0){
+        [disclosureSections[idx-1],disclosureSections[idx]] = [disclosureSections[idx],disclosureSections[idx-1]];
+      } else if(dir==='down' && idx<disclosureSections.length-1){
+        [disclosureSections[idx+1],disclosureSections[idx]] = [disclosureSections[idx],disclosureSections[idx+1]];
+      }
+      renderDisclosureSection();
+    });
+  });
+  // Delete custom section
+  document.querySelectorAll('button[data-delete-section]').forEach(btn => {
+    btn.addEventListener('click', function(e){
+      const idx = +btn.getAttribute('data-delete-section');
+      disclosureSections.splice(idx,1);
+      renderDisclosureSection();
+    });
+  });
+  // Add custom section
+  const addCustomSectionBtn = document.getElementById('add-custom-section');
+  if(addCustomSectionBtn) {
+    addCustomSectionBtn.addEventListener('click', function(){
+      const label = prompt('Enter custom section title:');
+      if(label && label.trim()) {
+        // Generate a unique id for the custom section
+        let baseId = label.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+        let id = baseId;
+        let i = 1;
+        while(window.disclosureSections.some(s => s.id === id)) {
+          id = baseId + '_' + i;
+          i++;
+        }
+        // Add the new custom section
+        window.disclosureSections.push({
+          id: id,
+          label: label.trim(),
+          enabled: true,
+          standard: false,
+          fields: [
+            { label: 'Name', type: 'text' }
+          ]
+        });
+        // Set as selected
+        window.disclosureSectionSelected = id;
+        renderDisclosureSection();
+      }
+    });
+  }
+  // Add/remove/edit custom fields (only for custom sections)
+  if(selected && disclosureSections.find(s=>s.id===selected && !s.standard)){
+    // Add field
+    const addFieldBtn = document.getElementById('add-custom-field');
+    if(addFieldBtn){
+      addFieldBtn.addEventListener('click',function(){
+        let custom = disclosureSections.find(s=>s.id===selected);
+        if(custom && custom.fields) {
+          custom.fields.push({label:'New Field',type:'text'});
+          renderDisclosureSection();
+        }
+      });
+    }
+    // Remove field
+    document.querySelectorAll('button[data-remove-field]').forEach(btn=>{
+      btn.addEventListener('click',function(){
+        let idx = +btn.getAttribute('data-remove-field');
+        let custom = disclosureSections.find(s=>s.id===selected);
+        if(custom && custom.fields && custom.fields.length > 1) {
+          custom.fields.splice(idx,1);
+          renderDisclosureSection();
+        }
+      });
+    });
+    // Edit field label/type
+    document.querySelectorAll('#custom-fields-list input[data-field-type], #custom-fields-list select[data-field-type]').forEach(el=>{
+      el.addEventListener('input',function(){
+        let idx = +el.getAttribute('data-field-idx');
+        let type = el.getAttribute('data-field-type');
+        let custom = disclosureSections.find(s=>s.id===selected);
+        if(custom && custom.fields && custom.fields[idx]) {
+          if(type==='label') custom.fields[idx].label = el.value;
+          if(type==='type') custom.fields[idx].type = el.value;
+        }
+      });
+    });
+  }
+}
       }
     }
 
