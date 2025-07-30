@@ -7,6 +7,11 @@
   <meta name="description" content="Mandatory Public Disclosure as per CBSE requirements for Vikas Public School." />
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
   <link rel="stylesheet" href="css/style.css?v=1.1" />
+  <!-- Font Awesome for social icons in footer -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- GSAP & ScrollTrigger CDN for animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
 </head>
 
 <style>
@@ -87,62 +92,134 @@
     <p class="subtitle">(As per CBSE requirements)</p>
 
     <!-- Section 1: General Information -->
-    <section class="mpd-section">
-      <h2>1. General Information</h2>
+    <!-- A. GENERAL INFORMATION -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>A. General Information</h2>
       <table class="mpd-table">
         <tbody>
           <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
-          <tr><td>1</td><td>Name of the School</td><td>Vikas Public School</td></tr>
-          <tr><td>2</td><td>Affiliation Number</td><td>[Your Affiliation Number]</td></tr>
+          <tr><td>1</td><td>Name of the School</td><td>[Your School Name]</td></tr>
+          <tr><td>2</td><td>Affiliation No</td><td>[Your Affiliation Number]</td></tr>
           <tr><td>3</td><td>School Code</td><td>[Your School Code]</td></tr>
-          <tr><td>4</td><td>Complete Address</td><td>[Your Address]</td></tr>
-          <tr><td>5</td><td>Principal Name & Qualification</td><td>[Principal Name, Qualification]</td></tr>
-          <tr><td>6</td><td>School Email ID</td><td>[Your Email]</td></tr>
-          <tr><td>7</td><td>Contact Details</td><td>[Your Phone Number]</td></tr>
+          <tr><td>4</td><td>Complete Address with Pin Code</td><td>[Your Address]</td></tr>
+          <tr><td>5</td><td>Principal Name</td><td>[Principal Name]</td></tr>
+          <tr><td>6</td><td>Principal Qualification</td><td>[Principal Qualification]</td></tr>
+          <tr><td>7</td><td>Principal Mobile Number</td><td>[Principal Mobile]</td></tr>
+          <tr><td>8</td><td>School Email ID</td><td>[Your Email]</td></tr>
+          <tr><td>9</td><td>Contact Us</td><td>[Your Phone Number]</td></tr>
         </tbody>
       </table>
     </section>
 
     <!-- Section 2: Documents and Information -->
-    <section class="mpd-section">
-      <h2>2. Documents and Information</h2>
+    <!-- B. DOCUMENTS AND INFORMATION -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>B. Documents and Information</h2>
       <table class="mpd-table">
         <tbody>
           <tr><th>SL No.</th><th>Documents/Information</th><th>Links</th></tr>
-          <tr><td>1</td><td>Copies of Affiliation/Upgradation Letter and Recent Extension of Affiliation</td><td><a href="assets/affiliation-letter.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>2</td><td>Society Registration Certificate</td><td><a href="assets/society-registration.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>3</td><td>No Objection Certificate (NOC) from State/UT</td><td><a href="assets/noc.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>4</td><td>Recognition Certificate under RTE Act</td><td><a href="assets/recognition-certificate.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>5</td><td>Building Safety Certificate</td><td><a href="assets/building-safety.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>6</td><td>Fire Safety Certificate</td><td><a href="assets/fire-safety.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>7</td><td>DEO Certificate</td><td><a href="assets/deo-certificate.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>8</td><td>Water, Health & Sanitation Certificate</td><td><a href="assets/water-health-sanitation.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><td>1</td><td>Copies of Affiliation/Upgradation Letter and Recent Extension of Affiliation, if any</td><td>[VIEW]</td></tr>
+          <tr><td>2</td><td>Copy Societies/Trust/Company Registration/Renewal Certificate, as applicable</td><td>[VIEW]</td></tr>
+          <tr><td>3</td><td>Copy of No Objection Certificate (NOC) issued, if applicable, by the State Govt/UT</td><td>[VIEW]</td></tr>
+          <tr><td>4</td><td>Copy of Recognition Certificate under RTE Act, 2009, and its renewal if applicable</td><td>[VIEW]</td></tr>
+          <tr><td>5</td><td>Copy of Building Safety Certificate as per the National Building Code</td><td>[VIEW]</td></tr>
+          <tr><td>6</td><td>Copy of Valid Fire Safety Certificate issued by the Competent Authority</td><td>[VIEW]</td></tr>
+          <tr><td>7</td><td>Copy of the DEO Certificate submitted by the school for affiliation/upgradation/extension of affiliation or self certification by school</td><td>[VIEW]</td></tr>
+          <tr><td>8</td><td>Copy of Valid Water, Health and Sanitation Certificates</td><td>[VIEW]</td></tr>
         </tbody>
       </table>
+      <p style="font-size:0.95em;color:#666;margin-top:0.5em;">NOTE: The school needs to upload the self-attested copies of above listed documents by Chairman/Manager/Secretary and Principal. In case, it is noticed at later stage that uploaded documents are not genuine then school shall be liable for action as per norms.</p>
     </section>
 
     <!-- Section 3: Result and Staff Information (Add more sections as needed) -->
-    <section class="mpd-section">
-      <h2>3. Result and Staff Information</h2>
+    <!-- C. RESULT AND ACADEMICS -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>C. Result and Academics</h2>
       <table class="mpd-table">
         <tbody>
-          <tr><th>SL No.</th><th>Information</th><th>Details/Links</th></tr>
-          <tr><td>1</td><td>Result Class X</td><td><a href="assets/result-x.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>2</td><td>Result Class XII</td><td><a href="assets/result-xii.pdf" target="_blank">View/Download</a></td></tr>
-          <tr><td>3</td><td>Staff Details</td><td><a href="assets/staff-details.pdf" target="_blank">View/Download</a></td></tr>
+          <tr><th>SL No.</th><th>Information</th><th>Links</th></tr>
+          <tr><td>1</td><td>Fee Structure of the School</td><td>[VIEW]</td></tr>
+          <tr><td>2</td><td>Annual Academic Calendar</td><td>[VIEW]</td></tr>
+          <tr><td>3</td><td>List of School Management Committee (SMC)</td><td>[VIEW]</td></tr>
+          <tr><td>4</td><td>List of Parents Teachers Association (PTA) Members</td><td>[VIEW]</td></tr>
+          <tr><td>5</td><td>Last Three-Year Result of the Board Examination as per Applicability</td><td>[VIEW]</td></tr>
         </tbody>
       </table>
     </section>
 
-    <!-- Add more sections as per CBSE format -->
-    <section class="mpd-section">
-      <h2>4. Other Information</h2>
-      <p>For more details, please contact the school office or visit our website regularly for updates.</p>
+    <!-- D. STAFF (TEACHING) -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>D. Staff (Teaching)</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
+          <tr><td>1</td><td>Principal</td><td>[Principal Count]</td></tr>
+          <tr><td>2</td><td>Total No. of Teachers</td><td>[Total Teachers]</td></tr>
+          <tr><td></td><td>PGT Teacher</td><td>[PGT Count]</td></tr>
+          <tr><td></td><td>TGT Teacher</td><td>[TGT Count]</td></tr>
+          <tr><td></td><td>PRT Teacher</td><td>[PRT Count]</td></tr>
+          <tr><td>3</td><td>Teachers Section Ratio</td><td>[Ratio]</td></tr>
+          <tr><td>4</td><td>Details of Special Educator</td><td>[Special Educator]</td></tr>
+          <tr><td>5</td><td>Details of Counselor and Wellness Teacher</td><td>[Counselor/Wellness]</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- RESULT CLASS: X -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>Result Class: X</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>Year</th><th>Registered Students</th><th>Students Passed</th><th>Pass Percentage</th></tr>
+          <tr><td>[Year 1]</td><td>[Reg X 1]</td><td>[Pass X 1]</td><td>[% X 1]</td></tr>
+          <tr><td>[Year 2]</td><td>[Reg X 2]</td><td>[Pass X 2]</td><td>[% X 2]</td></tr>
+          <tr><td>[Year 3]</td><td>[Reg X 3]</td><td>[Pass X 3]</td><td>[% X 3]</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- RESULT CLASS: XII -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>Result Class: XII</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>Year</th><th>Registered Students</th><th>Students Passed</th><th>Pass Percentage</th></tr>
+          <tr><td>[Year 1]</td><td>[Reg XII 1]</td><td>[Pass XII 1]</td><td>[% XII 1]</td></tr>
+          <tr><td>[Year 2]</td><td>[Reg XII 2]</td><td>[Pass XII 2]</td><td>[% XII 2]</td></tr>
+          <tr><td>[Year 3]</td><td>[Reg XII 3]</td><td>[Pass XII 3]</td><td>[% XII 3]</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <!-- E. SCHOOL INFRASTRUCTURE -->
+    <section class="mpd-section" style="margin-bottom:2.5rem;">
+      <h2>E. School Infrastructure</h2>
+      <table class="mpd-table">
+        <tbody>
+          <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
+          <tr><td>1</td><td>Total Campus Area of the School (in square mtr)</td><td>[Campus Area]</td></tr>
+          <tr><td>2</td><td>No. and Size of the Class Rooms (in sq mtr)</td><td>[Classrooms]</td></tr>
+          <tr><td>3</td><td>No. and Size of Laboratories including Computer Labs (in sq mtr)</td><td>[Labs]</td></tr>
+          <tr><td>4</td><td>Internet Facility (Y/N)</td><td>[Internet]</td></tr>
+          <tr><td>5</td><td>No. of Girls Toilets</td><td>[Girls Toilets]</td></tr>
+          <tr><td>6</td><td>No. of Boys Toilets</td><td>[Boys Toilets]</td></tr>
+          <tr><td>7</td><td>Link of YouTube Video of the Inspection of School Covering Infrastructure of the School</td><td>[VIEW]</td></tr>
+        </tbody>
+      </table>
     </section>
   </main>
 
   <!-- Footer (copy from index.html for consistency) -->
-  <!-- ...existing footer code... -->
+  <!-- Common Footer Include -->
+  <div id="footer-include"></div>
+  <script>
+    // Simple HTML include for static hosting
+    fetch('assets/footer.html')
+      .then(r => r.text())
+      .then(html => { document.getElementById('footer-include').innerHTML = html; });
+  </script>
+  <!-- GSAP Animation for MPD sections -->
+  <script src="js/mpd-animate.js"></script>
 
   <!-- Firebase SDKs (from index.html) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
