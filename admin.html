@@ -1492,53 +1492,240 @@
                 selected &&
                 disclosureSections.find((s) => s.id === selected && !s.standard)
               ) {
-                // Add field
-                const addFieldBtn = document.getElementById("add-custom-field");
-                if (addFieldBtn) {
-                  addFieldBtn.addEventListener("click", function () {
-                    let custom = disclosureSections.find(
-                      (s) => s.id === selected
-                    );
-                    if (custom && custom.fields) {
-                      custom.fields.push({}); // Always add a blank field (no label, no type)
+                // Always show section selector and Add Section button
+                const contentArea = document.getElementById("content-area");
+
+                let sectionSelectorHtml = `
+                  <div style="margin-bottom:2rem; display:flex; align-items:center; gap:1.5rem; background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; padding:1.1rem 1.5rem 1.1rem 1.5rem; box-shadow:0 1px 4px #f1f5f9;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                      <label for="disclosure-section-select" style="font-weight:500; color:#334155; font-size:1.05rem; margin-right:0.5rem;">Section:</label>
+                      <select id="disclosure-section-select" style="font-size:1.05rem; padding:7px 16px; border-radius:7px; border:1px solid #cbd5e1; background:#fff; color:#1e293b; min-width:160px;">
+                        ${disclosureSections.map(s => `<option value="${s.id}"${s.id===selected?' selected':''}>${s.label}</option>`).join('')}
+                      </select>
+                    </div>
+                    <div style="height:32px; width:1px; background:#e5e7eb; margin:0 0.5rem;"></div>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                      <button id="move-section-up" class="btn btn-secondary btn-sm" style="padding:4px 10px;" title="Move section up (rearrange order)" ${disclosureSections.findIndex(s=>s.id===selected)===0?'disabled':''}>⬆️</button>
+                      <button id="move-section-down" class="btn btn-secondary btn-sm" style="padding:4px 10px;" title="Move section down (rearrange order)" ${disclosureSections.findIndex(s=>s.id===selected)===disclosureSections.length-1?'disabled':''}>⬇️</button>
+                      <button id="delete-section" class="btn btn-danger btn-sm" style="padding:4px 10px;" title="Delete this section">🗑️</button>
+                    </div>
+                    <div style="height:32px; width:1px; background:#e5e7eb; margin:0 0.5rem;"></div>
+                    <button id="add-custom-section" class="btn btn-primary" style="font-size:1.05rem; padding:7px 20px; border-radius:7px;">
+                      <span class="icon">➕</span> Add Section
+                    </button>
+                  </div>
+                `;
+
+                // Render table UI for the selected section
+                const section = disclosureSections.find((s) => s.id === selected);
+                if (!section || !contentArea) return;
+
+                // Ensure fields array exists
+                if (!Array.isArray(section.fields)) section.fields = [];
+                // Ensure rows array exists
+                if (!Array.isArray(section.rows)) section.rows = [];
+
+                // Table header: fields (columns)
+                let tableHeader = `<tr>`;
+                section.fields.forEach((f, idx) => {
+                  tableHeader += `<th style="background:#f8fafc; padding:8px; border-bottom:1px solid #e5e7eb;">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                      <input type="text" value="${f.label || ''}" data-field-idx="${idx}" placeholder="Field name" class="form-input" style="width: 120px; font-size: 1rem;" />
+                      <button data-remove-field="${idx}" title="Remove column" class="btn btn-danger btn-sm" style="padding:2px 8px;">🗑️</button>
+                    </div>
+                  </th>`;
+                });
+                tableHeader += `<th style="background:#f8fafc; padding:8px; border-bottom:1px solid #e5e7eb; text-align:center;">
+                  <button id="add-custom-field" class="btn btn-secondary btn-sm" style="font-size:0.95rem;">+ Add Column</button>
+                </th>`;
+                tableHeader += `</tr>`;
+
+                // Table body: rows (records)
+                let tableBody = '';
+                section.rows.forEach((row, rIdx) => {
+                  tableBody += `<tr>`;
+                  section.fields.forEach((f, cIdx) => {
+                    tableBody += `<td style="padding:6px 8px; background:#fff; border-bottom:1px solid #f1f5f9;">
+                      <input type="text" value="${row[cIdx] || ''}" data-row-idx="${rIdx}" data-col-idx="${cIdx}" class="form-input" style="width: 120px; font-size: 1rem;" />
+                    </td>`;
+                  });
+                  tableBody += `<td style="text-align:center; background:#fff; border-bottom:1px solid #f1f5f9;">
+                    <button data-remove-row="${rIdx}" title="Remove row" class="btn btn-danger btn-sm" style="padding:2px 8px;">🗑️</button>
+                  </td>`;
+                  tableBody += `</tr>`;
+                });
+                // Add row button
+                tableBody += `<tr><td colspan="${section.fields.length + 1}" style="background:#f8fafc; text-align:left; padding:12px 8px;">
+                  <button id="add-custom-row" class="btn btn-secondary btn-sm" style="font-size:0.95rem;">+ Add Row</button>
+                </td></tr>`;
+
+                // Render section selector and table
+                contentArea.innerHTML = `
+                  ${sectionSelectorHtml}
+                  <div class="card" style="box-shadow:0 2px 8px #e5e7eb; border-radius:12px;">
+                    <div class="card-header" style="border-bottom:1px solid #e5e7eb; background:#f8fafc; border-radius:12px 12px 0 0;">
+                      <h2 class="card-title" style="margin:0; font-size:1.3rem; font-weight:600; color:#1e293b;">${section.label}</h2>
+                    </div>
+                    <div class="card-content" style="padding:2rem 1.5rem 1.5rem 1.5rem; background:#f9fafb; border-radius:0 0 12px 12px;">
+                      <div style="overflow-x:auto;">
+                        <table class="table" style="width:100%; border-collapse:separate; border-spacing:0; background:#fff; border-radius:8px; box-shadow:0 1px 2px #f1f5f9;">
+                          <thead>${tableHeader}</thead>
+                          <tbody>${tableBody}</tbody>
+                        </table>
+                      </div>
+                      <div class="form-actions" style="margin-top:1.5rem; text-align:right;">
+                        <button class="btn btn-primary" id="save-section-data" style="font-size:1.1rem; padding:10px 28px; border-radius:10px;">
+                          <span class="icon">💾</span>
+                          Save Section Data
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+
+                // Re-attach section selector and add section button events
+                const sectionSelect = document.getElementById("disclosure-section-select");
+                if (sectionSelect) {
+                  sectionSelect.addEventListener("change", function (e) {
+                    window.disclosureSectionSelected = e.target.value;
+                    renderDisclosureSection();
+                  });
+                }
+                const addCustomSectionBtn = document.getElementById("add-custom-section");
+                if (addCustomSectionBtn) {
+                  addCustomSectionBtn.addEventListener("click", function () {
+                    const label = prompt("Enter custom section title:");
+                    if (label && label.trim()) {
+                      // Generate a unique id for the custom section
+                      let baseId = label.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
+                      let id = baseId;
+                      let i = 1;
+                      while (window.disclosureSections.some((s) => s.id === id)) {
+                        id = baseId + "_" + i;
+                        i++;
+                      }
+                      // Add the new custom section
+                      window.disclosureSections.push({
+                        id: id,
+                        label: label.trim(),
+                        enabled: true,
+                        standard: false,
+                        fields: [],
+                        rows: [],
+                      });
+                      // Set as selected
+                      window.disclosureSectionSelected = id;
                       renderDisclosureSection();
                     }
                   });
                 }
-                // Remove field
-                document
-                  .querySelectorAll("button[data-remove-field]")
-                  .forEach((btn) => {
-                    btn.addEventListener("click", function () {
-                      let idx = +btn.getAttribute("data-remove-field");
-                      let custom = disclosureSections.find(
-                        (s) => s.id === selected
-                      );
-                      if (custom && custom.fields && custom.fields.length > 1) {
-                        custom.fields.splice(idx, 1);
-                        renderDisclosureSection();
-                      }
-                    });
+                // Move section up
+                const moveUpBtn = document.getElementById("move-section-up");
+                if (moveUpBtn) {
+                  moveUpBtn.addEventListener("click", function () {
+                    const idx = disclosureSections.findIndex(s => s.id === selected);
+                    if (idx > 0) {
+                      [disclosureSections[idx - 1], disclosureSections[idx]] = [disclosureSections[idx], disclosureSections[idx - 1]];
+                      renderDisclosureSection();
+                    }
                   });
-                // Edit field label/type
-                document
-                  .querySelectorAll(
-                    "#custom-fields-list input[data-field-type], #custom-fields-list select[data-field-type]"
-                  )
-                  .forEach((el) => {
-                    el.addEventListener("input", function () {
-                      let idx = +el.getAttribute("data-field-idx");
-                      let type = el.getAttribute("data-field-type");
-                      let custom = disclosureSections.find(
-                        (s) => s.id === selected
-                      );
-                      if (custom && custom.fields && custom.fields[idx]) {
-                        if (type === "label")
-                          custom.fields[idx].label = el.value;
-                        if (type === "type") custom.fields[idx].type = el.value;
-                      }
-                    });
+                }
+                // Move section down
+                const moveDownBtn = document.getElementById("move-section-down");
+                if (moveDownBtn) {
+                  moveDownBtn.addEventListener("click", function () {
+                    const idx = disclosureSections.findIndex(s => s.id === selected);
+                    if (idx < disclosureSections.length - 1) {
+                      [disclosureSections[idx + 1], disclosureSections[idx]] = [disclosureSections[idx], disclosureSections[idx + 1]];
+                      renderDisclosureSection();
+                    }
                   });
+                }
+                // Delete section
+                const deleteBtn = document.getElementById("delete-section");
+                if (deleteBtn) {
+                  deleteBtn.addEventListener("click", function () {
+                    const idx = disclosureSections.findIndex(s => s.id === selected);
+                    if (idx !== -1) {
+                      disclosureSections.splice(idx, 1);
+                      // Select next available section
+                      if (disclosureSections.length > 0) {
+                        window.disclosureSectionSelected = disclosureSections[Math.max(0, idx - 1)].id;
+                      } else {
+                        window.disclosureSectionSelected = null;
+                      }
+                      renderDisclosureSection();
+                    }
+                  });
+                }
+
+                // Add column (field)
+                const addFieldBtn = document.getElementById("add-custom-field");
+                if (addFieldBtn) {
+                  addFieldBtn.addEventListener("click", function () {
+                    section.fields.push({ label: "" });
+                    // Add empty value to all existing rows
+                    section.rows.forEach(row => row.push(""));
+                    renderDisclosureSection();
+                  });
+                }
+                // Remove column (field)
+                document.querySelectorAll("button[data-remove-field]").forEach((btn) => {
+                  btn.addEventListener("click", function () {
+                    let idx = +btn.getAttribute("data-remove-field");
+                    section.fields.splice(idx, 1);
+                    // Remove value from all rows
+                    section.rows.forEach(row => row.splice(idx, 1));
+                    renderDisclosureSection();
+                  });
+                });
+                // Edit field label
+                document.querySelectorAll("input[data-field-idx]").forEach((el) => {
+                  el.addEventListener("input", function () {
+                    let idx = +el.getAttribute("data-field-idx");
+                    section.fields[idx].label = el.value;
+                  });
+                });
+                // Add row (record)
+                const addRowBtn = document.getElementById("add-custom-row");
+                if (addRowBtn) {
+                  addRowBtn.addEventListener("click", function () {
+                    // New row: array of empty strings, one per field
+                    section.rows.push(Array(section.fields.length).fill(""));
+                    renderDisclosureSection();
+                  });
+                }
+                // Remove row
+                document.querySelectorAll("button[data-remove-row]").forEach((btn) => {
+                  btn.addEventListener("click", function () {
+                    let idx = +btn.getAttribute("data-remove-row");
+                    section.rows.splice(idx, 1);
+                    renderDisclosureSection();
+                  });
+                });
+                // Edit cell value
+                document.querySelectorAll("input[data-row-idx][data-col-idx]").forEach((el) => {
+                  el.addEventListener("input", function () {
+                    let rIdx = +el.getAttribute("data-row-idx");
+                    let cIdx = +el.getAttribute("data-col-idx");
+                    section.rows[rIdx][cIdx] = el.value;
+                  });
+                });
+                // Save section data
+                const saveSectionBtn = document.getElementById("save-section-data");
+                if (saveSectionBtn) {
+                  saveSectionBtn.addEventListener("click", function () {
+                    // Save logic: call saveData for this section
+                    if (typeof saveData === 'function') {
+                      saveData(section.id, { fields: section.fields, rows: section.rows });
+                      if (typeof showSuccessIndicator === 'function') {
+                        showSuccessIndicator('section-save', 'Section data saved successfully');
+                      }
+                    } else {
+                      alert('Save function not available.');
+                    }
+                  });
+                }
               }
             }
         }
