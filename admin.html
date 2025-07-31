@@ -1545,8 +1545,10 @@
                 section.rows.forEach((row, rIdx) => {
                   tableBody += `<tr>`;
                   section.fields.forEach((f, cIdx) => {
+                    // Support both array and object row formats
+                    var val = Array.isArray(row) ? row[cIdx] : (row && typeof row === 'object' ? row[f.label] : '');
                     tableBody += `<td style="padding:6px 8px; background:#fff; border-bottom:1px solid #f1f5f9;">
-                      <input type="text" value="${row[cIdx] || ''}" data-row-idx="${rIdx}" data-col-idx="${cIdx}" class="form-input" style="width: 120px; font-size: 1rem;" />
+                      <input type="text" value="${val || ''}" data-row-idx="${rIdx}" data-col-idx="${cIdx}" class="form-input" style="width: 120px; font-size: 1rem;" />
                     </td>`;
                   });
                   tableBody += `<td style="text-align:center; background:#fff; border-bottom:1px solid #f1f5f9;">
@@ -1563,8 +1565,9 @@
                 contentArea.innerHTML = `
                   ${sectionSelectorHtml}
                   <div class="card" style="box-shadow:0 2px 8px #e5e7eb; border-radius:12px;">
-                    <div class="card-header" style="border-bottom:1px solid #e5e7eb; background:#f8fafc; border-radius:12px 12px 0 0;">
+                    <div class="card-header" style="border-bottom:1px solid #e5e7eb; background:#f8fafc; border-radius:12px 12px 0 0; display:flex;align-items:center;justify-content:space-between;">
                       <h2 class="card-title" style="margin:0; font-size:1.3rem; font-weight:600; color:#1e293b;">${section.label}</h2>
+                      <button id="paste-table-btn" class="btn btn-secondary btn-sm" style="margin-left:auto;">Paste Table</button>
                     </div>
                     <div class="card-content" style="padding:2rem 1.5rem 1.5rem 1.5rem; background:#f9fafb; border-radius:0 0 12px 12px;">
                       <div style="overflow-x:auto;">
@@ -1581,9 +1584,132 @@
                       </div>
                     </div>
                   </div>
+                  <div id="paste-table-modal" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.35);z-index:99999;align-items:center;justify-content:center;">
+                    <div style="background:#fff;padding:2em 1.5em;border-radius:10px;max-width:98vw;width:420px;box-shadow:0 4px 24px #0002;position:relative;max-height:90vh;overflow-y:auto;">
+                      <button id="close-paste-table-modal" style="position:absolute;top:0.7em;right:1em;font-size:1.3em;background:none;border:none;cursor:pointer;">&times;</button>
+                      <h3 style="margin-top:0;">Paste Table Data</h3>
+                      <textarea id="paste-table-input" rows="7" style="width:100%;font-family:monospace;font-size:1em;resize:vertical;" placeholder="Paste CSV or tab-separated data here..."></textarea>
+                      <div style="margin-top:1em;text-align:right;">
+                        <button id="render-paste-table" class="btn btn-primary">Preview Table</button>
+                      </div>
+                      <div id="paste-table-error" style="color:#c00;font-size:0.95em;margin-top:0.5em;"></div>
+                      <div id="paste-table-preview" style="margin-top:1em;"></div>
+                      <div style="margin-top:1em;">
+                        <label style="display:block;margin-bottom:0.5em;font-size:0.98em;color:#334155;font-weight:500;">Import Mode:</label>
+                        <div style="display:flex;gap:1em;align-items:center;">
+                          <label style="font-size:0.97em;"><input type="radio" name="import-section-mode" id="import-into-current-section" value="current" checked style="margin-right:0.4em;">Import into current section</label>
+                          <label style="font-size:0.97em;"><input type="radio" name="import-section-mode" id="import-as-new-section" value="new" style="margin-right:0.4em;">Import as new section</label>
+                        </div>
+                      </div>
+                      <div style="margin-top:1em;text-align:right;">
+                        <button id="import-paste-table" class="btn btn-success" style="display:none;">Import Table</button>
+                      </div>
+                    </div>
+                  </div>
                 `;
 
                 // Re-attach section selector and add section button events
+                // Paste Table Feature (only for custom sections)
+                (function() {
+                  var pasteBtn = document.getElementById('paste-table-btn');
+                  var modal = document.getElementById('paste-table-modal');
+                  var closeModal = document.getElementById('close-paste-table-modal');
+                  var input = document.getElementById('paste-table-input');
+                  var renderBtn = document.getElementById('render-paste-table');
+                  var errorDiv = document.getElementById('paste-table-error');
+                  var previewDiv = document.getElementById('paste-table-preview');
+                  var importBtn = document.getElementById('import-paste-table');
+                  if (pasteBtn && modal && closeModal && input && renderBtn && errorDiv && previewDiv && importBtn) {
+                    pasteBtn.onclick = function() {
+                      modal.style.display = 'flex';
+                      input.value = '';
+                      errorDiv.textContent = '';
+                      previewDiv.innerHTML = '';
+                      importBtn.style.display = 'none';
+                    };
+                    closeModal.onclick = function() { modal.style.display = 'none'; };
+                    modal.onclick = function(e) { if (e.target === modal) modal.style.display = 'none'; };
+                    renderBtn.onclick = function() {
+                      errorDiv.textContent = '';
+                      previewDiv.innerHTML = '';
+                      importBtn.style.display = 'none';
+                      var text = input.value.trim();
+                      if (!text) { errorDiv.textContent = 'Please paste some data.'; return; }
+                      // Parse CSV/TSV robustly
+                      var rows = text.split(/\r?\n/).map(function(r) { return r.split(/\t|,(?=(?:[^"]*"[^"]*")*[^"]*$)/); });
+                      // Remove empty rows
+                      rows = rows.filter(function(r) { return r.some(function(cell) { return cell.trim() !== ''; }); });
+                      if (!rows.length || rows[0].length < 2) { errorDiv.textContent = 'Please paste at least two columns.'; return; }
+                      // Render preview table
+                      var html = '<div style="overflow-x:auto;"><table class="table"><thead><tr>';
+                      for (var j = 0; j < rows[0].length; ++j) {
+                        html += '<th>' + rows[0][j].replace(/"/g, '').trim() + '</th>';
+                      }
+                      html += '</tr></thead><tbody>';
+                      for (var i = 1; i < rows.length; ++i) {
+                        html += '<tr>';
+                        for (var k = 0; k < rows[i].length; ++k) {
+                          html += '<td>' + rows[i][k].replace(/"/g, '').trim() + '</td>';
+                        }
+                        html += '</tr>';
+                      }
+                      html += '</tbody></table></div>';
+                      previewDiv.innerHTML = html;
+                      // Always show import button after successful preview
+                      importBtn.style.display = 'block';
+                      // Store parsed rows for import
+                      importBtn._rows = rows;
+                    };
+                    importBtn.onclick = function() {
+                      var rows = importBtn._rows;
+                      if (!rows || !rows.length) return;
+                      var importMode = document.getElementById('import-into-current-section').checked ? 'current' : 'new';
+                      var fieldLabels = rows[0].map(function(label) { return label.replace(/"/g, '').trim(); });
+                      if (importMode === 'current') {
+                        if (!confirm('This will overwrite the current table for this section. Continue?')) return;
+                        section.fields = fieldLabels.map(function(label) { return { label: label }; });
+                        section.rows = rows.slice(1).map(function(row) {
+                          var obj = {};
+                          for (var i = 0; i < fieldLabels.length; ++i) {
+                            obj[fieldLabels[i]] = (row[i] || '').replace(/"/g, '').trim();
+                          }
+                          return obj;
+                        });
+                        modal.style.display = 'none';
+                        renderDisclosureSection();
+                      } else {
+                        var newSectionName = prompt('Enter a name for the new section:');
+                        if (!newSectionName || !newSectionName.trim()) return;
+                        // Generate unique id
+                        let baseId = newSectionName.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+                        let id = baseId;
+                        let i = 1;
+                        while (window.disclosureSections.some((s) => s.id === id)) {
+                          id = baseId + '_' + i;
+                          i++;
+                        }
+                        var newSection = {
+                          id: id,
+                          label: newSectionName.trim(),
+                          enabled: true,
+                          standard: false,
+                          fields: fieldLabels.map(function(label) { return { label: label }; }),
+                          rows: rows.slice(1).map(function(row) {
+                            var obj = {};
+                            for (var i = 0; i < fieldLabels.length; ++i) {
+                              obj[fieldLabels[i]] = (row[i] || '').replace(/"/g, '').trim();
+                            }
+                            return obj;
+                          })
+                        };
+                        window.disclosureSections.push(newSection);
+                        window.disclosureSectionSelected = id;
+                        modal.style.display = 'none';
+                        renderDisclosureSection();
+                      }
+                    };
+                  }
+                })();
                 const sectionSelect = document.getElementById("disclosure-section-select");
                 if (sectionSelect) {
                   sectionSelect.addEventListener("change", function (e) {
