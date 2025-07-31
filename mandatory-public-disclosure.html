@@ -91,122 +91,95 @@
     <h1 class="main-title" style="color: var(--primary-color);">Mandatory Public Disclosure</h1>
     <p class="subtitle">(As per CBSE requirements)</p>
 
-    <!-- Section 1: General Information -->
-    <!-- A. GENERAL INFORMATION -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>A. General Information</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
-          <tr><td>1</td><td>Name of the School</td><td>[Your School Name]</td></tr>
-          <tr><td>2</td><td>Affiliation No</td><td>[Your Affiliation Number]</td></tr>
-          <tr><td>3</td><td>School Code</td><td>[Your School Code]</td></tr>
-          <tr><td>4</td><td>Complete Address with Pin Code</td><td>[Your Address]</td></tr>
-          <tr><td>5</td><td>Principal Name</td><td>[Principal Name]</td></tr>
-          <tr><td>6</td><td>Principal Qualification</td><td>[Principal Qualification]</td></tr>
-          <tr><td>7</td><td>Principal Mobile Number</td><td>[Principal Mobile]</td></tr>
-          <tr><td>8</td><td>School Email ID</td><td>[Your Email]</td></tr>
-          <tr><td>9</td><td>Contact Us</td><td>[Your Phone Number]</td></tr>
-        </tbody>
-      </table>
-    </section>
+    <!-- Dynamic Disclosure Sections Rendered Here -->
+    <div id="disclosure-sections"></div>
+  <!-- Dynamic Disclosure Sections Loader -->
+  <script>
+    // DEBUG: Confirm script is loaded
+    console.log('MPD script loaded');
+    // Wait for Firebase and DOM
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOMContentLoaded fired');
+      function renderDisclosureSections(sections) {
+        const container = document.getElementById('disclosure-sections');
+        if (!container) return;
+        container.innerHTML = '';
+        if (!Array.isArray(sections) || sections.length === 0) {
+          container.innerHTML = '<div style="color:#888;font-size:1.1em;margin:2em 0;">No disclosure data available.<br><pre id="disclosure-debug"></pre></div>';
+          return;
+        }
+        sections.filter(s => s.enabled !== false).forEach(section => {
+          // Robustly convert rows from objects to arrays if needed (like admin)
+          let fields = Array.isArray(section.fields) ? section.fields : [];
+          let rows = Array.isArray(section.rows) ? section.rows : [];
+          if (fields.length && rows.length && typeof rows[0] === 'object' && !Array.isArray(rows[0])) {
+            // Convert objects to arrays in field order
+            const fieldLabels = fields.map(f => f.label || "");
+            rows = rows.map(obj => fieldLabels.map(label => obj[label || ""] || ""));
+          }
+          // Table header
+          let tableHeader = '<tr>';
+          fields.forEach(f => {
+            tableHeader += `<th>${f.label||''}</th>`;
+          });
+          tableHeader += '</tr>';
+          // Table body
+          let tableBody = '';
+          rows.forEach(row => {
+            tableBody += '<tr>';
+            fields.forEach((f, idx) => {
+              let val = Array.isArray(row) ? row[idx] : (row[f.label||'']||'');
+              tableBody += `<td>${val||''}</td>`;
+            });
+            tableBody += '</tr>';
+          });
+          // Section title and table
+          container.innerHTML += `
+            <section class="mpd-section" style="margin-bottom:2.5rem;">
+              <h2>${section.label||''}</h2>
+              <table class="mpd-table">
+                <thead>${tableHeader}</thead>
+                <tbody>${tableBody}</tbody>
+              </table>
+            </section>
+          `;
+        });
+      }
 
-    <!-- Section 2: Documents and Information -->
-    <!-- B. DOCUMENTS AND INFORMATION -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>B. Documents and Information</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>SL No.</th><th>Documents/Information</th><th>Links</th></tr>
-          <tr><td>1</td><td>Copies of Affiliation/Upgradation Letter and Recent Extension of Affiliation, if any</td><td>[VIEW]</td></tr>
-          <tr><td>2</td><td>Copy Societies/Trust/Company Registration/Renewal Certificate, as applicable</td><td>[VIEW]</td></tr>
-          <tr><td>3</td><td>Copy of No Objection Certificate (NOC) issued, if applicable, by the State Govt/UT</td><td>[VIEW]</td></tr>
-          <tr><td>4</td><td>Copy of Recognition Certificate under RTE Act, 2009, and its renewal if applicable</td><td>[VIEW]</td></tr>
-          <tr><td>5</td><td>Copy of Building Safety Certificate as per the National Building Code</td><td>[VIEW]</td></tr>
-          <tr><td>6</td><td>Copy of Valid Fire Safety Certificate issued by the Competent Authority</td><td>[VIEW]</td></tr>
-          <tr><td>7</td><td>Copy of the DEO Certificate submitted by the school for affiliation/upgradation/extension of affiliation or self certification by school</td><td>[VIEW]</td></tr>
-          <tr><td>8</td><td>Copy of Valid Water, Health and Sanitation Certificates</td><td>[VIEW]</td></tr>
-        </tbody>
-      </table>
-      <p style="font-size:0.95em;color:#666;margin-top:0.5em;">NOTE: The school needs to upload the self-attested copies of above listed documents by Chairman/Manager/Secretary and Principal. In case, it is noticed at later stage that uploaded documents are not genuine then school shall be liable for action as per norms.</p>
-    </section>
+      // Fetch all disclosure sections from Firestore
+      function fetchDisclosureSections() {
+        console.log('Fetching disclosure sections...');
+        if (!window.db) {
+          document.getElementById('disclosure-sections').innerHTML = '<div style="color:#888;font-size:1.1em;margin:2em 0;">Database not available.</div>';
+          return;
+        }
+        window.db.collection('settings').doc('disclosure').get().then(doc => {
+          let data = doc.exists ? doc.data() : {};
+          let sections = Array.isArray(data.sections) ? data.sections : [];
+          console.log('[MPD] Disclosure sections count:', sections.length, sections);
+          // Debug: show raw data if nothing renders
+          if ((!sections || !sections.length) && document.getElementById('disclosure-debug')) {
+            document.getElementById('disclosure-debug').textContent = JSON.stringify(data, null, 2);
+          }
+          renderDisclosureSections(sections);
+        }).catch(err => {
+          document.getElementById('disclosure-sections').innerHTML = '<div style="color:#c00;font-size:1.1em;margin:2em 0;">Failed to load disclosure data.</div>';
+        });
+      }
 
-    <!-- Section 3: Result and Staff Information (Add more sections as needed) -->
-    <!-- C. RESULT AND ACADEMICS -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>C. Result and Academics</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>SL No.</th><th>Information</th><th>Links</th></tr>
-          <tr><td>1</td><td>Fee Structure of the School</td><td>[VIEW]</td></tr>
-          <tr><td>2</td><td>Annual Academic Calendar</td><td>[VIEW]</td></tr>
-          <tr><td>3</td><td>List of School Management Committee (SMC)</td><td>[VIEW]</td></tr>
-          <tr><td>4</td><td>List of Parents Teachers Association (PTA) Members</td><td>[VIEW]</td></tr>
-          <tr><td>5</td><td>Last Three-Year Result of the Board Examination as per Applicability</td><td>[VIEW]</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- D. STAFF (TEACHING) -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>D. Staff (Teaching)</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
-          <tr><td>1</td><td>Principal</td><td>[Principal Count]</td></tr>
-          <tr><td>2</td><td>Total No. of Teachers</td><td>[Total Teachers]</td></tr>
-          <tr><td></td><td>PGT Teacher</td><td>[PGT Count]</td></tr>
-          <tr><td></td><td>TGT Teacher</td><td>[TGT Count]</td></tr>
-          <tr><td></td><td>PRT Teacher</td><td>[PRT Count]</td></tr>
-          <tr><td>3</td><td>Teachers Section Ratio</td><td>[Ratio]</td></tr>
-          <tr><td>4</td><td>Details of Special Educator</td><td>[Special Educator]</td></tr>
-          <tr><td>5</td><td>Details of Counselor and Wellness Teacher</td><td>[Counselor/Wellness]</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- RESULT CLASS: X -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>Result Class: X</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>Year</th><th>Registered Students</th><th>Students Passed</th><th>Pass Percentage</th></tr>
-          <tr><td>[Year 1]</td><td>[Reg X 1]</td><td>[Pass X 1]</td><td>[% X 1]</td></tr>
-          <tr><td>[Year 2]</td><td>[Reg X 2]</td><td>[Pass X 2]</td><td>[% X 2]</td></tr>
-          <tr><td>[Year 3]</td><td>[Reg X 3]</td><td>[Pass X 3]</td><td>[% X 3]</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- RESULT CLASS: XII -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>Result Class: XII</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>Year</th><th>Registered Students</th><th>Students Passed</th><th>Pass Percentage</th></tr>
-          <tr><td>[Year 1]</td><td>[Reg XII 1]</td><td>[Pass XII 1]</td><td>[% XII 1]</td></tr>
-          <tr><td>[Year 2]</td><td>[Reg XII 2]</td><td>[Pass XII 2]</td><td>[% XII 2]</td></tr>
-          <tr><td>[Year 3]</td><td>[Reg XII 3]</td><td>[Pass XII 3]</td><td>[% XII 3]</td></tr>
-        </tbody>
-      </table>
-    </section>
-
-    <!-- E. SCHOOL INFRASTRUCTURE -->
-    <section class="mpd-section" style="margin-bottom:2.5rem;">
-      <h2>E. School Infrastructure</h2>
-      <table class="mpd-table">
-        <tbody>
-          <tr><th>SL No.</th><th>Information</th><th>Details</th></tr>
-          <tr><td>1</td><td>Total Campus Area of the School (in square mtr)</td><td>[Campus Area]</td></tr>
-          <tr><td>2</td><td>No. and Size of the Class Rooms (in sq mtr)</td><td>[Classrooms]</td></tr>
-          <tr><td>3</td><td>No. and Size of Laboratories including Computer Labs (in sq mtr)</td><td>[Labs]</td></tr>
-          <tr><td>4</td><td>Internet Facility (Y/N)</td><td>[Internet]</td></tr>
-          <tr><td>5</td><td>No. of Girls Toilets</td><td>[Girls Toilets]</td></tr>
-          <tr><td>6</td><td>No. of Boys Toilets</td><td>[Boys Toilets]</td></tr>
-          <tr><td>7</td><td>Link of YouTube Video of the Inspection of School Covering Infrastructure of the School</td><td>[VIEW]</td></tr>
-        </tbody>
-      </table>
-    </section>
+      // Wait for window.db to be available before fetching
+      function waitForDbAndFetch(attempts = 0) {
+        if (window.db) {
+          fetchDisclosureSections();
+        } else if (attempts < 50) {
+          setTimeout(() => waitForDbAndFetch(attempts + 1), 100);
+        } else {
+          console.error('window.db not available after waiting.');
+        }
+      }
+      waitForDbAndFetch();
+    });
+  </script>
   </main>
 
   <!-- Footer (copy from index.html for consistency) -->
