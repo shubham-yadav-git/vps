@@ -1051,15 +1051,31 @@ function renderDisclosureSection() {
         const d = doc.data();
         console.log('[Disclosure] Firestore doc loaded:', d);
         if(d.sections) window.disclosureSections = d.sections;
-        if(d.data) window.disclosureData = d.data;
+        if(d.data) {
+          window.disclosureData = d.data;
+          // Also update the local variable for this render
+          disclosureData = d.data;
+        }
         window.disclosureSectionSelected = window.disclosureSectionSelected || (window.disclosureSections.find(s=>s.enabled)?.id || window.disclosureSections[0].id);
         renderDisclosureSection();
       } else {
         // If doc does not exist, create it with defaults
         console.log('[Disclosure] Firestore doc missing, creating default...');
-        db.collection('settings').doc('disclosure').set({sections: window.disclosureSections, data: {}})
+        const defaultDisclosureData = {
+          documents: {
+            affiliationLetter: '',
+            societyRegistration: '',
+            noc: '',
+            recognition: '',
+            buildingSafety: '',
+            fireSafety: '',
+            deoCertificate: '',
+            waterHealth: ''
+          }
+        };
+        db.collection('settings').doc('disclosure').set({sections: window.disclosureSections, data: defaultDisclosureData})
         .then(()=>{
-          window.disclosureData = {};
+          window.disclosureData = defaultDisclosureData;
           window.disclosureSectionSelected = window.disclosureSections[0].id;
           console.log('[Disclosure] Default doc created.');
           renderDisclosureSection();
@@ -1120,7 +1136,8 @@ function renderDisclosureSection() {
     // Custom section: allow dynamic fields and values
     let custom = disclosureSections.find(s=>s.id===selected);
     if (!custom.fields) custom.fields = [{label:'Name',type:'text'}];
-    const d = disclosureData[selected] || {};
+    // Always reload the latest disclosureData from window (in case it was updated by save or Firestore)
+    const d = (window.disclosureData && window.disclosureData[selected]) ? window.disclosureData[selected] : {};
     sectionHtml = `<strong>${custom?custom.label:'Custom Section'}</strong>
       <div id="custom-fields-list">${custom.fields.map((field, idx) => `
         <div class="form-group" style="display:flex;align-items:center;gap:0.5rem;">
@@ -1136,12 +1153,30 @@ function renderDisclosureSection() {
       <hr style="margin:1.5rem 0;">
       <div id="custom-fields-values">
         <h4 style="margin-bottom:1rem;">Enter Values</h4>
-        ${custom.fields.map((field, idx) => {
-          let inputType = field.type==='number'?'number':(field.type==='date'?'date':'text');
-          let key = field.label.replace(/\W+/g,'_').toLowerCase();
-          let val = d[key]!==undefined ? d[key] : '';
-          return `<div class="form-group"><label class="form-label">${field.label}</label><input class="form-input custom-value-input" type="${inputType}" data-value-idx="${idx}" data-value-key="${key}" value="${val}" placeholder="${field.label}"></div>`;
-        }).join('')}
+        ${(() => {
+          // Show all values in disclosureData[selected], even if not in fields
+          const d = (window.disclosureData && window.disclosureData[selected]) ? window.disclosureData[selected] : {};
+          // Map of key to field for current fields
+          const fieldMap = {};
+          custom.fields.forEach((field, idx) => {
+            let key = field.label.replace(/\W+/g,'_').toLowerCase();
+            fieldMap[key] = { field, idx };
+          });
+          // Render all fields in the current custom.fields first
+          let html = custom.fields.map((field, idx) => {
+            let inputType = field.type==='number'?'number':(field.type==='date'?'date':'text');
+            let key = field.label.replace(/\W+/g,'_').toLowerCase();
+            let val = d[key]!==undefined ? d[key] : '';
+            return `<div class="form-group"><label class="form-label">${field.label}</label><input class="form-input custom-value-input" type="${inputType}" data-value-idx="${idx}" data-value-key="${key}" value="${val}" placeholder="${field.label}"></div>`;
+          }).join('');
+          // Render any extra keys in d that are not in current fields (legacy/renamed fields)
+          Object.keys(d).forEach(key => {
+            if (!fieldMap[key]) {
+              html += `<div class="form-group"><label class="form-label">${key}</label><input class="form-input custom-value-input" type="text" data-value-key="${key}" value="${d[key]}" placeholder="${key}"></div>`;
+            }
+          });
+          return html;
+        })()}
       </div>`;
   // Save value changes for custom fields (update disclosureData)
   if(selected && disclosureSections.find(s=>s.id===selected && !s.standard)){
@@ -1156,109 +1191,120 @@ function renderDisclosureSection() {
   }
 
   // Save button handler (save all disclosureSections and data to Firestore)
-  const saveBtn = document.querySelector('.form-actions .btn-primary');
-  if(saveBtn && db){
-    saveBtn.onclick = function(){
-      console.log('[Disclosure] Save button clicked');
-      // Gather all standard section values
-      const stdIds = ['general','documents','academics','staff','resultx','resultxii','infra'];
-      stdIds.forEach(id => {
-        const d = disclosureData[id] || {};
-        if(id==='general'){
-          d.schoolName = document.getElementById('disclosure-school-name')?.value||'';
-          d.affiliationNo = document.getElementById('disclosure-affiliation-no')?.value||'';
-          d.schoolCode = document.getElementById('disclosure-school-code')?.value||'';
-          d.address = document.getElementById('disclosure-address')?.value||'';
-          d.principalName = document.getElementById('disclosure-principal-name')?.value||'';
-          d.principalQualification = document.getElementById('disclosure-principal-qualification')?.value||'';
-          d.principalMobile = document.getElementById('disclosure-principal-mobile')?.value||'';
-          d.email = document.getElementById('disclosure-email')?.value||'';
-          d.contact = document.getElementById('disclosure-contact')?.value||'';
-        } else if(id==='documents'){
-          d.affiliationLetter = document.getElementById('disclosure-affiliation-letter')?.value||'';
-          d.societyRegistration = document.getElementById('disclosure-society-registration')?.value||'';
-          d.noc = document.getElementById('disclosure-noc')?.value||'';
-          d.recognition = document.getElementById('disclosure-recognition')?.value||'';
-          d.buildingSafety = document.getElementById('disclosure-building-safety')?.value||'';
-          d.fireSafety = document.getElementById('disclosure-fire-safety')?.value||'';
-          d.deoCertificate = document.getElementById('disclosure-deo-certificate')?.value||'';
-          d.waterHealth = document.getElementById('disclosure-water-health')?.value||'';
-        } else if(id==='academics'){
-          d.feeStructure = document.getElementById('disclosure-fee-structure')?.value||'';
-          d.academicCalendar = document.getElementById('disclosure-academic-calendar')?.value||'';
-          d.smc = document.getElementById('disclosure-smc')?.value||'';
-          d.pta = document.getElementById('disclosure-pta')?.value||'';
-          d.boardResults = document.getElementById('disclosure-board-results')?.value||'';
-        } else if(id==='staff'){
-          d.principalCount = document.getElementById('disclosure-principal-count')?.value||'';
-          d.totalTeachers = document.getElementById('disclosure-total-teachers')?.value||'';
-          d.pgtCount = document.getElementById('disclosure-pgt-count')?.value||'';
-          d.tgtCount = document.getElementById('disclosure-tgt-count')?.value||'';
-          d.prtCount = document.getElementById('disclosure-prt-count')?.value||'';
-          d.teacherRatio = document.getElementById('disclosure-teacher-ratio')?.value||'';
-          d.specialEducator = document.getElementById('disclosure-special-educator')?.value||'';
-          d.counselor = document.getElementById('disclosure-counselor')?.value||'';
-        } else if(id==='resultx'){
-          d.year1 = document.getElementById('disclosure-x-year1')?.value||'';
-          d.reg1 = document.getElementById('disclosure-x-reg1')?.value||'';
-          d.pass1 = document.getElementById('disclosure-x-pass1')?.value||'';
-          d.percent1 = document.getElementById('disclosure-x-percent1')?.value||'';
-          d.year2 = document.getElementById('disclosure-x-year2')?.value||'';
-          d.reg2 = document.getElementById('disclosure-x-reg2')?.value||'';
-          d.pass2 = document.getElementById('disclosure-x-pass2')?.value||'';
-          d.percent2 = document.getElementById('disclosure-x-percent2')?.value||'';
-          d.year3 = document.getElementById('disclosure-x-year3')?.value||'';
-          d.reg3 = document.getElementById('disclosure-x-reg3')?.value||'';
-          d.pass3 = document.getElementById('disclosure-x-pass3')?.value||'';
-          d.percent3 = document.getElementById('disclosure-x-percent3')?.value||'';
-        } else if(id==='resultxii'){
-          d.year1 = document.getElementById('disclosure-xii-year1')?.value||'';
-          d.reg1 = document.getElementById('disclosure-xii-reg1')?.value||'';
-          d.pass1 = document.getElementById('disclosure-xii-pass1')?.value||'';
-          d.percent1 = document.getElementById('disclosure-xii-percent1')?.value||'';
-          d.year2 = document.getElementById('disclosure-xii-year2')?.value||'';
-          d.reg2 = document.getElementById('disclosure-xii-reg2')?.value||'';
-          d.pass2 = document.getElementById('disclosure-xii-pass2')?.value||'';
-          d.percent2 = document.getElementById('disclosure-xii-percent2')?.value||'';
-          d.year3 = document.getElementById('disclosure-xii-year3')?.value||'';
-          d.reg3 = document.getElementById('disclosure-xii-reg3')?.value||'';
-          d.pass3 = document.getElementById('disclosure-xii-pass3')?.value||'';
-          d.percent3 = document.getElementById('disclosure-xii-percent3')?.value||'';
-        } else if(id==='infra'){
-          d.campusArea = document.getElementById('disclosure-campus-area')?.value||'';
-          d.classrooms = document.getElementById('disclosure-classrooms')?.value||'';
-          d.labs = document.getElementById('disclosure-labs')?.value||'';
-          d.internet = document.getElementById('disclosure-internet')?.value||'';
-          d.girlsToilets = document.getElementById('disclosure-girls-toilets')?.value||'';
-          d.boysToilets = document.getElementById('disclosure-boys-toilets')?.value||'';
-          d.youtube = document.getElementById('disclosure-youtube')?.value||'';
+  setTimeout(()=>{
+    const saveBtn = document.querySelector('.form-actions .btn-primary');
+    if(saveBtn && db){
+      saveBtn.onclick = function(){
+        console.log('[Disclosure] Save button clicked');
+        const selected = window.disclosureSectionSelected;
+        console.log('[Disclosure] Section selected:', selected);
+        // Save only the currently selected section
+        if(selected && disclosureSections.find(s=>s.id===selected && s.standard)) {
+          const d = disclosureData[selected] || {};
+          if(selected==='general'){
+            d.schoolName = document.getElementById('disclosure-school-name')?.value||'';
+            d.affiliationNo = document.getElementById('disclosure-affiliation-no')?.value||'';
+            d.schoolCode = document.getElementById('disclosure-school-code')?.value||'';
+            d.address = document.getElementById('disclosure-address')?.value||'';
+            d.principalName = document.getElementById('disclosure-principal-name')?.value||'';
+            d.principalQualification = document.getElementById('disclosure-principal-qualification')?.value||'';
+            d.principalMobile = document.getElementById('disclosure-principal-mobile')?.value||'';
+            d.email = document.getElementById('disclosure-email')?.value||'';
+            d.contact = document.getElementById('disclosure-contact')?.value||'';
+          } else if(selected==='documents'){
+            d.affiliationLetter = document.getElementById('disclosure-affiliation-letter')?.value||'';
+            d.societyRegistration = document.getElementById('disclosure-society-registration')?.value||'';
+            d.noc = document.getElementById('disclosure-noc')?.value||'';
+            d.recognition = document.getElementById('disclosure-recognition')?.value||'';
+            d.buildingSafety = document.getElementById('disclosure-building-safety')?.value||'';
+            d.fireSafety = document.getElementById('disclosure-fire-safety')?.value||'';
+            d.deoCertificate = document.getElementById('disclosure-deo-certificate')?.value||'';
+            d.waterHealth = document.getElementById('disclosure-water-health')?.value||'';
+          } else if(selected==='academics'){
+            d.feeStructure = document.getElementById('disclosure-fee-structure')?.value||'';
+            d.academicCalendar = document.getElementById('disclosure-academic-calendar')?.value||'';
+            d.smc = document.getElementById('disclosure-smc')?.value||'';
+            d.pta = document.getElementById('disclosure-pta')?.value||'';
+            d.boardResults = document.getElementById('disclosure-board-results')?.value||'';
+          } else if(selected==='staff'){
+            d.principalCount = document.getElementById('disclosure-principal-count')?.value||'';
+            d.totalTeachers = document.getElementById('disclosure-total-teachers')?.value||'';
+            d.pgtCount = document.getElementById('disclosure-pgt-count')?.value||'';
+            d.tgtCount = document.getElementById('disclosure-tgt-count')?.value||'';
+            d.prtCount = document.getElementById('disclosure-prt-count')?.value||'';
+            d.teacherRatio = document.getElementById('disclosure-teacher-ratio')?.value||'';
+            d.specialEducator = document.getElementById('disclosure-special-educator')?.value||'';
+            d.counselor = document.getElementById('disclosure-counselor')?.value||'';
+          } else if(selected==='resultx'){
+            d.year1 = document.getElementById('disclosure-x-year1')?.value||'';
+            d.reg1 = document.getElementById('disclosure-x-reg1')?.value||'';
+            d.pass1 = document.getElementById('disclosure-x-pass1')?.value||'';
+            d.percent1 = document.getElementById('disclosure-x-percent1')?.value||'';
+            d.year2 = document.getElementById('disclosure-x-year2')?.value||'';
+            d.reg2 = document.getElementById('disclosure-x-reg2')?.value||'';
+            d.pass2 = document.getElementById('disclosure-x-pass2')?.value||'';
+            d.percent2 = document.getElementById('disclosure-x-percent2')?.value||'';
+            d.year3 = document.getElementById('disclosure-x-year3')?.value||'';
+            d.reg3 = document.getElementById('disclosure-x-reg3')?.value||'';
+            d.pass3 = document.getElementById('disclosure-x-pass3')?.value||'';
+            d.percent3 = document.getElementById('disclosure-x-percent3')?.value||'';
+          } else if(selected==='resultxii'){
+            d.year1 = document.getElementById('disclosure-xii-year1')?.value||'';
+            d.reg1 = document.getElementById('disclosure-xii-reg1')?.value||'';
+            d.pass1 = document.getElementById('disclosure-xii-pass1')?.value||'';
+            d.percent1 = document.getElementById('disclosure-xii-percent1')?.value||'';
+            d.year2 = document.getElementById('disclosure-xii-year2')?.value||'';
+            d.reg2 = document.getElementById('disclosure-xii-reg2')?.value||'';
+            d.pass2 = document.getElementById('disclosure-xii-pass2')?.value||'';
+            d.percent2 = document.getElementById('disclosure-xii-percent2')?.value||'';
+            d.year3 = document.getElementById('disclosure-xii-year3')?.value||'';
+            d.reg3 = document.getElementById('disclosure-xii-reg3')?.value||'';
+            d.pass3 = document.getElementById('disclosure-xii-pass3')?.value||'';
+            d.percent3 = document.getElementById('disclosure-xii-percent3')?.value||'';
+          } else if(selected==='infra'){
+            d.campusArea = document.getElementById('disclosure-campus-area')?.value||'';
+            d.classrooms = document.getElementById('disclosure-classrooms')?.value||'';
+            d.labs = document.getElementById('disclosure-labs')?.value||'';
+            d.internet = document.getElementById('disclosure-internet')?.value||'';
+            d.girlsToilets = document.getElementById('disclosure-girls-toilets')?.value||'';
+            d.boysToilets = document.getElementById('disclosure-boys-toilets')?.value||'';
+            d.youtube = document.getElementById('disclosure-youtube')?.value||'';
+          }
+          disclosureData[selected] = d;
+        } else if(selected && disclosureSections.find(s=>s.id===selected && !s.standard)) {
+          // Custom section: already updated on input, but ensure all values are gathered
+          const d = disclosureData[selected] || {};
+          document.querySelectorAll('.custom-value-input[data-value-key]')?.forEach(input => {
+            const key = input.getAttribute('data-value-key');
+            d[key] = input.value;
+          });
+          disclosureData[selected] = d;
         }
-        disclosureData[id] = d;
-      });
-      // Custom sections: already updated on input
-      window.disclosureData = disclosureData;
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<span class="icon">⏳</span> Saving...';
-      db.collection('settings').doc('disclosure').set({sections: window.disclosureSections, data: window.disclosureData}).then(()=>{
-        console.log('[Disclosure] Firestore save successful');
-        saveBtn.innerHTML = '<span class="icon">✅</span> Saved!';
-        setTimeout(()=>{
-          saveBtn.innerHTML = '<span class="icon">💾</span> Save Disclosure Data';
-          saveBtn.disabled = false;
-          window._disclosureSectionsLoaded = false;
-          renderDisclosureSection(); // force reload from Firestore
-        }, 1200);
-      }).catch(err=>{
-        console.error('[Disclosure] Firestore save error:', err);
-        saveBtn.innerHTML = '<span class="icon">❌</span> Error';
-        alert('Failed to save: '+err.message);
-        setTimeout(()=>{
-          saveBtn.innerHTML = '<span class="icon">💾</span> Save Disclosure Data';
-          saveBtn.disabled = false;
-        }, 1200);
-      });
-    };
-  }
+        window.disclosureData = disclosureData;
+        console.log('[Disclosure] Data to save:', JSON.stringify(window.disclosureData[selected], null, 2));
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<span class="icon">⏳</span> Saving...';
+        db.collection('settings').doc('disclosure').set({sections: window.disclosureSections, data: window.disclosureData}).then(()=>{
+          console.log('[Disclosure] Firestore save successful');
+          saveBtn.innerHTML = '<span class="icon">✅</span> Saved!';
+          setTimeout(()=>{
+            saveBtn.innerHTML = '<span class="icon">💾</span> Save Disclosure Data';
+            saveBtn.disabled = false;
+            window._disclosureSectionsLoaded = false;
+            renderDisclosureSection(); // force reload from Firestore
+          }, 1200);
+        }).catch(err=>{
+          console.error('[Disclosure] Firestore save error:', err);
+          saveBtn.innerHTML = '<span class="icon">❌</span> Error';
+          alert('Failed to save: '+err.message);
+          setTimeout(()=>{
+            saveBtn.innerHTML = '<span class="icon">💾</span> Save Disclosure Data';
+            saveBtn.disabled = false;
+          }, 1200);
+        });
+      };
+    }
+  }, 0);
   }
   const content = `
     ${managerHtml}
@@ -1311,6 +1357,12 @@ function renderDisclosureSection() {
     btn.addEventListener('click', function(e){
       const idx = +btn.getAttribute('data-delete-section');
       disclosureSections.splice(idx,1);
+      // If the deleted section was selected, select a valid one
+      if (window.disclosureSectionSelected && !disclosureSections.some(s => s.id === window.disclosureSectionSelected)) {
+        // Pick the first enabled section, or fallback to the first section
+        const enabled = disclosureSections.find(s => s.enabled);
+        window.disclosureSectionSelected = enabled ? enabled.id : (disclosureSections[0]?.id || null);
+      }
       renderDisclosureSection();
     });
   });
