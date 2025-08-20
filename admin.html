@@ -1213,18 +1213,60 @@
                 // Attach handlers for field name/value/remove after DOM update
                 setTimeout(() => {
                   // Field name change
-                  document.querySelectorAll('#custom-fields-list input[data-field-type="label"]').forEach((input) => {
-                    input.oninput = function () {
+                  document.querySelectorAll('input[data-field-idx]').forEach((input) => {
+                    let oldValue = input.value; // Store initial value
+                    input.onchange = function () { // Use onchange instead of oninput to trigger when field loses focus
                       const idx = +input.getAttribute('data-field-idx');
-                      const oldLabel = custom.fields[idx].label;
+                      const oldLabel = oldValue; // Use stored old value
                       const newLabel = input.value;
+                      
+                      if (oldLabel === newLabel) return; // No change
+                      
+                      // Store new value for next change
+                      oldValue = newLabel;
+                      
+                      // Update field label
                       custom.fields[idx].label = newLabel;
-                      if (d[oldLabel] !== undefined && oldLabel !== newLabel) {
-                        d[newLabel] = d[oldLabel];
-                        delete d[oldLabel];
-                        window.disclosureData[selected] = d;
-                        renderDisclosureSection();
+
+                      // Update all rows with the new field label
+                      if (oldLabel && oldLabel !== newLabel) {
+                        custom.rows.forEach(row => {
+                          if (typeof row === 'object' && row !== null) {
+                            // Preserve the data with the new label
+                            const value = row[oldLabel];
+                            if (value !== undefined) {
+                              row[newLabel] = value;
+                              delete row[oldLabel];
+                            }
+                          }
+                        });
+
+                        // Update window.disclosureData for the current section
+                        if (window.disclosureData && window.disclosureData[selected]) {
+                          // Create section data if it doesn't exist
+                          if (!window.disclosureData[selected]) {
+                            window.disclosureData[selected] = {};
+                          }
+                          
+                          // Migrate data to new label
+                          const sectionData = window.disclosureData[selected];
+                          if (sectionData[oldLabel] !== undefined) {
+                            sectionData[newLabel] = sectionData[oldLabel];
+                            delete sectionData[oldLabel];
+                          }
+                        }
+                        
+                        // Force UI update
+                        setTimeout(() => {
+                          renderDisclosureSection();
+                        }, 0);
                       }
+                    };
+
+                    // Also track input for immediate visual feedback
+                    input.oninput = function() {
+                      const idx = +input.getAttribute('data-field-idx');
+                      custom.fields[idx].label = input.value;
                     };
                   });
                   // Field value change
@@ -1232,8 +1274,15 @@
                     input.oninput = function () {
                       const idx = +input.getAttribute('data-field-idx');
                       const label = custom.fields[idx].label;
-                      d[label] = input.value;
-                      window.disclosureData[selected] = d;
+                      if (label) {
+                        if (!window.disclosureData[selected]) {
+                          window.disclosureData[selected] = {};
+                        }
+                        window.disclosureData[selected][label] = input.value;
+                        
+                        // Update the data object for immediate UI state
+                        d[label] = input.value;
+                      }
                     };
                   });
                   // Remove field
@@ -1542,13 +1591,30 @@
 
                 // Table body: rows (records)
                 let tableBody = '';
+                // Ensure rows is initialized as an array
+                if (!Array.isArray(section.rows)) {
+                  section.rows = [];
+                }
+                
                 section.rows.forEach((row, rIdx) => {
                   tableBody += `<tr>`;
                   section.fields.forEach((f, cIdx) => {
-                    // Support both array and object row formats
-                    var val = Array.isArray(row) ? row[cIdx] : (row && typeof row === 'object' ? row[f.label] : '');
+                    // Get value from row object using field label
+                    let val = '';
+                    if (row) {
+                      if (Array.isArray(row)) {
+                        val = row[cIdx] || '';
+                      } else if (typeof row === 'object' && f.label) {
+                        val = row[f.label] || '';
+                      }
+                    }
+                    
                     tableBody += `<td style="padding:6px 8px; background:#fff; border-bottom:1px solid #f1f5f9;">
-                      <input type="text" value="${val || ''}" data-row-idx="${rIdx}" data-col-idx="${cIdx}" class="form-input" style="width: 120px; font-size: 1rem;" />
+                      <input type="text" value="${val.replace(/"/g, '&quot;')}" 
+                             data-row-idx="${rIdx}" 
+                             data-col-idx="${cIdx}" 
+                             class="form-input" 
+                             style="width: 120px; font-size: 1rem;" />
                     </td>`;
                   });
                   tableBody += `<td style="text-align:center; background:#fff; border-bottom:1px solid #f1f5f9;">
@@ -1816,8 +1882,20 @@
                 const addRowBtn = document.getElementById("add-custom-row");
                 if (addRowBtn) {
                   addRowBtn.addEventListener("click", function () {
-                    // New row: array of empty strings, one per field
-                    section.rows.push(Array(section.fields.length).fill(""));
+                    // Create a new row as an object with all field labels
+                    const newRow = {};
+                    section.fields.forEach(field => {
+                      if (field.label) {
+                        newRow[field.label] = '';
+                      }
+                    });
+                    
+                    // Initialize rows array if it doesn't exist
+                    if (!Array.isArray(section.rows)) {
+                      section.rows = [];
+                    }
+                    
+                    section.rows.push(newRow);
                     renderDisclosureSection();
                   });
                 }
@@ -1834,21 +1912,109 @@
                   el.addEventListener("input", function () {
                     let rIdx = +el.getAttribute("data-row-idx");
                     let cIdx = +el.getAttribute("data-col-idx");
-                    section.rows[rIdx][cIdx] = el.value;
+                    const fieldLabel = section.fields[cIdx].label;
+
+                    // Ensure section.rows exists and has the row
+                    if (!Array.isArray(section.rows)) {
+                      section.rows = [];
+                    }
+                    if (!section.rows[rIdx]) {
+                      section.rows[rIdx] = {};
+                    }
+
+                    // If the row is an array, convert it to an object
+                    if (Array.isArray(section.rows[rIdx])) {
+                      const newRow = {};
+                      section.fields.forEach((field, idx) => {
+                        if (field.label) {
+                          newRow[field.label] = section.rows[rIdx][idx] || '';
+                        }
+                      });
+                      section.rows[rIdx] = newRow;
+                    }
+
+                    // Update the value
+                    if (fieldLabel) {
+                      section.rows[rIdx][fieldLabel] = el.value;
+                    }
                   });
                 });
                 // Save section data
                 const saveSectionBtn = document.getElementById("save-section-data");
                 if (saveSectionBtn) {
                   saveSectionBtn.addEventListener("click", function () {
-                    // Save logic: call saveData for this section
-                    if (typeof saveData === 'function') {
-                      saveData(section.id, { fields: section.fields, rows: section.rows });
-                      if (typeof showSuccessIndicator === 'function') {
-                        showSuccessIndicator('section-save', 'Section data saved successfully');
+                    // Update current section in disclosureSections array
+                    const sectionIndex = window.disclosureSections.findIndex(s => s.id === selected);
+                    if (sectionIndex !== -1) {
+                      window.disclosureSections[sectionIndex] = section;
+                    }
+
+                    // Save to Firebase
+                    if (db) {
+                      saveSectionBtn.disabled = true;
+                      saveSectionBtn.innerHTML = '<span class="icon">⏳</span> Saving...';
+                      
+                      // Ensure all row data is properly structured before saving
+                      if (section.rows && Array.isArray(section.rows)) {
+                        section.rows = section.rows.map(row => {
+                          if (Array.isArray(row)) {
+                            // Convert array row to object
+                            const objRow = {};
+                            section.fields.forEach((field, idx) => {
+                              if (field.label) {
+                                objRow[field.label] = row[idx] || '';
+                              }
+                            });
+                            return objRow;
+                          }
+                          return row;
+                        });
                       }
+
+                      // Update the section in disclosureSections
+                      const sectionIndex = window.disclosureSections.findIndex(s => s.id === selected);
+                      if (sectionIndex !== -1) {
+                        window.disclosureSections[sectionIndex] = section;
+                      }
+
+                      // Ensure window.disclosureData exists for this section
+                      if (!window.disclosureData) {
+                        window.disclosureData = {};
+                      }
+                      if (!window.disclosureData[selected]) {
+                        window.disclosureData[selected] = {};
+                      }
+
+                      // Update disclosureData with the current section's data
+                      section.rows.forEach(row => {
+                        Object.entries(row).forEach(([key, value]) => {
+                          if (!window.disclosureData[selected][key]) {
+                            window.disclosureData[selected][key] = value;
+                          }
+                        });
+                      });
+                      
+                      db.collection("settings").doc("disclosure").set({
+                        sections: window.disclosureSections,
+                        data: window.disclosureData
+                      }).then(() => {
+                        saveSectionBtn.innerHTML = '<span class="icon">✅</span> Saved!';
+                        setTimeout(() => {
+                          saveSectionBtn.innerHTML = '<span class="icon">💾</span> Save Section Data';
+                          saveSectionBtn.disabled = false;
+                          showSuccessIndicator('section-save', 'Section data saved successfully');
+                        }, 1200);
+                      }).catch((err) => {
+                        saveSectionBtn.innerHTML = '<span class="icon">❌</span> Error';
+                        console.error('Failed to save:', err);
+                        alert('Failed to save: ' + err.message);
+                        setTimeout(() => {
+                          saveSectionBtn.innerHTML = '<span class="icon">💾</span> Save Section Data';
+                          saveSectionBtn.disabled = false;
+                        }, 1200);
+                      });
                     } else {
-                      alert('Save function not available.');
+                      alert('Database connection not available.');
                     }
                   });
                 }
