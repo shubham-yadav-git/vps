@@ -232,7 +232,33 @@
             tableBody += '<tr>';
             fields.forEach((f, idx) => {
               let val = Array.isArray(row) ? row[idx] : (row[f.label||'']||'');
-              tableBody += `<td>${val||''}</td>`;
+              // Check if the field is a file field and value starts with data:
+              const isFileField = f.type === 'file';
+              if (isFileField && val && (val.startsWith('data:') || val.startsWith('http'))) {
+                // Determine file type for icon selection
+                let fileIcon = '📄';
+                let fileType = 'File';
+                
+                if (val.includes('data:image/')) {
+                  fileIcon = '🖼️';
+                  fileType = 'Image';
+                } else if (val.includes('data:application/pdf')) {
+                  fileIcon = '📑';
+                  fileType = 'PDF';
+                } else if (val.includes('data:text/')) {
+                  fileIcon = '📝';
+                  fileType = 'Document';
+                }
+                
+                tableBody += `<td>
+                  <a href="${val}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:#1d4ed8;font-weight:500;">
+                    <span style="font-size:1.2em;">${fileIcon}</span>
+                    <span>View ${fileType}</span>
+                  </a>
+                </td>`;
+              } else {
+                tableBody += `<td>${val||''}</td>`;
+              }
             });
             tableBody += '</tr>';
           });
@@ -296,6 +322,9 @@
   </script>
   <!-- GSAP Animation for MPD sections -->
   <script src="js/mpd-animate.js"></script>
+  
+  <!-- Modal for displaying files -->
+  <script src="js/mpd-modal.js"></script>
 
   <!-- Firebase SDKs (from index.html) -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>

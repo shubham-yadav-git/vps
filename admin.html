@@ -1578,17 +1578,25 @@
                 let tableHeader = `<tr>`;
                 section.fields.forEach((f, idx) => {
                   tableHeader += `<th style="background:#f8fafc; padding:8px; border-bottom:1px solid #e5e7eb;">
-                    <div style="display:flex;align-items:center;gap:0.5rem;">
-                      <input type="text" 
-                             value="${(f.label || '').replace(/"/g, '&quot;')}" 
-                             data-field-idx="${idx}" 
-                             placeholder="Column name" 
-                             class="form-input" 
-                             style="width: 120px; font-size: 1rem;" />
-                      <button data-remove-field="${idx}" 
-                              title="Remove column" 
-                              class="btn btn-danger btn-sm" 
-                              style="padding:2px 8px;">🗑️</button>
+                    <div style="display:flex;flex-direction:column;gap:0.5rem;">
+                      <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <input type="text" 
+                               value="${(f.label || '').replace(/"/g, '&quot;')}" 
+                               data-field-idx="${idx}" 
+                               placeholder="Column name" 
+                               class="form-input" 
+                               style="width: 120px; font-size: 1rem;" />
+                        <button data-remove-field="${idx}" 
+                                title="Remove column" 
+                                class="btn btn-danger btn-sm" 
+                                style="padding:2px 8px;">🗑️</button>
+                      </div>
+                      <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <select data-field-type-idx="${idx}" class="form-input field-type-select" style="width: 100%; font-size: 0.9rem;">
+                          <option value="text" ${!f.type || f.type === 'text' ? 'selected' : ''}>Text</option>
+                          <option value="file" ${f.type === 'file' ? 'selected' : ''}>File Upload</option>
+                        </select>
+                      </div>
                     </div>
                   </th>`;
                 });
@@ -1613,6 +1621,7 @@
                   section.fields.forEach((f, cIdx) => {
                     // Get value from row object using field label
                     let val = '';
+                    let isFileField = f.type === 'file';
                     if (row) {
                       if (Array.isArray(row)) {
                         val = row[cIdx] || '';
@@ -1621,13 +1630,39 @@
                       }
                     }
                     
-                    tableBody += `<td style="padding:6px 8px; background:#fff; border-bottom:1px solid #f1f5f9;">
-                      <input type="text" value="${val.replace(/"/g, '&quot;')}" 
-                             data-row-idx="${rIdx}" 
-                             data-col-idx="${cIdx}" 
-                             class="form-input" 
-                             style="width: 120px; font-size: 1rem;" />
-                    </td>`;
+                    if (isFileField) {
+                      // File upload field
+                      tableBody += `<td style="padding:6px 8px; background:#fff; border-bottom:1px solid #f1f5f9;">
+                        <div style="display:flex;flex-direction:column;gap:6px;">
+                          <div style="display:flex;align-items:center;gap:8px;width:100%;">
+                            <input type="text" value="${val.replace(/"/g, '&quot;')}" 
+                                   data-row-idx="${rIdx}" 
+                                   data-col-idx="${cIdx}"
+                                   class="form-input file-path-input" 
+                                   placeholder="File URL/Path"
+                                   style="width: 100%; font-size: 1rem;" />
+                            <button class="btn btn-sm file-upload-btn" 
+                                    data-row-idx="${rIdx}" 
+                                    data-col-idx="${cIdx}" 
+                                    style="white-space:nowrap;">
+                              Upload
+                            </button>
+                          </div>
+                          <div class="progress-container" id="progress-disclosure-${rIdx}-${cIdx}" style="display:none;width:100%;height:6px;background:#eee;border-radius:3px;">
+                            <div class="progress-fill" style="width:0%;height:100%;background:var(--primary-color);border-radius:3px;"></div>
+                          </div>
+                        </div>
+                      </td>`;
+                    } else {
+                      // Regular text field
+                      tableBody += `<td style="padding:6px 8px; background:#fff; border-bottom:1px solid #f1f5f9;">
+                        <input type="text" value="${val.replace(/"/g, '&quot;')}" 
+                               data-row-idx="${rIdx}" 
+                               data-col-idx="${cIdx}" 
+                               class="form-input" 
+                               style="width: 120px; font-size: 1rem;" />
+                      </td>`;
+                    }
                   });
                   tableBody += `<td style="text-align:center; background:#fff; border-bottom:1px solid #f1f5f9;">
                     <button data-remove-row="${rIdx}" title="Remove row" class="btn btn-danger btn-sm" style="padding:2px 8px;">🗑️</button>
@@ -1975,6 +2010,98 @@
                     let idx = +btn.getAttribute("data-remove-row");
                     section.rows.splice(idx, 1);
                     renderDisclosureSection();
+                  });
+                });
+                
+                // Add handlers for field type selection
+                document.querySelectorAll('.field-type-select').forEach(select => {
+                  select.addEventListener('change', function() {
+                    const idx = +this.getAttribute('data-field-type-idx');
+                    section.fields[idx].type = this.value;
+                    renderDisclosureSection();
+                  });
+                });
+
+                // Add handlers for file upload buttons
+                document.querySelectorAll('.file-upload-btn').forEach(btn => {
+                  btn.addEventListener('click', function() {
+                    const rowIdx = +this.getAttribute('data-row-idx');
+                    const colIdx = +this.getAttribute('data-col-idx');
+                    
+                    // Create a file input element
+                    const fileInput = document.createElement('input');
+                    fileInput.type = 'file';
+                    fileInput.style.display = 'none';
+                    document.body.appendChild(fileInput);
+                    
+                    // Set up file upload handling
+                    fileInput.addEventListener('change', function() {
+                      const file = this.files[0];
+                      if (!file) {
+                        document.body.removeChild(fileInput);
+                        return;
+                      }
+                      
+                      const progressId = `progress-disclosure-${rowIdx}-${colIdx}`;
+                      const progressDiv = document.getElementById(progressId);
+                      const progressBar = progressDiv.querySelector('.progress-fill');
+                      
+                      progressDiv.style.display = 'block';
+                      btn.disabled = true;
+                      
+                      // Use the existing image upload function with our custom upload
+                      let progress = 0;
+                      const progressInterval = setInterval(() => {
+                        progress += Math.random() * 30;
+                        if (progress > 100) progress = 100;
+                        progressBar.style.width = progress + '%';
+                        
+                        if (progress >= 100) {
+                          clearInterval(progressInterval);
+                          
+                          // Process the file (same as image upload)
+                          compressImageIfNeeded(file, (compressedFile) => {
+                            const reader = new FileReader();
+                            reader.onload = function(e) {
+                              const fileUrl = e.target.result;
+                              
+                              // Update the file path input
+                              const filePathInput = btn.parentElement.querySelector('.file-path-input');
+                              filePathInput.value = fileUrl;
+                              
+                              // Update data in the section
+                              const fieldLabel = section.fields[colIdx].label;
+                              if (section.rows[rowIdx]) {
+                                if (Array.isArray(section.rows[rowIdx])) {
+                                  section.rows[rowIdx][colIdx] = fileUrl;
+                                } else if (typeof section.rows[rowIdx] === 'object' && fieldLabel) {
+                                  section.rows[rowIdx][fieldLabel] = fileUrl;
+                                }
+                              }
+                              
+                              // Show success message
+                              const compressionMsg = compressedFile !== file ? ' (compressed)' : '';
+                              showSuccessIndicator(
+                                `disclosure-${rowIdx}-${colIdx}-upload`,
+                                `File uploaded as base64${compressionMsg}`
+                              );
+                              
+                              // Reset UI
+                              setTimeout(() => {
+                                progressDiv.style.display = 'none';
+                                progressBar.style.width = '0%';
+                                btn.disabled = false;
+                                document.body.removeChild(fileInput);
+                              }, 1000);
+                            };
+                            reader.readAsDataURL(compressedFile);
+                          });
+                        }
+                      }, 100);
+                    });
+                    
+                    // Trigger file selection
+                    fileInput.click();
                   });
                 });
                 // Edit cell value
