@@ -401,6 +401,12 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeBackToTop() {
   const backToTopBtn = document.getElementById('back-to-top');
   
+  // Only add event listener if the button exists
+  if (!backToTopBtn) {
+    console.log('Back to top button not found on this page, skipping initialization');
+    return;
+  }
+  
   // Show/hide button based on scroll position
   window.addEventListener('scroll', function() {
     if (window.pageYOffset > 300) {
@@ -731,12 +737,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function initializeGalleryModal() {
   const modal = document.querySelector('.gallery-modal');
+  
+  if (!modal) {
+    console.log('Gallery modal not found on this page, skipping initialization');
+    return;
+  }
+  
   const modalImg = modal.querySelector('.modal-content img');
   const modalClose = modal.querySelector('.close-modal');
   const modalPrev = modal.querySelector('.modal-prev');
   const modalNext = modal.querySelector('.modal-next');
   
-  if (!modal || !modalImg || !modalClose) {
+  if (!modalImg || !modalClose) {
     console.log('Gallery modal elements not found');
     return;
   }

@@ -242,7 +242,7 @@
                 if (val.includes('data:image/')) {
                   fileIcon = '🖼️';
                   fileType = 'Image';
-                } else if (val.includes('data:application/pdf')) {
+                } else if (val.includes('data:application/pdf') || val.toLowerCase().endsWith('.pdf')) {
                   fileIcon = '📑';
                   fileType = 'PDF';
                 } else if (val.includes('data:text/')) {
@@ -250,12 +250,22 @@
                   fileType = 'Document';
                 }
                 
-                tableBody += `<td>
-                  <a href="${val}" target="_blank" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:#1d4ed8;font-weight:500;">
-                    <span style="font-size:1.2em;">${fileIcon}</span>
-                    <span>View ${fileType}</span>
-                  </a>
-                </td>`;
+                // For PDFs, create a special handler that will prevent direct navigation
+                if (fileType === 'PDF') {
+                  tableBody += `<td>
+                    <a href="#" data-file-url="${encodeURIComponent(val)}" class="pdf-viewer-link" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:#1d4ed8;font-weight:500;cursor:pointer;">
+                      <span style="font-size:1.2em;">${fileIcon}</span>
+                      <span>View ${fileType}</span>
+                    </a>
+                  </td>`;
+                } else {
+                  tableBody += `<td>
+                    <a href="${val}" class="file-viewer-link" style="display:inline-flex;align-items:center;gap:5px;text-decoration:none;color:#1d4ed8;font-weight:500;cursor:pointer;">
+                      <span style="font-size:1.2em;">${fileIcon}</span>
+                      <span>View ${fileType}</span>
+                    </a>
+                  </td>`;
+                }
               } else {
                 tableBody += `<td>${val||''}</td>`;
               }
