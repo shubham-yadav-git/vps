@@ -2031,6 +2031,7 @@
                     // Create a file input element
                     const fileInput = document.createElement('input');
                     fileInput.type = 'file';
+                    fileInput.accept = 'application/pdf,image/*'; // Allow PDFs and images
                     fileInput.style.display = 'none';
                     document.body.appendChild(fileInput);
                     
@@ -4104,12 +4105,39 @@
         // Firebase Firestore document limit is ~1MB, base64 adds ~33% overhead
         // So we need to keep final file size under ~700KB to account for base64 encoding
         const maxSize = 700 * 1024; // 700KB limit for Firebase compatibility
-
+        
         console.log(
-          `Processing image: ${(file.size / (1024 * 1024)).toFixed(1)}MB`
+          `Processing file: ${(file.size / (1024 * 1024)).toFixed(1)}MB, Type: ${file.type}`
         );
 
-        // Show compression notification
+        // Handle PDFs and other non-image files directly
+        if (!file.type.startsWith('image/')) {
+          // Check if file is too large for Firestore
+          if (file.size > maxSize * 1.5) { // Allow slightly larger PDFs but warn
+            showCompressionNotification(`Warning: File is ${(file.size / 1024).toFixed(0)}KB - may exceed Firestore limits`);
+            setTimeout(() => {
+              if (confirm(`This file (${(file.size / 1024).toFixed(0)}KB) may be too large for storage in Firestore.\nThe recommended maximum is 700KB.\n\nDo you want to continue anyway?`)) {
+                hideCompressionNotification();
+                callback(file); // Return original file if user confirms
+              } else {
+                hideCompressionNotification();
+                // Let user know upload was cancelled
+                showCompressionNotification("File upload cancelled");
+                setTimeout(() => hideCompressionNotification(), 1500);
+              }
+            }, 100);
+          } else {
+            // File is within acceptable size limit
+            showCompressionNotification("Processing file...");
+            setTimeout(() => {
+              hideCompressionNotification();
+              callback(file);
+            }, 1000);
+          }
+          return;
+        }
+        
+        // Handle images - existing code
         showCompressionNotification("Processing image for Firebase...");
 
         const canvas = document.createElement("canvas");
@@ -4199,10 +4227,15 @@
           callback(file); // Return original file if compression fails
         };
 
-        // Load image
+        // Load image with error handling
         const reader = new FileReader();
         reader.onload = function (e) {
           img.src = e.target.result;
+        };
+        reader.onerror = function() {
+          console.error("Error reading file for compression");
+          hideCompressionNotification();
+          callback(file); // Return original file if reading fails
         };
         reader.readAsDataURL(file);
       }
