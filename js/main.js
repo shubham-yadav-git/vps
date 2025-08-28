@@ -1,11 +1,17 @@
 // ===== Notice System Initialization (from index.html) =====
 function adjustNoticeTickerPosition() {
-  const header = document.querySelector('header');
-  const tickerBar = document.getElementById('notice-ticker-bar');
-  if (header && tickerBar) {
-    const headerHeight = header.offsetHeight;
-    document.documentElement.style.setProperty('--calculated-header-height', headerHeight + 'px');
-    tickerBar.style.top = headerHeight + 'px';
+  try {
+    const header = document.querySelector('header');
+    const tickerBar = document.getElementById('notice-ticker-bar');
+    if (header && tickerBar) {
+      const headerHeight = header.offsetHeight;
+      document.documentElement.style.setProperty('--calculated-header-height', headerHeight + 'px');
+      tickerBar.style.top = headerHeight + 'px';
+    }
+  } catch (error) {
+    if (window.SecurityUtils) {
+      console.error('Error adjusting ticker position:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
   }
 }
 
@@ -50,6 +56,11 @@ window.toggleNoticePanel = function() {
 
 window.loadNoticesData = async function() {
   try {
+    // Log data access attempt
+    if (window.AuthUtils) {
+      window.AuthUtils.logAccessAttempt('load_notices', 'notices_data');
+    }
+    
     window.noticeState.isLoaded = true;
     const cachedEventsData = localStorage.getItem('eventsData');
     const cachedTime = localStorage.getItem('eventsCacheTime');
@@ -86,7 +97,12 @@ window.loadNoticesData = async function() {
     window.renderNoticePanel(activeNotices);
   } catch (error) {
     const tickerText = document.getElementById('notice-ticker-text');
-    tickerText.innerHTML = '<span class="ticker-item">📌 Error loading notices</span>';
+    if (tickerText) {
+      tickerText.innerHTML = '<span class="ticker-item">📌 Error loading notices</span>';
+    }
+    if (window.SecurityUtils) {
+      console.error('Notice loading error:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
   }
 };
 
@@ -150,7 +166,8 @@ window.updateNoticeTicker = function(notices) {
   const tickerItems = notices.map(notice => {
     const categoryIcon = window.getCategoryIcon(notice.category);
     const urgentClass = notice.category === 'urgent' ? ' urgent' : '';
-    return `<span class="ticker-item${urgentClass}">${categoryIcon} ${notice.title}</span>`;
+    const safeTitle = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(notice.title) : notice.title;
+    return `<span class="ticker-item${urgentClass}">${categoryIcon} ${safeTitle}</span>`;
   }).join('');
   tickerText.innerHTML = tickerItems;
 };
@@ -169,16 +186,20 @@ window.renderNoticePanel = function(notices) {
     const titleTruncated = notice.title.length > maxTitleLength;
     const descriptionTruncated = notice.description.length > maxDescriptionLength;
     const showReadMore = titleTruncated || descriptionTruncated;
-    const displayTitle = titleTruncated ? notice.title.substring(0, maxTitleLength) + '...' : notice.title;
-    const displayDescription = descriptionTruncated ? notice.description.substring(0, maxDescriptionLength) + '...' : notice.description;
+    const safeTitle = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(notice.title) : notice.title;
+    const safeDescription = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(notice.description) : notice.description;
+    const displayTitle = titleTruncated ? safeTitle.substring(0, maxTitleLength) + '...' : safeTitle;
+    const displayDescription = descriptionTruncated ? safeDescription.substring(0, maxDescriptionLength) + '...' : safeDescription;
+    const escapedTitle = window.SecurityUtils ? window.SecurityUtils.escapeHTMLAttribute(notice.title) : notice.title.replace(/"/g, '&quot;');
+    const escapedDescription = window.SecurityUtils ? window.SecurityUtils.escapeHTMLAttribute(notice.description) : notice.description.replace(/"/g, '&quot;');
     return `
       <div class="notice-item-panel ${notice.category}" data-notice-id="${notice.id}" data-expanded="false">
         <div class="notice-item-header">
           <span class="notice-category ${notice.category}">${categoryIcon} ${notice.category}</span>
           <span class="notice-date">${formattedDate}</span>
         </div>
-        <div class="notice-title" data-full-title="${notice.title.replace(/"/g, '&quot;')}">${displayTitle}</div>
-        <div class="notice-description" data-full-description="${notice.description.replace(/"/g, '&quot;')}">${displayDescription}</div>
+        <div class="notice-title" data-full-title="${escapedTitle}">${displayTitle}</div>
+        <div class="notice-description" data-full-description="${escapedDescription}">${displayDescription}</div>
         ${showReadMore ? `
           <div class="notice-action">
             <button class="notice-read-more-btn">
@@ -287,30 +308,48 @@ window.formatNoticeDate = function(dateString) {
 
 // Enhanced mobile menu functionality
 function toggleMenu() {
-  const nav = document.getElementById("main-nav");
-  const hamburger = document.querySelector(".hamburger");
-  const isExpanded = hamburger.getAttribute("aria-expanded") === "true";
+  try {
+    const nav = document.getElementById("main-nav");
+    const hamburger = document.querySelector(".hamburger");
+    
+    if (!nav || !hamburger) {
+      console.warn('Navigation elements not found');
+      return;
+    }
+    
+    const isExpanded = hamburger.getAttribute("aria-expanded") === "true";
 
-  if (isExpanded) {
-    nav.classList.remove("show");
-    hamburger.setAttribute("aria-expanded", "false");
-    document.body.style.overflow = ''; // Re-enable scrolling
-  } else {
-    nav.classList.add("show");
-    hamburger.setAttribute("aria-expanded", "true");
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    if (isExpanded) {
+      nav.classList.remove("show");
+      hamburger.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = ''; // Re-enable scrolling
+    } else {
+      nav.classList.add("show");
+      hamburger.setAttribute("aria-expanded", "true");
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+  } catch (error) {
+    if (window.SecurityUtils) {
+      console.error('Error toggling menu:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
   }
 }
 
 // Close mobile menu function
 function closeMobileMenu() {
-  const nav = document.getElementById("main-nav");
-  const hamburger = document.querySelector(".hamburger");
-  
-  if (nav && nav.classList.contains("show")) {
-    nav.classList.remove("show");
-    hamburger.setAttribute("aria-expanded", "false");
-    document.body.style.overflow = '';
+  try {
+    const nav = document.getElementById("main-nav");
+    const hamburger = document.querySelector(".hamburger");
+    
+    if (nav && hamburger && nav.classList.contains("show")) {
+      nav.classList.remove("show");
+      hamburger.setAttribute("aria-expanded", "false");
+      document.body.style.overflow = '';
+    }
+  } catch (error) {
+    if (window.SecurityUtils) {
+      console.error('Error closing mobile menu:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
   }
 }
 
@@ -357,7 +396,17 @@ document.addEventListener('DOMContentLoaded', function() {
   // Close menu when clicking nav links
   const navLinks = document.querySelectorAll('.nav-link');
   navLinks.forEach(link => {
-    link.addEventListener('click', () => {
+    link.addEventListener('click', (e) => {
+      // Check route access if AuthUtils is available
+      if (window.AuthUtils) {
+        const href = link.getAttribute('href');
+        if (href && !window.AuthUtils.validateRouteAccess(href)) {
+          e.preventDefault();
+          console.warn('Access denied to route:', href);
+          return;
+        }
+        window.AuthUtils.logAccessAttempt('navigation', href || 'unknown');
+      }
       closeMobileMenu();
     });
   });
@@ -373,18 +422,27 @@ document.addEventListener('DOMContentLoaded', function() {
   navLinks.forEach(link => {
     link.addEventListener('click', function(e) {
       const href = this.getAttribute('href');
+      
+      // Log navigation attempt
+      if (window.AuthUtils) {
+        window.AuthUtils.logAccessAttempt('scroll_navigation', href || 'unknown');
+      }
+      
       if (href.startsWith('#') && href !== '#') {
         e.preventDefault();
         const target = document.querySelector(href);
         if (target) {
           // Calculate offset for sticky header
-          const headerHeight = document.querySelector('header').offsetHeight;
-          const targetPosition = target.offsetTop - headerHeight - 20;
-          
-          window.scrollTo({
-            top: targetPosition,
-            behavior: 'smooth'
-          });
+          const header = document.querySelector('header');
+          if (header) {
+            const headerHeight = header.offsetHeight;
+            const targetPosition = target.offsetTop - headerHeight - 20;
+            
+            window.scrollTo({
+              top: targetPosition,
+              behavior: 'smooth'
+            });
+          }
           
           // Close mobile menu after clicking
           closeMobileMenu();
@@ -399,22 +457,34 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Back to top functionality
 function initializeBackToTop() {
-  const backToTopBtn = document.getElementById('back-to-top');
-  
-  // Only add event listener if the button exists
-  if (!backToTopBtn) {
-    console.log('Back to top button not found on this page, skipping initialization');
-    return;
-  }
-  
-  // Show/hide button based on scroll position
-  window.addEventListener('scroll', function() {
-    if (window.pageYOffset > 300) {
-      backToTopBtn.style.display = 'flex';
-    } else {
-      backToTopBtn.style.display = 'none';
+  try {
+    const backToTopBtn = document.getElementById('back-to-top');
+    
+    // Only add event listener if the button exists
+    if (!backToTopBtn) {
+      console.log('Back to top button not found on this page, skipping initialization');
+      return;
     }
-  });
+    
+    // Show/hide button based on scroll position
+    window.addEventListener('scroll', function() {
+      try {
+        if (window.pageYOffset > 300) {
+          backToTopBtn.style.display = 'flex';
+        } else {
+          backToTopBtn.style.display = 'none';
+        }
+      } catch (error) {
+        if (window.SecurityUtils) {
+          console.error('Error in scroll handler:', window.SecurityUtils.sanitizeForLogging(error.message));
+        }
+      }
+    });
+  } catch (error) {
+    if (window.SecurityUtils) {
+      console.error('Error initializing back to top:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
+  }
 }
 
 function scrollToTop() {
@@ -999,12 +1069,15 @@ function announceToScreenReader(message) {
   announcement.setAttribute('aria-live', 'polite');
   announcement.setAttribute('aria-atomic', 'true');
   announcement.className = 'sr-only';
-  announcement.textContent = message;
+  const safeMessage = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(message) : message;
+  announcement.textContent = safeMessage;
   
   document.body.appendChild(announcement);
   
   setTimeout(() => {
-    document.body.removeChild(announcement);
+    if (announcement.parentNode) {
+      document.body.removeChild(announcement);
+    }
   }, 1000);
 }
 
@@ -1013,6 +1086,11 @@ window.loadMoreNotices = loadMoreNotices;
 
 // School Address Database Integration using Firebase
 function loadSchoolAddress() {
+  // Log data access attempt
+  if (window.AuthUtils) {
+    window.AuthUtils.logAccessAttempt('load_address', 'school_address');
+  }
+  
   // Check if Firebase is available (loaded from index.html)
   if (typeof window.db !== 'undefined' && window.db) {
     console.log('Loading school address from Firebase...');
@@ -1046,7 +1124,8 @@ function loadSchoolAddress() {
       updateAddressDisplay(schoolData);
       
     }).catch(error => {
-      console.error('Error loading school data from Firebase:', error);
+      const errorMsg = window.SecurityUtils ? window.SecurityUtils.sanitizeForLogging(error.message) : error.message;
+      console.error('Error loading school data from Firebase:', errorMsg);
       // Fallback to default values
       updateAddressDisplay({
         name: 'Vikas Public School',
@@ -1068,59 +1147,65 @@ function loadSchoolAddress() {
 }
 
 function updateAddressDisplay(addressData) {
-  const elements = {
-    address: document.getElementById('db-address'),
-    cityState: document.getElementById('db-city-state'),
-    pincode: document.getElementById('db-pincode'),
-    phone: document.getElementById('db-phone'),
-    email: document.getElementById('db-email')
-  };
+  try {
+    const elements = {
+      address: document.getElementById('db-address'),
+      cityState: document.getElementById('db-city-state'),
+      pincode: document.getElementById('db-pincode'),
+      phone: document.getElementById('db-phone'),
+      email: document.getElementById('db-email')
+    };
 
-  // Update address elements if they exist
-  if (elements.address && addressData.address) {
-    // For Firebase data, address is stored as a complete address
-    // We'll display the full address in the address field
-    elements.address.textContent = addressData.address;
-  }
-  
-  // Hide city/state/pincode sections if using Firebase address format
-  if (elements.cityState) {
-    // If we have separate city/state data, use it; otherwise hide
-    if (addressData.city && addressData.state) {
-      elements.cityState.textContent = `${addressData.city}, ${addressData.state}`;
-    } else {
-      // Hide the city-state element if using complete address from Firebase
-      const parentBr = elements.cityState.previousElementSibling;
-      if (parentBr && parentBr.tagName === 'BR') {
-        parentBr.style.display = 'none';
-      }
-      elements.cityState.style.display = 'none';
+    // Update address elements if they exist
+    if (elements.address && addressData.address) {
+      // For Firebase data, address is stored as a complete address
+      // We'll display the full address in the address field
+      elements.address.textContent = addressData.address;
     }
-  }
-  
-  if (elements.pincode) {
-    if (addressData.pincode) {
-      elements.pincode.textContent = addressData.pincode;
-    } else {
-      // Hide pincode section if not available
-      const parentText = elements.pincode.parentNode;
-      if (parentText) {
-        const textNodes = Array.from(parentText.childNodes).filter(node => 
-          node.nodeType === Node.TEXT_NODE && node.textContent.includes('PIN')
-        );
-        textNodes.forEach(node => node.textContent = '');
+    
+    // Hide city/state/pincode sections if using Firebase address format
+    if (elements.cityState) {
+      // If we have separate city/state data, use it; otherwise hide
+      if (addressData.city && addressData.state) {
+        elements.cityState.textContent = `${addressData.city}, ${addressData.state}`;
+      } else {
+        // Hide the city-state element if using complete address from Firebase
+        const parentBr = elements.cityState.previousElementSibling;
+        if (parentBr && parentBr.tagName === 'BR') {
+          parentBr.style.display = 'none';
+        }
+        elements.cityState.style.display = 'none';
       }
-      elements.pincode.style.display = 'none';
     }
-  }
-  
-  if (elements.phone && addressData.phone) {
-    elements.phone.textContent = addressData.phone;
-    elements.phone.href = `tel:${addressData.phone.replace(/[^+\d]/g, '')}`;
-  }
-  
-  if (elements.email && addressData.email) {
-    elements.email.textContent = addressData.email;
-    elements.email.href = `mailto:${addressData.email}`;
+    
+    if (elements.pincode) {
+      if (addressData.pincode) {
+        elements.pincode.textContent = addressData.pincode;
+      } else {
+        // Hide pincode section if not available
+        const parentText = elements.pincode.parentNode;
+        if (parentText) {
+          const textNodes = Array.from(parentText.childNodes).filter(node => 
+            node.nodeType === Node.TEXT_NODE && node.textContent.includes('PIN')
+          );
+          textNodes.forEach(node => node.textContent = '');
+        }
+        elements.pincode.style.display = 'none';
+      }
+    }
+    
+    if (elements.phone && addressData.phone) {
+      elements.phone.textContent = addressData.phone;
+      elements.phone.href = `tel:${addressData.phone.replace(/[^+\d]/g, '')}`;
+    }
+    
+    if (elements.email && addressData.email) {
+      elements.email.textContent = addressData.email;
+      elements.email.href = `mailto:${addressData.email}`;
+    }
+  } catch (error) {
+    if (window.SecurityUtils) {
+      console.error('Error updating address display:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
   }
 }

@@ -168,8 +168,27 @@ function initMpdModal() {
         
         link.addEventListener('click', function(e) {
           e.preventDefault();
-          console.log('File link clicked:', this.href);
-          openFileModal(this.href, this.textContent.trim());
+          
+          // Check file access authorization
+          if (window.AuthUtils && !window.AuthUtils.canAccessFiles()) {
+            console.warn('File access denied');
+            return;
+          }
+          
+          const safeHref = window.SecurityUtils ? window.SecurityUtils.sanitizeURL(this.href) : this.href;
+          const safeTitle = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(this.textContent.trim()) : this.textContent.trim();
+          
+          // Log file access attempt
+          if (window.AuthUtils) {
+            window.AuthUtils.logAccessAttempt('file_access', safeTitle || 'unknown_file');
+          }
+          
+          if (window.SecurityUtils) {
+            console.log('File link clicked:', window.SecurityUtils.sanitizeForLogging(this.href));
+          }
+          if (safeHref) {
+            openFileModal(safeHref, safeTitle);
+          }
         });
       });
     }, 1000); // Increased delay to ensure tables are fully rendered
@@ -193,6 +212,12 @@ function initMpdModal() {
           e.preventDefault();
           e.stopPropagation(); // Prevent any other event handlers
           
+          // Check file access authorization
+          if (window.AuthUtils && !window.AuthUtils.canAccessFiles()) {
+            console.warn('PDF access denied');
+            return;
+          }
+          
           // Get the encoded URL from the data attribute
           const encodedUrl = this.getAttribute('data-file-url');
           if (!encodedUrl) {
@@ -203,18 +228,31 @@ function initMpdModal() {
           // Decode the URL
           try {
             const fileUrl = decodeURIComponent(encodedUrl);
-            console.log('PDF link clicked, decoded URL length:', fileUrl.length);
+            const safeUrl = window.SecurityUtils ? window.SecurityUtils.sanitizeURL(fileUrl) : fileUrl;
+            const safeTitle = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(this.textContent.trim()) : this.textContent.trim();
             
-            if (fileUrl.length < 100) {
-              console.log('Full URL:', fileUrl);
-            } else {
-              console.log('URL start:', fileUrl.substring(0, 50) + '...');
+            // Log PDF access attempt
+            if (window.AuthUtils) {
+              window.AuthUtils.logAccessAttempt('pdf_access', safeTitle || 'unknown_pdf');
+            }
+            
+            if (window.SecurityUtils) {
+              console.log('PDF link clicked, decoded URL length:', window.SecurityUtils.sanitizeForLogging(String(fileUrl.length)));
+              
+              if (fileUrl.length < 100) {
+                console.log('Full URL:', window.SecurityUtils.sanitizeForLogging(fileUrl));
+              } else {
+                console.log('URL start:', window.SecurityUtils.sanitizeForLogging(fileUrl.substring(0, 50) + '...'));
+              }
             }
             
             // Open the modal with the decoded URL
-            openFileModal(fileUrl, this.textContent.trim());
+            if (safeUrl) {
+              openFileModal(safeUrl, safeTitle);
+            }
           } catch (error) {
-            console.error('Error decoding URL:', error);
+            const errorMsg = window.SecurityUtils ? window.SecurityUtils.sanitizeForLogging(error.message) : error.message;
+            console.error('Error decoding URL:', errorMsg);
           }
           
           return false; // Extra prevention of default behavior
@@ -246,28 +284,35 @@ function initMpdModal() {
 
 // Function to open file modal
 function openFileModal(fileUrl, title = 'File Viewer') {
-  console.log('Opening file modal for:', title);
-  console.log('File URL type:', typeof fileUrl);
-  console.log('File URL starts with:', fileUrl.substring(0, 20) + '...');
+  try {
+    if (window.SecurityUtils) {
+      console.log('Opening file modal for:', window.SecurityUtils.sanitizeForLogging(title));
+      console.log('File URL type:', window.SecurityUtils.sanitizeForLogging(typeof fileUrl));
+      console.log('File URL starts with:', window.SecurityUtils.sanitizeForLogging(fileUrl.substring(0, 20) + '...'));
+    }
+    
+    if (!fileUrl) {
+      console.error('No file URL provided to openFileModal');
+      return;
+    }
+    
+    const modal = document.getElementById('mpd-file-modal');
+    const modalTitle = document.getElementById('mpd-file-modal-title');
+    const modalBody = document.getElementById('mpd-file-modal-body');
+    
+    if (!modal || !modalTitle || !modalBody) {
+      console.error('Modal elements not found');
+      // Fallback to opening in a new tab
+      const safeUrl = window.SecurityUtils ? window.SecurityUtils.sanitizeURL(fileUrl) : fileUrl;
+      if (safeUrl) {
+        window.open(safeUrl, '_blank');
+      }
+      return;
+    }
   
-  if (!fileUrl) {
-    console.error('No file URL provided to openFileModal');
-    return;
-  }
-  
-  const modal = document.getElementById('mpd-file-modal');
-  const modalTitle = document.getElementById('mpd-file-modal-title');
-  const modalBody = document.getElementById('mpd-file-modal-body');
-  
-  if (!modal || !modalTitle || !modalBody) {
-    console.error('Modal elements not found');
-    // Fallback to opening in a new tab
-    window.open(fileUrl, '_blank');
-    return;
-  }
-  
-  // Set title
-  modalTitle.textContent = title;
+  // Set title with sanitization
+  const safeTitle = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(title) : title;
+  modalTitle.textContent = safeTitle;
   
   // Clear previous content
   modalBody.innerHTML = '';
@@ -298,7 +343,9 @@ function openFileModal(fileUrl, title = 'File Viewer') {
       };
       img.onerror = function() {
         modalBody.innerHTML = '<div style="padding:20px;color:#ef4444;">Error loading image. The file might be too large or corrupted.</div>';
-        console.error('Error loading image');
+        if (window.SecurityUtils) {
+          console.error('Error loading image:', window.SecurityUtils.sanitizeForLogging('Image load failed'));
+        }
       };
       img.style.cssText = `
         max-width: 100%;
@@ -510,8 +557,10 @@ function openFileModal(fileUrl, title = 'File Viewer') {
       }, 200);
     }
   } catch (error) {
-    console.error('Error displaying file:', error);
-    modalBody.innerHTML = `<div style="padding:20px;color:#ef4444;">Error: ${error.message}</div>`;
+    const errorMsg = window.SecurityUtils ? window.SecurityUtils.sanitizeForLogging(error.message) : error.message;
+    console.error('Error displaying file:', errorMsg);
+    const safeErrorMsg = window.SecurityUtils ? window.SecurityUtils.sanitizeHTML(error.message) : error.message;
+    modalBody.innerHTML = `<div style="padding:20px;color:#ef4444;">Error: ${safeErrorMsg}</div>`;
   }
   
   // Show modal with animation
@@ -534,29 +583,35 @@ function openFileModal(fileUrl, title = 'File Viewer') {
 
 // Function to close file modal
 function closeFileModal() {
-  const modal = document.getElementById('mpd-file-modal');
-  if (!modal) return;
-  
-  console.log('Closing file modal');
-  
-  // Hide modal with animation
-  modal.style.opacity = '0';
-  const modalContent = modal.querySelector('div');
-  if (modalContent) {
-    modalContent.style.transform = 'scale(0.95)';
-  }
-  
-  // Restore scrolling
-  document.body.style.overflow = '';
-  
-  setTimeout(() => {
-    modal.style.display = 'none';
-    const modalBody = document.getElementById('mpd-file-modal-body');
-    if (modalBody) {
-      modalBody.innerHTML = '';
+  try {
+    const modal = document.getElementById('mpd-file-modal');
+    if (!modal) return;
+    
+    console.log('Closing file modal');
+    
+    // Hide modal with animation
+    modal.style.opacity = '0';
+    const modalContent = modal.querySelector('div');
+    if (modalContent) {
+      modalContent.style.transform = 'scale(0.95)';
     }
     
-    // Dispatch a hidden event for cleanup
-    modal.dispatchEvent(new Event('hidden'));
-  }, 300);
+    // Restore scrolling
+    document.body.style.overflow = '';
+    
+    setTimeout(() => {
+      modal.style.display = 'none';
+      const modalBody = document.getElementById('mpd-file-modal-body');
+      if (modalBody) {
+        modalBody.innerHTML = '';
+      }
+      
+      // Dispatch a hidden event for cleanup
+      modal.dispatchEvent(new Event('hidden'));
+    }, 300);
+  } catch (error) {
+    if (window.SecurityUtils) {
+      console.error('Error closing modal:', window.SecurityUtils.sanitizeForLogging(error.message));
+    }
+  }
 }
