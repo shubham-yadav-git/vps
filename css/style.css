@@ -4625,11 +4625,11 @@ main {
   transition: width 0.3s ease;
 }
 
-/* Floating Action Buttons - Constrained within viewport */
+/* Floating Action Buttons - Aligned with chatbot */
 .refresh-fab {
   position: fixed;
-  bottom: 74px;
-  right: 32px;
+  bottom: 110px;
+  right: 20px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -4660,8 +4660,8 @@ main {
 
 .back-to-top {
   position: fixed;
-  bottom: 32px;
-  right: 32px;
+  bottom: 60px;
+  right: 20px;
   width: 40px;
   height: 40px;
   border-radius: 50%;
@@ -4707,46 +4707,38 @@ main {
 /* Mobile responsive adjustments for floating buttons */
 @media (max-width: 768px) {
   .refresh-fab {
-    bottom: 85px;
-    right: 10px;
-    width: 44px;
-    height: 44px;
-    font-size: 14px;
-    right: max(10px, min(10px, calc(100vw - 54px)));
-    bottom: max(85px, min(85px, calc(100vh - 129px)));
+    bottom: 95px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
   }
   
   .back-to-top {
-    bottom: 10px;
-    right: 10px;
-    width: 50px;
-    height: 50px;
-    font-size: 18px;
-    right: max(10px, min(10px, calc(100vw - 60px)));
-    bottom: max(10px, min(10px, calc(100vh - 60px)));
+    bottom: 45px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    font-size: 16px;
   }
 }
 
 /* Extra small screens */
 @media (max-width: 480px) {
   .refresh-fab {
-    bottom: 80px;
-    right: 8px;
-    width: 40px;
-    height: 40px;
-    font-size: 12px;
-    right: max(8px, min(8px, calc(100vw - 48px)));
-    bottom: max(80px, min(80px, calc(100vh - 120px)));
+    bottom: 88px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
   
   .back-to-top {
-    bottom: 8px;
-    right: 8px;
-    width: 46px;
-    height: 46px;
-    font-size: 16px;
-    right: max(8px, min(8px, calc(100vw - 54px)));
-    bottom: max(8px, min(8px, calc(100vh - 54px)));
+    bottom: 40px;
+    right: 10px;
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
   }
 }
 
