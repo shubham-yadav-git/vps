@@ -48,7 +48,13 @@ ADMISSIONS:
 - Process: Application → Entrance Test → Interview → Admission Confirmation
 - Required Documents: Birth Certificate, Previous Year's Marksheet, Passport-size Photographs, Address Proof
 
-Please answer questions about the school in a friendly, helpful manner. If asked about something not covered in this information, try to find relevant information from the current webpage content if available, otherwise politely say you don't have that specific information and suggest contacting the school directly.
+MANDATORY PUBLIC DISCLOSURE:
+- Available at: mandatory-public-disclosure.html
+- Contains: School infrastructure details, faculty qualifications, fee structure, academic calendar, safety measures, and all regulatory compliance information as per CBSE guidelines
+- Updated regularly as per government requirements
+- Accessible via the green MPD badge in the website header
+
+Please answer questions about the school in a friendly, helpful manner. If asked about mandatory disclosure, direct users to the MPD page. If asked about something not covered in this information, try to find relevant information from the current webpage content if available, otherwise politely say you don't have that specific information and suggest contacting the school directly.
 `;
     
     // Get current page content
