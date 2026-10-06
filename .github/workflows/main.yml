@@ -1,4 +1,4 @@
-name: Deploy static site to GitHub Pages
+name: Deploy site to GitHub Pages
 
 on:
   push:
@@ -6,8 +6,14 @@ on:
       - main
 
 permissions:
+  contents: read
   id-token: write
   pages: write
+
+# Don't let two deploys race; the newest push wins
+concurrency:
+  group: pages
+  cancel-in-progress: true
 
 jobs:
   deploy:
@@ -16,13 +22,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      # Builds the React site into web/dist, including admin.html and assets/
+      - name: Build site
+        working-directory: web
+        run: |
+          npm ci
+          npm run build
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: web/dist
 
       - name: Deploy to GitHub Pages
         id: deployment
