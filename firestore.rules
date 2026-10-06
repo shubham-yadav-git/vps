@@ -23,7 +23,7 @@ service cloud.firestore {
 
     function isContentCollection(collection) {
       return collection in [
-        'faculty', 'gallery', 'testimonials', 'events', 'faq',
+        'faculty', 'gallery', 'gallery_full', 'testimonials', 'events', 'faq',
         'settings', 'cache', 'disclosure_rows'
       ];
     }

@@ -93,6 +93,16 @@ export function clearCachedContent() {
   }
 }
 
+const fullPhotos = new Map();
+
+/** Full-size gallery photo, fetched only when opened in the lightbox. */
+export async function fetchGalleryFull(id) {
+  if (!fullPhotos.has(id)) {
+    fullPhotos.set(id, getDoc(doc(getDb(), 'gallery_full', id)).then(s => (s.exists() ? s.data().src : '')));
+  }
+  return fullPhotos.get(id);
+}
+
 /** The disclosure document is large (embedded PDFs), so it is fetched fresh, not cached. */
 export async function fetchDisclosureSections() {
   const db = getDb();

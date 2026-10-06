@@ -70,11 +70,23 @@ export function activeNotices(events, today = new Date()) {
     .sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
 }
 
-/** Gallery items with safe sources, without exact duplicates. */
+/**
+ * Gallery items with safe sources, without exact duplicates.
+ * `src` is what the grid shows (the small preview when there is one); `full` is the
+ * full-size photo, or null when it lives in gallery_full/{id} and must be fetched.
+ */
 export function galleryItems(items) {
   const seen = new Set();
   return (Array.isArray(items) ? items : [])
-    .map(item => ({ id: String(item.id), src: safeUrl(item.src), alt: item.alt || 'Vikas Public School gallery photo' }))
+    .map(item => {
+      const preview = safeUrl(item.thumb) || safeUrl(item.src);
+      return {
+        id: String(item.id),
+        src: preview,
+        full: item.hasFull ? null : safeUrl(item.src),
+        alt: item.alt || 'Vikas Public School gallery photo',
+      };
+    })
     .filter(item => item.src && !seen.has(item.src) && seen.add(item.src));
 }
 

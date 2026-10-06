@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Icon from '../../components/Icon';
 import { loadCounts } from '../api';
 import { Card, PageHeader } from '../ui';
+import PhotoOptimizer from './PhotoOptimizer';
 import { activeNotices, galleryItems } from '../../lib/normalize';
 
 function Stat({ label, value, note, href }) {
@@ -16,7 +17,8 @@ function Stat({ label, value, note, href }) {
 
 export default function Dashboard({ user }) {
   const [data, setData] = useState(null);
-  useEffect(() => { loadCounts().then(setData); }, []);
+  const reload = () => loadCounts().then(setData);
+  useEffect(() => { reload(); }, []);
 
   const events = data?.events || [];
   const active = activeNotices(events);
@@ -39,6 +41,7 @@ export default function Dashboard({ user }) {
         <Stat label="Gallery photos" value={data?.gallery?.length} href="#/gallery" />
         <Stat label="Testimonials" value={data?.testimonials?.length} href="#/testimonials" />
       </div>
+      <div className="mt-6 empty:hidden"><PhotoOptimizer data={data} onDone={reload} /></div>
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <Card title="Suggestions">
           {!data ? <p className="text-sm text-slate-500">Checking…</p> : tasks.length ? (

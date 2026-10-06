@@ -6,11 +6,33 @@ import Section from './Section';
 import { useSiteContent } from '../lib/SiteContent';
 import { galleryItems } from '../lib/normalize';
 
+// Full-size photos live in their own documents; fetch them only when viewed
+function useFullPhoto(item) {
+  const [full, setFull] = useState({ id: null, src: '' });
+  const id = item?.id;
+  const needsFetch = Boolean(item && !item.full);
+  useEffect(() => {
+    if (!needsFetch) return;
+    let cancelled = false;
+    import('../lib/content')
+      .then(({ fetchGalleryFull }) => fetchGalleryFull(id))
+      .then(src => { if (!cancelled && src) setFull({ id, src }); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [id, needsFetch]);
+  if (!item) return '';
+  if (item.full) return item.full;
+  return full.id === item.id ? full.src : '';
+}
+
 function Lightbox({ items, index, onChange, onClose }) {
   const touchStart = useRef(null);
   const item = items[index];
   const hasPrev = index > 0;
   const hasNext = index < items.length - 1;
+  const fullSrc = useFullPhoto(item);
+  // Warm up the next photo so arrowing through feels instant
+  useFullPhoto(items[index + 1]);
 
   useEffect(() => {
     const onKey = e => {
@@ -37,7 +59,8 @@ function Lightbox({ items, index, onChange, onClose }) {
       }}
     >
       <figure className="max-h-full max-w-5xl">
-        <img src={item.src} alt={item.alt} className="max-h-[80dvh] w-auto rounded-xl object-contain shadow-2xl" />
+        {/* The preview shows immediately; the full-size photo replaces it once loaded */}
+        <img src={fullSrc || item.src} alt={item.alt} className={`max-h-[80dvh] min-w-[min(40rem,80vw)] w-auto rounded-xl object-contain shadow-2xl transition ${fullSrc ? '' : 'blur-[1px]'}`} />
         <figcaption className="mt-3 text-center text-sm text-white/80">
           {item.alt} · {index + 1} / {items.length}
         </figcaption>

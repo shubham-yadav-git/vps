@@ -2,8 +2,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Dialog from '../../components/Dialog';
 import FadeImage from '../../components/FadeImage';
 import Icon from '../../components/Icon';
-import { deleteItem, friendlyError, listCollection, saveItem } from '../api';
-import { compressImage } from '../images';
+import { deleteGalleryItem, deleteItem, friendlyError, listCollection, saveGalleryItem, saveItem } from '../api';
+import { compressDataUrl, compressImage } from '../images';
 import {
   Button, EmptyState, ErrorBox, ImageField, PageHeader, Select, TextArea, TextInput,
   useConfirm, useToast, useUnsavedChanges,
@@ -35,12 +35,14 @@ export const COLLECTIONS = {
     singular: 'photo',
     layout: 'grid',
     bulkUpload: true,
-    empty: () => ({ src: '', alt: '' }),
+    empty: () => ({ photo: '', alt: '' }),
+    // Stored as a small preview + separate full-size photo; the editor works with one "photo"
+    fromStored: item => ({ id: item.id, alt: item.alt || '', photo: item.thumb || item.src || '' }),
     fields: [
-      { key: 'src', label: 'Photo', type: 'image', preset: 'gallery', required: true, previewClass: 'h-40 w-64 object-cover' },
+      { key: 'photo', label: 'Photo', type: 'image', preset: 'gallery', required: true, previewClass: 'h-40 w-64 object-cover' },
       { key: 'alt', label: 'Caption', placeholder: 'e.g. Students at the annual science fair', hint: 'Describe the photo; it is read aloud to visually impaired visitors.' },
     ],
-    summary: item => ({ title: item.alt || 'No caption', image: item.src }),
+    summary: item => ({ title: item.alt || 'No caption', image: item.photo }),
   },
   testimonials: {
     title: 'Testimonials',
@@ -70,6 +72,21 @@ export const COLLECTIONS = {
     sort: (a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0),
   },
 };
+
+/** Full-size photo plus a small preview for the gallery grid. */
+async function galleryPhoto(photo) {
+  if (!photo.startsWith('data:')) return { full: photo };
+  const { dataUrl: thumb } = await compressDataUrl(photo, 'thumb');
+  return { full: photo, thumb };
+}
+
+async function saveAny(name, item, original) {
+  if (name !== 'gallery') return saveItem(name, item);
+  const photoChanged = !original?.id || item.photo !== original.photo;
+  return saveGalleryItem({ id: item.id, alt: item.alt }, photoChanged ? await galleryPhoto(item.photo) : null);
+}
+
+const deleteAny = (name, id) => (name === 'gallery' ? deleteGalleryItem(id) : deleteItem(name, id));
 
 function ItemForm({ config, item, onChange, errors }) {
   return (
@@ -113,7 +130,7 @@ function EditDialog({ config, name, editing, onClose, onSaved, onDeleted }) {
     if (Object.keys(found).length) return;
     setBusy(true);
     try {
-      const id = await saveItem(name, trimmed);
+      const id = await saveAny(name, trimmed, editing);
       onSaved({ ...trimmed, id });
       toast.success(isNew ? `Added ${config.singular}.` : 'Changes saved.');
     } catch (error) {
@@ -127,7 +144,7 @@ function EditDialog({ config, name, editing, onClose, onSaved, onDeleted }) {
     if (!(await confirm({ title: `Delete this ${config.singular}?`, message: 'It will be removed from the website. This cannot be undone.', confirmLabel: 'Delete', danger: true }))) return;
     setBusy(true);
     try {
-      await deleteItem(name, item.id);
+      await deleteAny(name, item.id);
       onDeleted(item.id);
       toast.success(`Deleted ${config.singular}.`);
     } catch (error) {
@@ -253,8 +270,9 @@ function BulkUpload({ onAdded }) {
       setProgress(`${i + 1} / ${list.length}`);
       try {
         const { dataUrl } = await compressImage(list[i], 'gallery');
-        const item = { src: dataUrl, alt: '' };
-        added.push({ ...item, id: await saveItem('gallery', item) });
+        const photo = await galleryPhoto(dataUrl);
+        const id = await saveGalleryItem({ alt: '' }, photo);
+        added.push({ id, alt: '', photo: photo.thumb });
       } catch (error) {
         toast.error(`${list[i].name}: ${friendlyError(error)}`);
       }
@@ -287,8 +305,11 @@ export default function CollectionEditor({ name }) {
   const load = useCallback(async () => {
     setError('');
     setItems(null);
-    try { setItems(await listCollection(name)); } catch (err) { setError(friendlyError(err)); }
-  }, [name]);
+    try {
+      const list = await listCollection(name);
+      setItems(config.fromStored ? list.map(config.fromStored) : list);
+    } catch (err) { setError(friendlyError(err)); }
+  }, [name, config]);
 
   useEffect(() => { load(); }, [load]);
 

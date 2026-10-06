@@ -1,8 +1,9 @@
 // Images are stored inside Firestore documents (Spark plan, no Storage), so they
 // are resized and compressed before saving. Presets match where each image is shown.
 export const IMAGE_PRESETS = {
-  photo: { maxSize: 900, maxBytes: 250 * 1024 },     // faculty, leadership
-  gallery: { maxSize: 1600, maxBytes: 450 * 1024 },
+  photo: { maxSize: 560, maxBytes: 60 * 1024 },      // faculty, leadership: only shown small
+  thumb: { maxSize: 480, maxBytes: 28 * 1024 },      // gallery grid previews
+  gallery: { maxSize: 1600, maxBytes: 450 * 1024 },  // full-size gallery photo (lightbox)
   hero: { maxSize: 1920, maxBytes: 550 * 1024 },
   logo: { maxSize: 512, maxBytes: 150 * 1024, keepTransparency: true },
 };
@@ -62,6 +63,17 @@ export async function compressImage(file, presetName = 'photo') {
     else scale *= 0.8;
   }
   throw new Error('This image is too large to store even after compression. Please use a smaller image.');
+}
+
+/** Re-compresses an existing data URL (e.g. a stored photo) with another preset. */
+export async function compressDataUrl(dataUrl, presetName) {
+  const blob = await (await fetch(dataUrl)).blob();
+  return compressImage(blob, presetName);
+}
+
+/** Approximate decoded size of a data URL in bytes. */
+export function dataUrlBytes(value) {
+  return typeof value === 'string' && value.startsWith('data:') ? Math.round((value.length - value.indexOf(',') - 1) * 0.75) : 0;
 }
 
 /** Reads a document file (PDF) as a data URL, refusing anything that can't fit in Firestore. */

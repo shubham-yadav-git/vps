@@ -61,6 +61,51 @@ export async function deleteItem(name, id) {
   await invalidateCache(name);
 }
 
+// ---- Gallery: small preview in gallery/{id}, full photo in gallery_full/{id} ----
+// gallery/{id} = { alt, thumb?, hasFull?, src? }  (src is a plain URL/path, or a legacy embedded photo)
+// gallery_full/{id} = { src }                    (full-size embedded photo, fetched on demand)
+
+/** Saves a gallery item. Pass `newPhoto` (full-size data URL + preview) when the photo changed. */
+export async function saveGalleryItem({ id, alt }, newPhoto) {
+  const db = getDb();
+  const ref = id ? doc(db, 'gallery', id) : doc(collection(db, 'gallery'));
+  if (newPhoto) {
+    const { full, thumb } = newPhoto;
+    if (full.startsWith('data:')) {
+      assertSize({ src: full }, 'This photo');
+      await setDoc(doc(db, 'gallery_full', ref.id), { src: full });
+      await setDoc(ref, { alt, thumb, hasFull: true });
+    } else {
+      await setDoc(ref, { alt, src: full });
+    }
+  } else {
+    await setDoc(ref, { alt }, { merge: true });
+  }
+  await invalidateCache('gallery');
+  return ref.id;
+}
+
+export async function deleteGalleryItem(id) {
+  const db = getDb();
+  await deleteDoc(doc(db, 'gallery', id));
+  await deleteDoc(doc(db, 'gallery_full', id)).catch(() => {});
+  await invalidateCache('gallery');
+}
+
+/** Moves a legacy embedded photo out of the gallery list document. */
+export async function splitLegacyGalleryItem(item, thumb) {
+  const db = getDb();
+  await setDoc(doc(db, 'gallery_full', item.id), { src: item.src });
+  await setDoc(doc(db, 'gallery', item.id), { alt: item.alt || '', thumb, hasFull: true });
+}
+
+/** Replaces one field of a document without touching the rest (used by photo optimisation). */
+export async function updateField(collectionName, id, field, value) {
+  await setDoc(doc(getDb(), collectionName, id), { [field]: value }, { merge: true });
+}
+
+export { invalidateCache };
+
 // ---- Settings documents (hero, about, academics, logo, school-info, contact, disclosure) ----
 
 export async function getSettings(name) {
