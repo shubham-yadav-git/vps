@@ -62,8 +62,7 @@ export async function refreshContent(onUpdate) {
   }
 
   const now = Date.now();
-  const types = [...COLLECTION_TYPES, ...SETTINGS_TYPES];
-  await Promise.all(types.map(async type => {
+  const refreshType = async type => {
     const cached = readCache(type);
     const isFresh = cached && lastUpdated
       && now - cached.savedAt < MAX_CACHE_AGE
@@ -77,7 +76,14 @@ export async function refreshContent(onUpdate) {
     } catch (error) {
       console.warn(`Could not load ${type} from Firestore, keeping current content`, error);
     }
-  }));
+  };
+
+  // Photos are stored inside these documents (hundreds of KB), so fetch the small,
+  // above-the-fold content first and let the heavy collections follow
+  const heavy = ['faculty', 'gallery'];
+  const light = [...SETTINGS_TYPES, ...COLLECTION_TYPES].filter(type => !heavy.includes(type));
+  await Promise.all(light.map(refreshType));
+  await Promise.all(heavy.map(refreshType));
 }
 
 /** Drops every cached type so the next refresh refetches all content. */

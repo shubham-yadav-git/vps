@@ -69,27 +69,24 @@ export default function Gallery() {
 
   return (
     <Section id="gallery" eyebrow="Gallery" title="Life at Vikas Public School" intro="Moments from our classrooms, labs, events and celebrations.">
-      {!ready ? (
-        // Real photos come from the database; show shimmer tiles instead of sample photos
-        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-busy="true">
-          {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <li key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />)}
-        </ul>
-      ) : (
-      <ul className="columns-2 gap-4 sm:columns-3 lg:columns-4">
-        {items.map((item, index) => (
-          <li key={item.id} className="mb-4 break-inside-avoid">
-            <button
-              type="button"
-              onClick={() => setOpenIndex(index)}
-              className="group block w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800"
-              aria-label={`View photo: ${item.alt}`}
-            >
-              <FadeImage src={item.src} alt={item.alt} loading="lazy" className="min-h-24 w-full !transition duration-500 group-hover:scale-105" />
-            </button>
-          </li>
-        ))}
+      {/* Fixed 4:3 tiles: photos fade into place without moving anything (a masonry
+          layout reflowed as each photo arrived, which looked like photos being added) */}
+      <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-busy={!ready}>
+        {!ready
+          ? [0, 1, 2, 3, 4, 5].map(i => <li key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />)
+          : items.map((item, index) => (
+            <li key={item.id}>
+              <button
+                type="button"
+                onClick={() => setOpenIndex(index)}
+                className="group block aspect-[4/3] w-full overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800"
+                aria-label={`View photo: ${item.alt}`}
+              >
+                <FadeImage src={item.src} alt={item.alt} loading="lazy" className="size-full object-cover !transition duration-500 group-hover:scale-105" />
+              </button>
+            </li>
+          ))}
       </ul>
-      )}
       <Dialog open={openIndex !== null} onClose={() => setOpenIndex(null)} label="Photo viewer" variant="bare">
         {openIndex !== null && <Lightbox items={items} index={openIndex} onChange={setOpenIndex} onClose={() => setOpenIndex(null)} />}
       </Dialog>
