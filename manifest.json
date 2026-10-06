@@ -9,24 +9,23 @@
   "orientation": "portrait-primary",
   "scope": "/",
   "lang": "en",
-  "categories": ["education", "school", "learning"],
+  "categories": [
+    "education",
+    "school",
+    "learning"
+  ],
   "icons": [
     {
-      "src": "assets/logo.png",
+      "src": "/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "maskable any"
+      "purpose": "any"
     },
     {
-      "src": "assets/logo.png",
+      "src": "/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable any"
-    },
-    {
-      "src": "assets/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "purpose": "any"
     }
   ],
   "shortcuts": [
@@ -35,30 +34,48 @@
       "short_name": "Apply",
       "description": "Apply for admission to Vikas Public School",
       "url": "/#admissions",
-      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Contact",
       "short_name": "Contact",
       "description": "Contact Vikas Public School",
       "url": "/#contact",
-      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Gallery",
       "short_name": "Gallery",
       "description": "View school gallery",
       "url": "/#gallery",
-      "icons": [{ "src": "assets/logo.png", "sizes": "96x96" }]
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
     }
   ],
   "screenshots": [
     {
-      "src": "assets/school.jpg",
-      "sizes": "1280x720",
+      "src": "/campus.jpg",
+      "sizes": "1600x1600",
       "type": "image/jpeg",
-      "platform": "wide",
-      "label": "Vikas Public School Homepage"
+      "form_factor": "wide",
+      "label": "Vikas Public School campus"
     }
   ]
 }
