@@ -8,13 +8,9 @@ const here = import.meta.dirname;
 const repoRoot = resolve(here, '..');
 
 // Files from the existing static site that ship unchanged with the React build.
-// admin.html keeps working as-is until it is ported in a later pass.
+// (The old admin.html is replaced by the React admin in admin.html here.)
 const LEGACY_FILES = [
   'assets',
-  'admin.html',
-  'js/security-utils.js',
-  'js/auth-utils.js',
-  'js/fixed-save-handler.js',
   'manifest.json',
   'robots.txt',
   'sitemap.xml',
@@ -73,6 +69,7 @@ export default defineConfig({
       input: {
         main: resolve(here, 'index.html'),
         disclosure: resolve(here, 'mandatory-public-disclosure.html'),
+        admin: resolve(here, 'admin.html'),
       },
     },
   },

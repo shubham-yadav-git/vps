@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore/lite';
+import { connectFirestoreEmulator, getFirestore } from 'firebase/firestore/lite';
 
 // Firebase web config is public by design; access is controlled by firestore.rules
 const firebaseConfig = {
@@ -12,15 +12,22 @@ const firebaseConfig = {
   measurementId: 'G-02JK84S8NH',
 };
 
+// Set VITE_FIREBASE_EMULATOR=1 (dev only) to use local emulators instead of the live project
+export const USE_EMULATOR = import.meta.env.DEV && import.meta.env.VITE_FIREBASE_EMULATOR === '1';
+
 let db;
 
+export function getFirebaseApp() {
+  return getApps()[0] || initializeApp(firebaseConfig);
+}
+
 // Lazily created so nothing touches Firebase during the build-time prerender.
-// Uses the Lite SDK (one-off reads only, much smaller); caching is done in content.js
+// Uses the Lite SDK (one-off reads and writes only, much smaller); caching is done in content.js
 // (multi-tab IndexedDB persistence caused spurious empty reads on the old site).
 export function getDb() {
   if (!db) {
-    const app = getApps()[0] || initializeApp(firebaseConfig);
-    db = getFirestore(app);
+    db = getFirestore(getFirebaseApp());
+    if (USE_EMULATOR) connectFirestoreEmulator(db, '127.0.0.1', 8085);
   }
   return db;
 }
