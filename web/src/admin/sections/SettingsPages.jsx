@@ -102,5 +102,3 @@ export default function SettingsPage({ name }) {
     </>
   );
 }
-
-export const SETTINGS_PAGE_NAMES = Object.keys(PAGES);

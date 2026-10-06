@@ -86,13 +86,6 @@ export async function refreshContent(onUpdate) {
   await Promise.all(heavy.map(refreshType));
 }
 
-/** Drops every cached type so the next refresh refetches all content. */
-export function clearCachedContent() {
-  for (const type of [...COLLECTION_TYPES, ...SETTINGS_TYPES]) {
-    try { localStorage.removeItem(STORAGE_PREFIX + type); } catch { /* storage blocked */ }
-  }
-}
-
 const fullPhotos = new Map();
 
 /** Full-size gallery photo, fetched only when opened in the lightbox. */

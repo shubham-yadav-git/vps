@@ -66,10 +66,7 @@ export const DEFAULT_CONTENT = {
   gallery: [
     { id: 'g1', src: '/assets/gallery7.jpg', alt: 'Science experiments in the school lab' },
     { id: 'g2', src: '/assets/gallery8.jpg', alt: 'School activity or event' },
-    { id: 'g3', src: '/assets/gallery9.jpg', alt: 'Students in classroom' },
-    { id: 'g4', src: '/assets/gallery10.jpg', alt: 'Classroom learning environment' },
-    { id: 'g5', src: '/assets/gallery11.jpg', alt: 'School assembly and student activities' },
-    { id: 'g6', src: '/assets/gallery12.jpg', alt: 'School infrastructure and learning spaces' },
+    { id: 'g3', src: '/assets/gallery9.jpg', alt: 'Principal' },
   ],
   faq: [
     { id: 'faq1', question: 'What is the admission process?', answer: 'We have an application followed by an entrance test and interview. Detailed steps are available in the Admissions section.' },

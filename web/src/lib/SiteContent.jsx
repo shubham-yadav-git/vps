@@ -66,14 +66,8 @@ export function SiteContentProvider({ children }) {
 
   const isResolved = useCallback(type => settled || resolvedTypes.has(type), [settled, resolvedTypes]);
 
-  const forceRefresh = useCallback(async () => {
-    const { clearCachedContent } = await loadContentModule();
-    clearCachedContent();
-    return load();
-  }, [load]);
-
   return (
-    <SiteContentContext.Provider value={{ content, hydrated, noticesLoaded, isResolved, forceRefresh }}>
+    <SiteContentContext.Provider value={{ content, hydrated, noticesLoaded, isResolved }}>
       {children}
     </SiteContentContext.Provider>
   );

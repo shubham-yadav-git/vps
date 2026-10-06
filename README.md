@@ -14,27 +14,27 @@ A modern, responsive website for Vikas Public School featuring dynamic content m
 
 ## Project Structure
 
-The live site is the React app in `web/`. GitHub Actions builds it and deploys `web/dist`.
-
 ```
 vps/
-├── web/                    # React + Vite + Tailwind site (what gets deployed)
-│   ├── index.html          # Homepage (prerendered at build time)
+├── web/                     # The website (React + Vite + Tailwind)
+│   ├── index.html           # Homepage (prerendered at build time)
 │   ├── mandatory-public-disclosure.html
-│   ├── admin.html          # Admin panel (React, client-only)
-│   └── src/
-│       ├── components/     # Public page sections
-│       ├── pages/          # Home and Disclosure pages
-│       ├── admin/          # Admin panel: editors, auth, Firestore writes
-│       ├── lib/            # Firebase, content loading/caching, helpers
-│       └── data/defaults.js # Fallback content rendered into the HTML
-├── assets/                 # Images and the admission form (copied into the build)
-├── firestore.rules         # Firestore security rules
-├── firebase.json           # Firebase CLI config (rules deployment)
-└── .github/workflows/      # Build and deploy to GitHub Pages
+│   ├── admin.html           # Admin panel (client-only)
+│   ├── src/
+│   │   ├── components/      # Public page sections
+│   │   ├── pages/           # Home and Disclosure pages
+│   │   ├── admin/           # Admin panel: editors, auth, Firestore writes
+│   │   ├── lib/             # Firebase, content loading/caching, helpers
+│   │   └── data/defaults.js # Fallback content rendered into the HTML
+│   ├── public/              # Copied as-is: icons, logo, 404, robots, sitemap, assets/
+│   ├── brand/               # Full-size logo source (not deployed)
+│   └── scripts/prerender.js
+├── firestore.rules          # Firestore security rules
+├── firebase.json            # Firebase CLI config (rules deployment)
+└── .github/workflows/       # Build and deploy to GitHub Pages
 ```
 
-Root-level `index.html`, `admin.html`, `js/` and `css/` are the previous static site. They are no longer deployed.
+`web/public/assets/` holds the photos the database still points to (two leadership photos and three gallery photos) and the printable admission form.
 
 ## Development
 
