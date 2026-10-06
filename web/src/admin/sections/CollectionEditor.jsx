@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Dialog from '../../components/Dialog';
+import FadeImage from '../../components/FadeImage';
 import Icon from '../../components/Icon';
 import { deleteItem, friendlyError, listCollection, saveItem } from '../api';
 import { compressImage } from '../images';
 import {
-  Button, EmptyState, ErrorBox, ImageField, Loading, PageHeader, Select, TextArea, TextInput,
+  Button, EmptyState, ErrorBox, ImageField, PageHeader, Select, TextArea, TextInput,
   useConfirm, useToast, useUnsavedChanges,
 } from '../ui';
 import { activeNotices, formatDate, initials, safeUrl } from '../../lib/normalize';
@@ -166,8 +167,8 @@ function ItemCard({ config, item, onEdit, expired }) {
   if (config.layout === 'grid') {
     return (
       <button type="button" onClick={onEdit} className="group overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-slate-200 transition hover:ring-brand-400 dark:bg-slate-900 dark:ring-slate-800">
-        <div className="aspect-[4/3] bg-slate-100 dark:bg-slate-800">
-          {image && <img src={image} alt="" loading="lazy" className="size-full object-cover" />}
+        <div className="aspect-[4/3] bg-slate-200 dark:bg-slate-800">
+          {image && <FadeImage src={image} alt="" loading="lazy" className="size-full object-cover" />}
         </div>
         <p className={`truncate px-3 py-2.5 text-sm ${s.title === 'No caption' ? 'text-amber-600' : 'text-slate-700 dark:text-slate-300'}`}>{s.title}</p>
       </button>
@@ -177,7 +178,7 @@ function ItemCard({ config, item, onEdit, expired }) {
     <button type="button" onClick={onEdit} className="flex w-full items-start gap-4 rounded-2xl bg-white p-4 text-left shadow-sm ring-1 ring-slate-200 transition hover:ring-brand-400 dark:bg-slate-900 dark:ring-slate-800">
       {(image || s.fallback) && (
         image
-          ? <img src={image} alt="" loading="lazy" className="size-14 shrink-0 rounded-xl object-cover" />
+          ? <span className="size-14 shrink-0 overflow-hidden rounded-xl bg-slate-200 dark:bg-slate-800"><FadeImage src={image} alt="" loading="lazy" className="size-full object-cover" /></span>
           : <span className="grid size-14 shrink-0 place-items-center rounded-xl bg-brand-100 font-bold text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">{s.fallback}</span>
       )}
       <div className="min-w-0 flex-1">
@@ -322,7 +323,13 @@ export default function CollectionEditor({ name }) {
       />
 
       {error && <ErrorBox onRetry={load}>{error}</ErrorBox>}
-      {!items && !error && <Loading />}
+      {!items && !error && (
+        <div aria-busy="true" aria-label="Loading" className={config.layout === 'grid' ? 'grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4' : 'grid gap-3'}>
+          {[0, 1, 2, 3, 4, 5].map(i => (
+            <div key={i} className={`animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800 ${config.layout === 'grid' ? 'aspect-[4/3]' : 'h-22'}`} />
+          ))}
+        </div>
+      )}
 
       {items && activeIds && (
         <div role="tablist" className="mb-4 flex gap-2">
