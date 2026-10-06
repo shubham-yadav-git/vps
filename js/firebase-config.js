@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   keysToRemove.forEach(key => localStorage.removeItem(key));
 
-  // Only show hero section when Firestore data is loaded
+  // Show Firestore hero data when available, otherwise the static default content
   function updateHeroSection(heroData) {
     const heroElement = document.querySelector('.hero');
     if (heroElement) {
@@ -23,10 +23,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const heroTitle = heroElement.querySelector('.hero-title');
       const heroSubtitle = heroElement.querySelector('.hero-subtitle');
 
-      // Set content only if Firestore data is present
       if (heroData && heroTitle && heroSubtitle) {
-        heroTitle.textContent = heroData.title || '';
-        heroSubtitle.textContent = heroData.subtitle || '';
+        if (heroData.title) heroTitle.textContent = heroData.title;
+        if (heroData.subtitle) heroSubtitle.textContent = heroData.subtitle;
       }
 
       // Hide skeleton, show actual content only if Firestore data is present
@@ -34,17 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
         heroSkeleton.style.display = 'none';
       }
       if (heroActualContent) {
-        if (heroData) {
-          heroActualContent.style.display = '';
-          heroActualContent.classList.add('loaded');
-        } else {
-          heroActualContent.style.display = 'none';
-        }
+        heroActualContent.style.display = '';
+        heroActualContent.classList.add('loaded');
       }
 
       // Handle background image
       if (heroData && heroData.backgroundImage && heroData.backgroundImage.trim() !== '') {
-        heroElement.style.setProperty('--hero-bg-image', `url(${heroData.backgroundImage})`);
+        heroElement.style.setProperty('--hero-bg-image', `url("${heroData.backgroundImage.replace(/["\\\n]/g, '')}")`);
         heroElement.classList.add('has-custom-image');
       } else {
         heroElement.classList.remove('has-custom-image');
@@ -68,8 +63,11 @@ document.addEventListener('DOMContentLoaded', function() {
   let db;
   if (typeof firebase !== 'undefined') {
     try {
-      firebase.initializeApp(firebaseConfig);
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
       db = firebase.firestore();
+      window.db = db;
       
       // Enable offline persistence for free tier efficiency
       db.enablePersistence({ synchronizeTabs: true })
@@ -85,10 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
       // Load dynamic content efficiently
       loadDynamicContent();
     } catch (error) {
-      console.log('Firebase not available, hero section will remain hidden.');
+      console.log('Firebase not available, using static content.');
+      updateHeroSection(null);
     }
   } else {
-    console.log('Firebase not loaded, hero section will remain hidden.');
+    console.log('Firebase not loaded, using static content.');
+    updateHeroSection(null);
   }
   
   // Enhanced cache checking function
@@ -119,130 +119,49 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Load a whole collection with smart caching; failures are isolated per collection
+  async function loadCollectionData(collection, updateFunction, now, CACHE_DURATION) {
+    try {
+      const cache = localStorage.getItem(`${collection}Data`);
+      const cacheTime = parseInt(localStorage.getItem(`${collection}CacheTime`));
+
+      if (cache && await shouldUseCache(collection, cacheTime, now, CACHE_DURATION)) {
+        updateFunction(JSON.parse(cache));
+        return;
+      }
+
+      const snapshot = await db.collection(collection).get();
+      const data = snapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
+
+      localStorage.setItem(`${collection}Data`, JSON.stringify(data));
+      localStorage.setItem(`${collection}CacheTime`, now.toString());
+
+      updateFunction(data);
+    } catch (error) {
+      console.log(`Error loading ${collection} data, keeping static content:`, error);
+    }
+  }
+
   // Free tier optimized data loading with auto-invalidation
   async function loadDynamicContent() {
-    try {
-      const now = Date.now();
-      const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-      
-      // Load faculty data with smart caching
-      const facultyCache = localStorage.getItem('facultyData');
-      const facultyCacheTime = parseInt(localStorage.getItem('facultyCacheTime'));
-      
-      if (facultyCache && await shouldUseCache('faculty', facultyCacheTime, now, CACHE_DURATION)) {
-        // Use cached data to minimize reads
-        console.log('Using cached faculty data');
-        updateFacultySection(JSON.parse(facultyCache));
-      } else {
-        // Fetch fresh data only when needed
-        console.log('Fetching fresh faculty data');
-        const facultySnapshot = await db.collection('faculty').get();
-        const facultyData = facultySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        
-        // Cache the data
-        localStorage.setItem('facultyData', JSON.stringify(facultyData));
-        localStorage.setItem('facultyCacheTime', now.toString());
-        
-        console.log('Faculty data loaded:', facultyData); // Debug log
-        updateFacultySection(facultyData);
-      }
-      
-      // Load testimonials with smart caching
-      const testimonialsCache = localStorage.getItem('testimonialsData');
-      const testimonialsCacheTime = parseInt(localStorage.getItem('testimonialsCacheTime'));
-      
-      if (testimonialsCache && await shouldUseCache('testimonials', testimonialsCacheTime, now, CACHE_DURATION)) {
-        console.log('Using cached testimonials data');
-        updateTestimonialsSection(JSON.parse(testimonialsCache));
-      } else {
-        console.log('Fetching fresh testimonials data');
-        const testimonialsSnapshot = await db.collection('testimonials').get();
-        const testimonialsData = testimonialsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        
-        localStorage.setItem('testimonialsData', JSON.stringify(testimonialsData));
-        localStorage.setItem('testimonialsCacheTime', now.toString());
-        
-        updateTestimonialsSection(testimonialsData);
-      }
-      
-      // Load gallery data with smart caching
-      const galleryCache = localStorage.getItem('galleryData');
-      const galleryCacheTime = parseInt(localStorage.getItem('galleryCacheTime'));
-      
-      if (galleryCache && await shouldUseCache('gallery', galleryCacheTime, now, CACHE_DURATION)) {
-        console.log('Using cached gallery data');
-        updateGallerySection(JSON.parse(galleryCache));
-      } else {
-        console.log('Fetching fresh gallery data');
-        const gallerySnapshot = await db.collection('gallery').get();
-        const galleryData = gallerySnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        
-        localStorage.setItem('galleryData', JSON.stringify(galleryData));
-        localStorage.setItem('galleryCacheTime', now.toString());
-        
-        updateGallerySection(galleryData);
-      }
-      
-      // Load events data with smart caching
-      const eventsCache = localStorage.getItem('eventsData');
-      const eventsCacheTime = parseInt(localStorage.getItem('eventsCacheTime'));
-      
-      if (eventsCache && await shouldUseCache('events', eventsCacheTime, now, CACHE_DURATION)) {
-        console.log('Using cached events data');
-        updateEventsSection(JSON.parse(eventsCache));
-      } else {
-        console.log('Fetching fresh events data');
-        const eventsSnapshot = await db.collection('events').get();
-        const eventsData = eventsSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        
-        localStorage.setItem('eventsData', JSON.stringify(eventsData));
-        localStorage.setItem('eventsCacheTime', now.toString());
-        
-        updateEventsSection(eventsData);
-      }
-      
-      // Load hero section data
-      await loadSettingsData('hero', function(heroData) {
-        // Only show hero section if Firestore data is loaded
-        updateHeroSection(heroData);
-      });
-      
-      // Load about section data
-      await loadSettingsData('about', updateAboutSection);
-      
-      // Load academics section data
-      await loadSettingsData('academics', updateAcademicsSection);
-      
-      // Load logo data
-      await loadSettingsData('logo', updateLogoSection);
-      
-      // Load school info data
-      await loadSettingsData('school-info', updateSchoolInfoSection);
-      
-      // Load contact data
-      await loadSettingsData('contact', updateContactSection);
-      
-      // Load FAQ data
-      const faqCache = localStorage.getItem('faqData');
-      const faqCacheTime = parseInt(localStorage.getItem('faqCacheTime'));
-      
-      if (faqCache && await shouldUseCache('faq', faqCacheTime, now, CACHE_DURATION)) {
-        console.log('Using cached FAQ data');
-        updateFaqSection(JSON.parse(faqCache));
-      } else {
-        console.log('Fetching fresh FAQ data');
-        const faqSnapshot = await db.collection('faq').get();
-        const faqData = faqSnapshot.docs.map(doc => ({id: doc.id, ...doc.data()}));
-        
-        localStorage.setItem('faqData', JSON.stringify(faqData));
-        localStorage.setItem('faqCacheTime', now.toString());
-        
-        updateFaqSection(faqData);
-      }
-      
-    } catch (error) {
-      console.log('Error loading dynamic content, using static fallback:', error);
-    }
+    const now = Date.now();
+    const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
+
+    // Hero first so the top of the page is never left blank
+    await loadSettingsData('hero', updateHeroSection);
+
+    await Promise.all([
+      loadCollectionData('faculty', updateFacultySection, now, CACHE_DURATION),
+      loadCollectionData('testimonials', updateTestimonialsSection, now, CACHE_DURATION),
+      loadCollectionData('gallery', updateGallerySection, now, CACHE_DURATION),
+      loadCollectionData('events', updateEventsSection, now, CACHE_DURATION),
+      loadCollectionData('faq', updateFaqSection, now, CACHE_DURATION),
+      loadSettingsData('about', updateAboutSection),
+      loadSettingsData('academics', updateAcademicsSection),
+      loadSettingsData('logo', updateLogoSection),
+      loadSettingsData('school-info', updateSchoolInfoSection),
+      loadSettingsData('contact', updateContactSection)
+    ]);
   }
   
   // Helper function to load settings data (hero, about, school-info, contact)
@@ -285,31 +204,23 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
+  const CACHED_CONTENT_TYPES = [
+    'faculty', 'testimonials', 'gallery', 'events', 'faq',
+    'hero', 'about', 'academics', 'logo', 'school-info', 'contact'
+  ];
+
+  function clearCachedContent() {
+    CACHED_CONTENT_TYPES.forEach(type => {
+      localStorage.removeItem(`${type}Data`);
+      localStorage.removeItem(`${type}CacheTime`);
+    });
+  }
+
   // Force refresh function for immediate updates
   function forceRefreshContent() {
     console.log('Force refreshing all content...');
     
-    // Clear all cache
-    localStorage.removeItem('facultyData');
-    localStorage.removeItem('facultyCacheTime');
-    localStorage.removeItem('testimonialsData');
-    localStorage.removeItem('testimonialsCacheTime');
-    localStorage.removeItem('galleryData');
-    localStorage.removeItem('galleryCacheTime');
-    localStorage.removeItem('eventsData');
-    localStorage.removeItem('eventsCacheTime');
-    localStorage.removeItem('heroData');
-    localStorage.removeItem('heroCacheTime');
-    localStorage.removeItem('aboutData');
-    localStorage.removeItem('aboutCacheTime');
-    localStorage.removeItem('academicsData');
-    localStorage.removeItem('academicsCacheTime');
-    localStorage.removeItem('logoData');
-    localStorage.removeItem('logoCacheTime');
-    localStorage.removeItem('school-infoData');
-    localStorage.removeItem('school-infoCacheTime');
-    localStorage.removeItem('contactData');
-    localStorage.removeItem('contactCacheTime');
+    clearCachedContent();
     
     // Reload content
     loadDynamicContent();
@@ -374,28 +285,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Helper function to clear cache for testing (call from browser console)
   window.clearDynamicContentCache = function() {
-    localStorage.removeItem('facultyData');
-    localStorage.removeItem('facultyCacheTime');
-    localStorage.removeItem('testimonialsData');
-    localStorage.removeItem('testimonialsCacheTime');
-    localStorage.removeItem('galleryData');
-    localStorage.removeItem('galleryCacheTime');
-    localStorage.removeItem('eventsData');
-    localStorage.removeItem('eventsCacheTime');
-    localStorage.removeItem('heroData');
-    localStorage.removeItem('heroCacheTime');
-    localStorage.removeItem('aboutData');
-    localStorage.removeItem('aboutCacheTime');
-    localStorage.removeItem('academicsData');
-    localStorage.removeItem('academicsCacheTime');
-    localStorage.removeItem('logoData');
-    localStorage.removeItem('logoCacheTime');
-    localStorage.removeItem('school-infoData');
-    localStorage.removeItem('school-infoCacheTime');
-    localStorage.removeItem('contactData');
-    localStorage.removeItem('contactCacheTime');
-    localStorage.removeItem('faqData');
-    localStorage.removeItem('faqCacheTime');
+    clearCachedContent();
     console.log('All cache cleared! Reload the page to see fresh data.');
   };
 });

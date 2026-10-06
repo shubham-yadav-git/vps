@@ -19,7 +19,7 @@ Disallow: /FIREBASE-SETUP.md
 Disallow: /SECURITY.md
 
 # Sitemap location
-Sitemap: https://vikaspublicschool.edu/sitemap.xml
+Sitemap: https://vikaspublicschool.in/sitemap.xml
 
 # Crawl delay (optional)
 Crawl-delay: 1

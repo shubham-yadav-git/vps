@@ -7,7 +7,7 @@ function updateReadingProgress() {
   
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
   const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-  const progress = (scrollTop / scrollHeight) * 100;
+  const progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
   
   progressBar.style.width = Math.min(progress, 100) + '%';
 }
@@ -74,15 +74,10 @@ function initializeUIComponents() {
           refreshed = false;
         }
       }
+      // forceRefreshContent shows its own notification on success
       if (!refreshed) {
         localStorage.setItem('showRefreshNotification', '1');
         location.reload();
-      } else {
-        if (typeof showUpdateNotification === 'function') {
-          showUpdateNotification('Content refreshed successfully!');
-        } else {
-          showRefreshNotification();
-        }
       }
     });
   }

@@ -6,9 +6,9 @@ const seoSchemas = {
     "name": "Vikas Public School",
     "alternateName": "VPS",
     "description": "Premier educational institution offering quality education since 2006. Nurturing young minds through holistic development and innovative teaching methods.",
-    "url": "https://vikaspublicschool.edu",
-    "logo": "https://vikaspublicschool.edu/assets/logo.png",
-    "image": "https://vikaspublicschool.edu/assets/school.jpg",
+    "url": "https://vikaspublicschool.in",
+    "logo": "https://vikaspublicschool.in/assets/logo.png",
+    "image": "https://vikaspublicschool.in/assets/school.jpg",
     "foundingDate": "2006",
     "founder": {
       "@type": "Person",
@@ -55,10 +55,10 @@ const seoSchemas = {
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "Vikas Public School",
-    "url": "https://vikaspublicschool.edu",
+    "url": "https://vikaspublicschool.in",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://vikaspublicschool.edu/?s={search_term_string}",
+      "target": "https://vikaspublicschool.in/?s={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   },
@@ -67,8 +67,8 @@ const seoSchemas = {
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "Vikas Public School",
-    "url": "https://vikaspublicschool.edu",
-    "logo": "https://vikaspublicschool.edu/assets/logo.png",
+    "url": "https://vikaspublicschool.in",
+    "logo": "https://vikaspublicschool.in/assets/logo.png",
     "slogan": "Excellence in Education",
     "description": "Vikas Public School - Empowering Future Leaders through Quality Education",
     "foundingDate": "2006",

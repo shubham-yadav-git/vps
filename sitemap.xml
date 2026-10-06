@@ -4,17 +4,17 @@
   
   <!-- Main Pages -->
   <url>
-    <loc>https://vikaspublicschool.edu/</loc>
+    <loc>https://vikaspublicschool.in/</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://vikaspublicschool.edu/assets/logo.png</image:loc>
+      <image:loc>https://vikaspublicschool.in/assets/logo.png</image:loc>
       <image:title>Vikas Public School Logo</image:title>
       <image:caption>Official logo of Vikas Public School</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://vikaspublicschool.edu/assets/school.jpg</image:loc>
+      <image:loc>https://vikaspublicschool.in/assets/school.jpg</image:loc>
       <image:title>Vikas Public School Building</image:title>
       <image:caption>Main building of Vikas Public School</image:caption>
     </image:image>
@@ -22,63 +22,63 @@
   
   <!-- Section-specific URLs (if implementing separate pages) -->
   <url>
-    <loc>https://vikaspublicschool.edu/#about</loc>
+    <loc>https://vikaspublicschool.in/#about</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#academics</loc>
+    <loc>https://vikaspublicschool.in/#academics</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#faculty</loc>
+    <loc>https://vikaspublicschool.in/#faculty</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#admissions</loc>
+    <loc>https://vikaspublicschool.in/#admissions</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#events</loc>
+    <loc>https://vikaspublicschool.in/#events</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#gallery</loc>
+    <loc>https://vikaspublicschool.in/#gallery</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#testimonials</loc>
+    <loc>https://vikaspublicschool.in/#testimonials</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#contact</loc>
+    <loc>https://vikaspublicschool.in/#contact</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   
   <url>
-    <loc>https://vikaspublicschool.edu/#faq</loc>
+    <loc>https://vikaspublicschool.in/#faq</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -86,7 +86,7 @@
   
   <!-- Special Pages -->
   <url>
-    <loc>https://vikaspublicschool.edu/assets/admission-form.html</loc>
+    <loc>https://vikaspublicschool.in/assets/admission-form.html</loc>
     <lastmod>2025-01-27</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.7</priority>

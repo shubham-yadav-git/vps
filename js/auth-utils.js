@@ -13,7 +13,7 @@ function isAuthorizedAdmin() {
       
       // Check if user email is in admin list (you should configure this)
       const adminEmails = [
-        'admin@vikaspublicschool.edu',
+        'admin@vikaspublicschool.in',
         // Add more admin emails as needed
       ];
       

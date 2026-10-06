@@ -1,19 +1,41 @@
 // Content Update Functions for Dynamic Loading
 
+// Escape text for safe insertion into HTML content and attribute values
+function escapeHTML(value) {
+  if (value === null || value === undefined) return '';
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Allow only http(s), image data URLs and relative paths for src/href values
+function safeURL(value, fallback) {
+  if (typeof value !== 'string' || !value.trim()) return fallback;
+  const url = value.trim();
+  if (/^data:image\//i.test(url)) return url;
+  if (/^[a-z][a-z0-9+.-]*:/i.test(url)) {
+    return /^https?:/i.test(url) ? url : fallback;
+  }
+  return url;
+}
+
 function updateFacultySection(facultyData) {
   const facultyList = document.querySelector('.faculty-list');
-  if (facultyList && facultyData.length > 0) {
+  if (facultyList && Array.isArray(facultyData) && facultyData.length > 0) {
     facultyList.innerHTML = facultyData.map(faculty => {
       // Handle both regular URLs and base64 data URLs
-      const photoSrc = faculty.photo || 'assets/default-faculty.svg'; // fallback image
-      const safeName = (faculty.name || 'Faculty Member').replace(/"/g, '&quot;');
-      const safeRole = (faculty.role || 'Staff').replace(/"/g, '&quot;');
-      const safeDescription = (faculty.description || '').replace(/"/g, '&quot;');
+      const photoSrc = escapeHTML(safeURL(faculty.photo, 'assets/default-faculty.svg'));
+      const safeName = escapeHTML(faculty.name || 'Faculty Member');
+      const safeRole = escapeHTML(faculty.role || 'Staff');
+      const safeDescription = escapeHTML(faculty.description || '');
       
       return `
       <li class="faculty-member">
         <img src="${photoSrc}" alt="${safeName}" class="faculty-photo" 
-             onerror="this.src='assets/default-faculty.svg'; console.log('Faculty image failed to load, using fallback');" />
+             onerror="this.onerror=null; this.src='assets/default-faculty.svg';" />
         <div class="faculty-info">
           <h3>${safeName}</h3>
           <p>${safeRole}${safeDescription ? ' - ' + safeDescription : ''}</p>
@@ -26,12 +48,12 @@ function updateFacultySection(facultyData) {
 
 function updateTestimonialsSection(testimonialsData) {
   const testimonialsList = document.querySelector('.testimonial-list');
-  if (testimonialsList && testimonialsData.length > 0) {
+  if (testimonialsList && Array.isArray(testimonialsData) && testimonialsData.length > 0) {
     testimonialsList.innerHTML = testimonialsData.map(testimonial => `
       <li class="testimonial-item">
         <div class="testimonial-info">
-          <h3>${testimonial.name}, ${testimonial.role}</h3>
-          <p>"${testimonial.text}"</p>
+          <h3>${escapeHTML(testimonial.name)}${testimonial.role ? ', ' + escapeHTML(testimonial.role) : ''}</h3>
+          <p>"${escapeHTML(testimonial.text)}"</p>
         </div>
       </li>
     `).join('');
@@ -40,16 +62,16 @@ function updateTestimonialsSection(testimonialsData) {
 
 function updateGallerySection(galleryData) {
   const gallery = document.querySelector('.gallery');
-  if (gallery && galleryData.length > 0) {
+  if (gallery && Array.isArray(galleryData) && galleryData.length > 0) {
     gallery.innerHTML = galleryData.map(item => {
       // Handle both regular URLs and base64 data URLs
-      const imageSrc = item.src || 'assets/gallery7.jpg'; // fallback image
-      const safeAlt = (item.alt || 'Gallery image').replace(/"/g, '&quot;');
+      const imageSrc = escapeHTML(safeURL(item.src, 'assets/gallery7.jpg'));
+      const safeAlt = escapeHTML(item.alt || 'Gallery image');
       
       return `
       <a href="#" data-img="${imageSrc}" tabindex="0" role="listitem" class="gallery-link">
         <img src="${imageSrc}" alt="${safeAlt}" 
-             onerror="this.src='assets/gallery7.jpg'; console.log('Gallery image failed to load, using fallback');" />
+             onerror="this.onerror=null; this.src='assets/gallery7.jpg';" />
       </a>
     `;
     }).join('');
@@ -76,12 +98,13 @@ function updateAboutSection(aboutData) {
     // Update leadership profiles
     if (aboutData.leadership && Array.isArray(aboutData.leadership)) {
       aboutData.leadership.forEach((leader, index) => {
+        if (!leader || !/^[\w-]+$/.test(leader.id || '')) return;
         const profileCard = aboutSection.querySelector(`.${leader.id}-profile`);
         if (profileCard) {
           // Update image
           const img = profileCard.querySelector('img');
           if (img && leader.image) {
-            img.src = leader.image;
+            img.src = safeURL(leader.image, img.src);
             img.alt = `${leader.name}, ${leader.position}`;
           }
           
@@ -160,16 +183,18 @@ function updateContactSection(contactData) {
       let addressHTML = '';
       
       if (contactData.address) {
-        addressHTML += `<p><strong>Address:</strong> ${contactData.address}</p>`;
+        addressHTML += `<p><strong>Address:</strong> ${escapeHTML(contactData.address)}</p>`;
       }
       if (contactData.email) {
-        addressHTML += `<p><strong>Email:</strong> <a href="mailto:${contactData.email}">${contactData.email}</a></p>`;
+        const email = escapeHTML(contactData.email);
+        addressHTML += `<p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p>`;
       }
       if (contactData.phone) {
-        addressHTML += `<p><strong>Phone:</strong> ${contactData.phone}</p>`;
+        const tel = String(contactData.phone).replace(/[^+\d]/g, '');
+        addressHTML += `<p><strong>Phone:</strong> <a href="tel:${tel}">${escapeHTML(contactData.phone)}</a></p>`;
       }
       if (contactData.hours) {
-        addressHTML += `<p><strong>Office Hours:</strong> ${contactData.hours}</p>`;
+        addressHTML += `<p><strong>Office Hours:</strong> ${escapeHTML(contactData.hours)}</p>`;
       }
       
       // Only update if we have some data
@@ -187,8 +212,6 @@ function updateContactSection(contactData) {
 function updateFooterAddress(data, source) {
   if (!data) return;
   
-  console.log(`Updating footer address from ${source}:`, data);
-  
   // Get footer address elements
   const footerAddress = document.getElementById('db-address');
   const footerPhone = document.getElementById('db-phone');
@@ -199,7 +222,6 @@ function updateFooterAddress(data, source) {
   // Update address - Firebase stores complete address in single field
   if (footerAddress && data.address) {
     footerAddress.textContent = data.address;
-    console.log('Footer address updated');
   }
   
   // Hide city/state/pincode for Firebase data (since address is complete)
@@ -227,38 +249,54 @@ function updateFooterAddress(data, source) {
   // Update phone
   if (footerPhone && data.phone) {
     footerPhone.textContent = data.phone;
-    footerPhone.href = `tel:${data.phone.replace(/[^+\d]/g, '')}`;
-    console.log('Footer phone updated');
+    footerPhone.href = `tel:${String(data.phone).replace(/[^+\d]/g, '')}`;
   }
   
   // Update email
   if (footerEmail && data.email) {
     footerEmail.textContent = data.email;
     footerEmail.href = `mailto:${data.email}`;
-    console.log('Footer email updated');
   }
 }
 
 function updateEventsSection(eventsData) {
   const noticesList = document.querySelector('.notices-list');
 
-  if (noticesList && eventsData.length > 0) {
+  if (!noticesList || !Array.isArray(eventsData)) return;
+
+  // Hide expired notices and show the newest first
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const activeNotices = eventsData
+    .filter(notice => {
+      if (!notice.validUntil) return true;
+      const validUntil = new Date(notice.validUntil);
+      if (isNaN(validUntil)) return true;
+      validUntil.setHours(23, 59, 59, 999);
+      return validUntil >= today;
+    })
+    .sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
+
+  if (activeNotices.length === 0) {
+    noticesList.innerHTML = '<li class="notice-item general" data-category="general"><div class="notice-content"><p>No active notices at this time.</p></div></li>';
+    return;
+  }
+
+  {
     // Truncation lengths
     const maxTitleLength = 80;
     const maxDescriptionLength = 120;
-    noticesList.innerHTML = eventsData.map((notice, idx) => {
-      const safeTitle = (notice.title || 'Notice').replace(/"/g, '&quot;');
-      const safeDate = (notice.date || '').replace(/"/g, '&quot;');
-      const safeValidUntil = (notice.validUntil || '').replace(/"/g, '&quot;');
-      const safeDescription = (notice.description || '').replace(/"/g, '&quot;');
+    noticesList.innerHTML = activeNotices.map((notice, idx) => {
+      const rawTitle = String(notice.title || 'Notice');
+      const rawDescription = String(notice.description || '');
+      const formatDate = (value) => {
+        if (!value) return '';
+        const date = new Date(value);
+        return isNaN(date) ? '' : date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+      };
+      const displayDate = formatDate(notice.date);
+      const displayValidUntil = formatDate(notice.validUntil);
       const category = notice.category || 'general';
-      // Format dates for display
-      const displayDate = safeDate ? new Date(safeDate).toLocaleDateString('en-US', { 
-        year: 'numeric', month: 'long', day: 'numeric' 
-      }) : '';
-      const displayValidUntil = safeValidUntil ? new Date(safeValidUntil).toLocaleDateString('en-US', { 
-        year: 'numeric', month: 'long', day: 'numeric' 
-      }) : '';
       // Use category-specific badge class for color control
       let safeCategory = category;
       if (!['urgent', 'academic', 'events', 'general'].includes(category)) {
@@ -281,11 +319,13 @@ function updateEventsSection(eventsData) {
       const badgeText = badgeTextMap[safeCategory] || badgeTextMap.general;
 
       // Truncation logic
-      const titleTruncated = notice.title.length > maxTitleLength;
-      const descriptionTruncated = notice.description.length > maxDescriptionLength;
+      const titleTruncated = rawTitle.length > maxTitleLength;
+      const descriptionTruncated = rawDescription.length > maxDescriptionLength;
       const showReadMore = titleTruncated || descriptionTruncated;
-      const displayTitle = titleTruncated ? notice.title.substring(0, maxTitleLength) + '...' : notice.title;
-      const displayDescription = descriptionTruncated ? notice.description.substring(0, maxDescriptionLength) + '...' : notice.description;
+      const displayTitle = escapeHTML(titleTruncated ? rawTitle.substring(0, maxTitleLength) + '...' : rawTitle);
+      const displayDescription = escapeHTML(descriptionTruncated ? rawDescription.substring(0, maxDescriptionLength) + '...' : rawDescription);
+      const safeTitle = escapeHTML(rawTitle);
+      const safeDescription = escapeHTML(rawDescription);
       // Unique id for expand/collapse
       const noticeId = `main-notice-${idx}`;
       return `
@@ -298,7 +338,7 @@ function updateEventsSection(eventsData) {
           <h3 class="main-notice-title" data-full-title="${safeTitle}">${displayTitle}</h3>
           <div class="notice-meta">
             <span class="notice-date">
-              <i class="fas fa-calendar"></i> Posted: ${displayDate}
+              <i class="fas fa-calendar"></i> Posted: ${displayDate || 'N/A'}
             </span>
             ${displayValidUntil ? `
             <span class="notice-valid">
@@ -391,13 +431,13 @@ function updateEventsSection(eventsData) {
 
 function updateFaqSection(faqData) {
   const faqList = document.querySelector('.faq-list');
-  if (faqList && faqData.length > 0) {
+  if (faqList && Array.isArray(faqData) && faqData.length > 0) {
     // Sort FAQ data by order field
     const sortedFaqData = faqData.sort((a, b) => (a.order || 0) - (b.order || 0));
     
     faqList.innerHTML = sortedFaqData.map((faq, index) => {
-      const safeQuestion = (faq.question || '').replace(/"/g, '&quot;');
-      const safeAnswer = (faq.answer || '').replace(/"/g, '&quot;');
+      const safeQuestion = escapeHTML(faq.question);
+      const safeAnswer = escapeHTML(faq.answer);
       const faqId = `faq${index + 1}`;
       const btnId = `${faqId}-btn`;
       
@@ -457,10 +497,10 @@ function updateAcademicsSection(academicsData) {
     const list = academicsSection.querySelector('ul');
     if (list) {
       list.innerHTML = `
-        <li><strong>Curriculum:</strong> ${academicsData.curriculum || 'CBSE syllabus from Nursery to Class XII.'}</li>
-        <li><strong>Special Programs:</strong> ${academicsData.programs || 'STEM initiatives, Coding clubs, Language enrichment.'}</li>
-        <li><strong>Assessment:</strong> ${academicsData.assessment || 'Continuous Evaluation, Project Based Learning, Olympiads preparation.'}</li>
-        <li><strong>Extra-Curricular:</strong> ${academicsData.extracurricular || 'Art, Music, Dance, Debate, and Sports to nurture talents.'}</li>
+        <li><strong>Curriculum:</strong> ${escapeHTML(academicsData.curriculum) || 'CBSE syllabus from Nursery to Class XII.'}</li>
+        <li><strong>Special Programs:</strong> ${escapeHTML(academicsData.programs) || 'STEM initiatives, Coding clubs, Language enrichment.'}</li>
+        <li><strong>Assessment:</strong> ${escapeHTML(academicsData.assessment) || 'Continuous Evaluation, Project Based Learning, Olympiads preparation.'}</li>
+        <li><strong>Extra-Curricular:</strong> ${escapeHTML(academicsData.extracurricular) || 'Art, Music, Dance, Debate, and Sports to nurture talents.'}</li>
       `;
     }
   }
@@ -471,7 +511,7 @@ function updateLogoSection(logoData) {
     // Update logo image
     const logoImg = document.querySelector('.logo-img');
     if (logoImg && logoData.logoUrl) {
-      logoImg.src = logoData.logoUrl;
+      logoImg.src = safeURL(logoData.logoUrl, logoImg.src);
       logoImg.alt = `${logoData.schoolName || 'School'} Logo`;
     }
     

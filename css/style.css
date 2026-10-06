@@ -3262,6 +3262,8 @@ header {
   user-select: none;
   -webkit-user-select: none;
   background: rgba(0, 0, 0, 0.8);
+  border: none;
+  font-family: inherit;
   width: 50px;
   height: 50px;
   display: flex;
@@ -3998,7 +4000,7 @@ main {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('assets/school.jpg');
+  background-image: url('../assets/school.jpg');
   background-size: cover;
   background-position: center;
   background-attachment: fixed;
@@ -4082,7 +4084,7 @@ main {
 .hero.school-building {
   background-image: 
     linear-gradient(135deg, rgba(59, 130, 246, 0.75) 0%, rgba(30, 64, 175, 0.75) 100%),
-    url('assets/school.jpg');
+    url('../assets/school.jpg');
 }
 
 /* Option 2: Students/Campus Life Focus */
@@ -4625,7 +4627,7 @@ main {
   transition: width 0.3s ease;
 }
 
-/* Floating Action Buttons - Aligned with chatbot */
+/* Floating Action Buttons */
 .refresh-fab {
   position: fixed;
   bottom: 110px;

@@ -579,6 +579,9 @@ function openFileModal(fileUrl, title = 'File Viewer') {
     }
     console.log('Modal displayed and animated');
   });
+  } catch (error) {
+    console.error('Error opening file modal:', window.SecurityUtils ? window.SecurityUtils.sanitizeForLogging(error.message) : error.message);
+  }
 }
 
 // Function to close file modal

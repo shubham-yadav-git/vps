@@ -7,21 +7,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   
   <!-- SEO Meta Tags -->
-  <title>Vikas Public School - Excellence in Education | Top School in [Your City]</title>
+  <title>Vikas Public School - Excellence in Education | Top CBSE School in Jaunpur</title>
   <meta name="description" content="Vikas Public School, established in 2006, offers quality education with holistic development. Admissions open for 2025-26. Excellence in academics, sports, and character building." />
   <meta name="keywords" content="Vikas Public School, best school, quality education, admissions 2025, CBSE school, primary education, secondary education, holistic development, experienced faculty" />
   <meta name="author" content="Vikas Public School" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   
   <!-- Canonical URL -->
-  <link rel="canonical" href="https://vikaspublicschool.edu" />
+  <link rel="canonical" href="https://vikaspublicschool.in" />
   
   <!-- Open Graph Meta Tags for Social Media -->
   <meta property="og:title" content="Vikas Public School - Excellence in Education" />
   <meta property="og:description" content="Premier educational institution offering quality education since 2006. Nurturing young minds through holistic development and innovative teaching methods." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://vikaspublicschool.edu" />
-  <meta property="og:image" content="https://vikaspublicschool.edu/assets/logo.png" />
+  <meta property="og:url" content="https://vikaspublicschool.in" />
+  <meta property="og:image" content="https://vikaspublicschool.in/assets/logo.png" />
   <meta property="og:image:alt" content="Vikas Public School Logo" />
   <meta property="og:site_name" content="Vikas Public School" />
   <meta property="og:locale" content="en_US" />
@@ -30,7 +30,7 @@
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Vikas Public School - Excellence in Education" />
   <meta name="twitter:description" content="Premier educational institution offering quality education since 2006. Admissions open for 2025-26." />
-  <meta name="twitter:image" content="https://vikaspublicschool.edu/assets/logo.png" />
+  <meta name="twitter:image" content="https://vikaspublicschool.in/assets/logo.png" />
   <meta name="twitter:image:alt" content="Vikas Public School Logo" />
   
   <!-- Additional SEO Meta Tags -->
@@ -38,11 +38,9 @@
   <meta name="msapplication-TileColor" content="#4f46e5" />
   <meta name="application-name" content="Vikas Public School" />
   
-  <!-- Geo Meta Tags (Update with actual location) -->
-  <meta name="geo.region" content="IN" />
-  <meta name="geo.placename" content="Your City, Your State" />
-  <meta name="geo.position" content="latitude;longitude" />
-  <meta name="ICBM" content="latitude, longitude" />
+  <!-- Geo Meta Tags -->
+  <meta name="geo.region" content="IN-UP" />
+  <meta name="geo.placename" content="Jaunpur, Uttar Pradesh" />
   
   <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -69,7 +67,6 @@
     rel="stylesheet"
   />
   <link rel="stylesheet" href="css/style.css?v=1.2" />
-  <link rel="stylesheet" href="css/chatbot.css" />
   <!-- Include fontawesome icons for social -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   
@@ -119,8 +116,8 @@
           class="hamburger"
           aria-label="Toggle navigation menu"
           aria-expanded="false"
+          aria-controls="main-nav"
           onclick="toggleMenu()"
-          onkeypress="event.key === 'Enter' && toggleMenu()"
         >
           <span></span>
           <span></span>
@@ -133,7 +130,7 @@
   <!-- Notice Ticker Bar -->
   <div class="notice-ticker-bar" id="notice-ticker-bar">
     <div class="notice-ticker-container">
-      <div class="notice-bell-icon" onclick="toggleNoticePanel()">
+      <div class="notice-bell-icon" onclick="toggleNoticePanel()" role="button" tabindex="0" aria-label="Open notice board" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleNoticePanel(); }">
         <div class="bell-icon">🔔</div>
         <div class="notice-count-badge" id="notice-count-badge">0</div>
       </div>
@@ -142,7 +139,7 @@
           <span class="ticker-item">📌 Loading latest notices...</span>
         </div>
       </div>
-      <div class="notice-view-all" onclick="toggleNoticePanel()">
+      <div class="notice-view-all" onclick="toggleNoticePanel()" role="button" tabindex="0" onkeydown="if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleNoticePanel(); }">
         View All
       </div>
     </div>
@@ -152,7 +149,7 @@
   <div class="notice-panel" id="notice-panel">
     <div class="notice-panel-header">
       <h3>📌 School Notice Board</h3>
-      <button class="notice-panel-close" onclick="toggleNoticePanel()">✕</button>
+      <button class="notice-panel-close" onclick="toggleNoticePanel()" aria-label="Close notice board">✕</button>
     </div>
     <div class="notice-panel-content" id="notice-panel-content">
       <div class="notice-loading">Loading notices...</div>
@@ -170,8 +167,8 @@
         </div>
       </div>
       <div class="hero-actual-content" style="display: none;">
-        <h1 class="hero-title"></h1>
-        <p class="hero-subtitle"></p>
+        <h1 class="hero-title">Welcome to Vikas Public School</h1>
+        <p class="hero-subtitle">Nurturing young minds through holistic education since 2006.</p>
         <div class="hero-actions">
           <a href="#admissions" class="cta-button primary" aria-label="Learn about admissions process">Apply for Admission</a>
           <a href="#about" class="cta-button secondary" aria-label="Learn more about our school">Learn More</a>
@@ -409,13 +406,7 @@
           </div>
         </li>
       </ul>
-      
-      <!-- View More Button -->
-      <div class="notice-actions">
-        <button class="cta-button secondary" onclick="loadMoreNotices()">
-          <i class="fas fa-plus"></i> Load More Notices
-        </button>
-      </div>
+
     </section>
 
     <section class="section" id="gallery" tabindex="-1" aria-labelledby="gallery-heading">
@@ -446,8 +437,8 @@
       <!-- Modal for image viewing -->
       <div class="gallery-modal" aria-modal="true" role="dialog" tabindex="-1">
         <span class="close-modal" tabindex="0" aria-label="Close image modal">&times;</span>
-        <span class="modal-prev" aria-label="Previous image">&#10094;</span>
-        <span class="modal-next" aria-label="Next image">&#10095;</span>
+        <button type="button" class="modal-prev" aria-label="Previous image">&#10094;</button>
+        <button type="button" class="modal-next" aria-label="Next image">&#10095;</button>
         <div class="modal-content">
           <img src="" alt="Gallery image enlarged">
         </div>
@@ -500,7 +491,7 @@
             Do you offer transportation facilities?
           </button>
           <div class="faq-answer" id="faq2" role="region" aria-labelledby="faq2-btn">
-            Yes, we provide safe and reliable transport services covering major areas of Bengaluru.
+            Yes, we provide safe and reliable transport services covering major areas in and around Jaunpur.
           </div>
         </li>
         <li class="faq-item">
@@ -547,17 +538,6 @@
         </ul>
       </div>
       <p><strong>Eligibility:</strong> Nursery to Class XII</p>
-      <p>
-        <strong>Process:</strong> Application &rarr; Entrance Test &rarr; Interview &rarr; Admission
-        Confirmation
-      </p>
-      <p>
-        <strong>Required Documents:</strong> Birth Certificate, Previous Year’s Marksheet,
-        Passport-size Photographs, Address Proof.
-      </p>
-      <div class="cta-wrapper">
-        <a href="assets/admission_form.pdf" class="cta-button" download>Download Admission Form</a>
-      </div>
     </section>
 
     <section class="section" id="contact" tabindex="-1" aria-labelledby="contact-heading">
@@ -565,7 +545,7 @@
       <address>
         <p><strong>Address:</strong> Jaunpur, UP India 222146</p>
         <p><strong>Email:</strong> <a href="mailto:info@vikasschool.edu.in">info@vikasschool.edu.in</a></p>
-        <p><strong>Phone:</strong> +91-98765 43210</p>
+        <p><strong>Phone:</strong> <a href="tel:+919876543210">+91-98765 43210</a></p>
         <p><strong>Office Hours:</strong> 9 AM – 4 PM, Monday to Saturday</p>
       </address>
       <form
@@ -622,10 +602,9 @@
           <h3>Vikas Public School</h3>
           <p>Excellence in Education since 2006. Nurturing young minds through holistic development and innovative teaching methodologies.</p>
           <address id="school-address">
-            <strong>Address:</strong> <span id="db-address">Loading address...</span><br>
-            <span id="db-city-state">Loading city, state...</span> - <span id="db-pincode">PIN</span><br>
-            <strong>Phone:</strong> <a href="tel:+91XXXXXXXXXX" id="db-phone">+91-XXXXXXXXXX</a><br>
-            <strong>Email:</strong> <a href="mailto:info@vikaspublicschool.edu" id="db-email">info@vikaspublicschool.edu</a>
+            <strong>Address:</strong> <span id="db-address">Jaunpur, UP India 222146</span><br>
+            <strong>Phone:</strong> <a href="tel:+919876543210" id="db-phone">+91-98765 43210</a><br>
+            <strong>Email:</strong> <a href="mailto:info@vikasschool.edu.in" id="db-email">info@vikasschool.edu.in</a>
           </address>
         </div>
         
@@ -674,9 +653,8 @@
       
       <div class="footer-bottom">
         <div class="copyright">
-          <p>&copy; 2025 Vikas Public School. All Rights Reserved. | 
-          <a href="/privacy-policy">Privacy Policy</a> | 
-          <a href="/terms-of-service">Terms of Service</a></p>
+          <p>&copy; 2026 Vikas Public School. All Rights Reserved. |
+          <a href="mandatory-public-disclosure.html">Mandatory Public Disclosure</a></p>
         </div>
         <div class="footer-meta">
           <p>Affiliated to CBSE | Established 2006 | Quality Education for All</p>
@@ -698,8 +676,6 @@
   <script src="js/ui-components.js"></script>
   <script src="js/firebase-config.js"></script>
   <script src="js/content-updaters.js"></script>
-  <script src="js/notice-system.js"></script>
-  <script src="js/chatbot.js"></script>
 
   <!-- Floating Refresh Button -->
   <button id="refresh-fab" class="refresh-fab" title="Refresh content (Ctrl+Shift+R)" aria-label="Refresh content" tabindex="0">
@@ -707,7 +683,7 @@
   </button>
 
   <!-- Back to Top Button -->
-  <button id="back-to-top" class="back-to-top" onclick="scrollToTop()" title="Back to top">
+  <button id="back-to-top" class="back-to-top" onclick="scrollToTop()" title="Back to top" aria-label="Back to top">
     <i class="fas fa-arrow-up" aria-hidden="true"></i>
   </button>
 

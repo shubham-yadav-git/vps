@@ -54,6 +54,23 @@ window.toggleNoticePanel = function() {
   }
 };
 
+// Close the notice panel when clicking outside it or pressing Escape
+document.addEventListener('click', function(event) {
+  if (!window.noticeState.panelOpen) return;
+  const panel = document.getElementById('notice-panel');
+  const triggers = document.querySelectorAll('.notice-bell-icon, .notice-view-all');
+  const clickedTrigger = Array.from(triggers).some(el => el.contains(event.target));
+  if (panel && !panel.contains(event.target) && !clickedTrigger) {
+    window.toggleNoticePanel();
+  }
+});
+
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape' && window.noticeState.panelOpen) {
+    window.toggleNoticePanel();
+  }
+});
+
 window.loadNoticesData = async function() {
   try {
     // Log data access attempt
@@ -84,6 +101,12 @@ window.loadNoticesData = async function() {
     }
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    eventsData = eventsData.map(notice => ({
+      ...notice,
+      title: String(notice.title || 'Notice'),
+      description: String(notice.description || ''),
+      validUntil: notice.validUntil ? String(notice.validUntil) : ''
+    }));
     const activeNotices = eventsData.filter(notice => {
       if (notice.validUntil && notice.validUntil.trim() !== '') {
         const validUntilDate = new Date(notice.validUntil);
@@ -192,10 +215,12 @@ window.renderNoticePanel = function(notices) {
     const displayDescription = descriptionTruncated ? safeDescription.substring(0, maxDescriptionLength) + '...' : safeDescription;
     const escapedTitle = window.SecurityUtils ? window.SecurityUtils.escapeHTMLAttribute(notice.title) : notice.title.replace(/"/g, '&quot;');
     const escapedDescription = window.SecurityUtils ? window.SecurityUtils.escapeHTMLAttribute(notice.description) : notice.description.replace(/"/g, '&quot;');
+    const category = ['urgent', 'academic', 'events', 'general'].includes(notice.category) ? notice.category : 'general';
+    const noticeId = window.SecurityUtils ? window.SecurityUtils.escapeHTMLAttribute(String(notice.id)) : notice.id;
     return `
-      <div class="notice-item-panel ${notice.category}" data-notice-id="${notice.id}" data-expanded="false">
+      <div class="notice-item-panel ${category}" data-notice-id="${noticeId}" data-expanded="false">
         <div class="notice-item-header">
-          <span class="notice-category ${notice.category}">${categoryIcon} ${notice.category}</span>
+          <span class="notice-category ${category}">${categoryIcon} ${category}</span>
           <span class="notice-date">${formattedDate}</span>
         </div>
         <div class="notice-title" data-full-title="${escapedTitle}">${displayTitle}</div>
@@ -220,7 +245,9 @@ window.renderNoticePanel = function(notices) {
     `;
   }).join('');
   content.innerHTML = noticesHtml;
-  const noticeItems = content.querySelectorAll('.notice-item-panel[data-notice-id]');
+  // Bind once: re-rendering used to stack listeners so "Read more" toggled twice and did nothing
+  if (content.dataset.listenerBound) return;
+  content.dataset.listenerBound = 'true';
   content.addEventListener('click', function(e) {
     const readMoreBtn = e.target.closest('.notice-read-more-btn');
     const readLessBtn = e.target.closest('.notice-read-less-btn');
@@ -295,6 +322,7 @@ window.getCategoryIcon = function(category) {
 window.formatNoticeDate = function(dateString) {
   try {
     const date = new Date(dateString);
+    if (isNaN(date)) return dateString || '';
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -690,10 +718,12 @@ function initializeSectionHighlighting() {
 function initializeReadingProgress() {
   const progressBar = document.getElementById('reading-progress');
   
+  if (!progressBar) return;
+
   function updateProgress() {
     const scrollTop = window.pageYOffset;
     const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-    const scrollPercent = (scrollTop / docHeight) * 100;
+    const scrollPercent = docHeight > 0 ? Math.min((scrollTop / docHeight) * 100, 100) : 0;
     
     progressBar.style.width = scrollPercent + '%';
   }
@@ -719,7 +749,7 @@ function handleSubmit(event) {
     nameError.style.display = "none";
   }
 
-  const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   if (!email.value.trim() || !emailPattern.test(email.value.trim())) {
     emailError.style.display = "block";
     if (valid) email.focus();
@@ -729,8 +759,14 @@ function handleSubmit(event) {
   }
 
   if (valid) {
-    // Create success notification
-    showNotification("Thank you for contacting Vikas Public School. We will get back to you shortly.", "success");
+    // There is no backend, so hand the message to the visitor's email app
+    const message = document.getElementById("message");
+    const schoolEmailLink = document.querySelector('#contact address a[href^="mailto:"]');
+    const schoolEmail = schoolEmailLink ? schoolEmailLink.getAttribute('href').replace(/^mailto:/, '') : '';
+    const subject = `Website enquiry from ${name.value.trim()}`;
+    const body = `Name: ${name.value.trim()}\nEmail: ${email.value.trim()}\n\n${message ? message.value.trim() : ''}`;
+    window.location.href = `mailto:${schoolEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    showNotification("Opening your email app to send the message to Vikas Public School.", "success");
     event.target.reset();
   }
 
@@ -807,109 +843,85 @@ document.addEventListener('DOMContentLoaded', function () {
 
 function initializeGalleryModal() {
   const modal = document.querySelector('.gallery-modal');
-  
-  if (!modal) {
-    console.log('Gallery modal not found on this page, skipping initialization');
-    return;
-  }
-  
+  if (!modal) return;
+
+  const modalContent = modal.querySelector('.modal-content');
   const modalImg = modal.querySelector('.modal-content img');
   const modalClose = modal.querySelector('.close-modal');
   const modalPrev = modal.querySelector('.modal-prev');
   const modalNext = modal.querySelector('.modal-next');
-  
-  if (!modalImg || !modalClose) {
-    console.log('Gallery modal elements not found');
-    return;
+  if (!modalImg || !modalClose) return;
+
+  let currentIndex = 0;
+  let lastFocused = null;
+
+  function getImages() {
+    return Array.from(document.querySelectorAll('.gallery-link img'));
   }
 
-  // Function to attach events to gallery links
-  function attachGalleryEvents() {
-    const galleryLinks = document.querySelectorAll('.gallery-link');
-    let currentIndex = 0;
-    const totalImages = galleryLinks.length;
-    
-    galleryLinks.forEach((link, index) => {
-      // Remove existing listeners to prevent duplicates
-      link.removeEventListener('click', handleGalleryClick);
-      link.addEventListener('click', (e) => handleGalleryClick(e, index));
-    });
-
-    // Navigation functions
-    function showImage(index) {
-      currentIndex = index;
-      const imgSrc = galleryLinks[index].querySelector('img').src;
-      modalImg.src = imgSrc;
-      
-      // Update navigation buttons visibility
-      if (modalPrev) modalPrev.style.display = index === 0 ? 'none' : 'flex';
-      if (modalNext) modalNext.style.display = index === totalImages - 1 ? 'none' : 'flex';
-    }
-
-    // Add navigation event listeners
-    if (modalPrev) {
-      modalPrev.addEventListener('click', () => {
-        if (currentIndex > 0) showImage(currentIndex - 1);
-      });
-    }
-
-    if (modalNext) {
-      modalNext.addEventListener('click', () => {
-        if (currentIndex < totalImages - 1) showImage(currentIndex + 1);
-      });
-    }
+  function showImage(index) {
+    const images = getImages();
+    if (!images.length) return;
+    currentIndex = Math.max(0, Math.min(index, images.length - 1));
+    modalImg.src = images[currentIndex].src;
+    modalImg.alt = images[currentIndex].alt || 'Gallery image enlarged';
+    if (modalPrev) modalPrev.style.display = currentIndex === 0 ? 'none' : 'flex';
+    if (modalNext) modalNext.style.display = currentIndex === images.length - 1 ? 'none' : 'flex';
   }
 
-  function handleGalleryClick(e, index) {
-    e.preventDefault();
+  function openModal(index) {
+    lastFocused = document.activeElement;
+    modalImg.onload = () => { if (modalContent) modalContent.style.opacity = '1'; };
+    showImage(index);
     modal.classList.add('active');
-    const imgSrc = e.currentTarget.querySelector('img').src;
-    modalImg.src = imgSrc;
-    modalImg.onload = () => {
-      modal.querySelector('.modal-content').style.opacity = '1';
-    };
+    document.body.style.overflow = 'hidden';
+    modalClose.focus();
   }
 
   function closeModal() {
+    if (!modal.classList.contains('active')) return;
     modal.classList.remove('active');
+    document.body.style.overflow = '';
     setTimeout(() => {
       modalImg.src = '';
-      modal.querySelector('.modal-content').style.opacity = '0';
+      if (modalContent) modalContent.style.opacity = '0';
     }, 300);
+    if (lastFocused && lastFocused.focus) lastFocused.focus();
   }
 
-  // Attach close events (only once)
-  modalClose.removeEventListener('click', closeModal);
+  // Delegated so links re-rendered from Firebase keep working
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('.gallery-link');
+    if (!link) return;
+    e.preventDefault();
+    const links = Array.from(document.querySelectorAll('.gallery-link'));
+    openModal(links.indexOf(link));
+  });
+
+  modalClose.setAttribute('role', 'button');
   modalClose.addEventListener('click', closeModal);
-  
-  modalClose.removeEventListener('keypress', handleCloseKeypress);
-  modalClose.addEventListener('keypress', handleCloseKeypress);
+  modalClose.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      closeModal();
+    }
+  });
+  if (modalPrev) modalPrev.addEventListener('click', () => showImage(currentIndex - 1));
+  if (modalNext) modalNext.addEventListener('click', () => showImage(currentIndex + 1));
 
-  function handleCloseKeypress(e) {
-    if (e.key === 'Enter' || e.key === ' ') closeModal();
-  }
-
-  // Close modal when clicking outside the image
-  modal.removeEventListener('click', handleModalClick);
-  modal.addEventListener('click', handleModalClick);
-
-  function handleModalClick(e) {
+  modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
-  }
+  });
 
-  // Close modal on Escape key
-  document.removeEventListener('keydown', handleEscapeKey);
-  document.addEventListener('keydown', handleEscapeKey);
+  document.addEventListener('keydown', (e) => {
+    if (!modal.classList.contains('active')) return;
+    if (e.key === 'Escape') closeModal();
+    else if (e.key === 'ArrowLeft') showImage(currentIndex - 1);
+    else if (e.key === 'ArrowRight') showImage(currentIndex + 1);
+  });
 
-  function handleEscapeKey(e) {
-    if (modal.style.display === 'block' && e.key === 'Escape') closeModal();
-  }
-
-  // Initial attachment
-  attachGalleryEvents();
-  
-  // Make attachGalleryEvents globally available for Firebase updates
-  window.attachGalleryEvents = attachGalleryEvents;
+  // Kept for content-updaters.js, which calls this after re-rendering the gallery
+  window.attachGalleryEvents = function() {};
 }
 
 // Dynamic Breadcrumb Navigation System
