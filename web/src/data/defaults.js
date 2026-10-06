@@ -33,7 +33,7 @@ export const DEFAULT_CONTENT = {
       },
     ],
     highlights: [
-      { id: 'cbse', icon: '🏛️', title: 'CBSE Affiliation', description: 'Accredited standards ensuring quality education' },
+      { id: 'academics', icon: '📚', title: 'Strong Academics', description: 'A structured curriculum with regular assessment and support' },
       { id: 'campus', icon: '🏫', title: 'Modern Campus', description: 'Smart classrooms, libraries, science labs, and sports facilities' },
       { id: 'development', icon: '🎯', title: 'Holistic Development', description: 'Focus on academics, co-curricular activities, and personal growth' },
       { id: 'environment', icon: '🛡️', title: 'Safe Environment', description: 'Inclusive and secure learning atmosphere for all students' },

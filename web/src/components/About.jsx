@@ -1,9 +1,11 @@
+import FadeImage from './FadeImage';
 import Section, { buttonStyles } from './Section';
 import { useSiteContent } from '../lib/SiteContent';
 import { initials, safeUrl } from '../lib/normalize';
 
 export default function About() {
-  const { content } = useSiteContent();
+  const { content, isResolved } = useSiteContent();
+  const ready = isResolved('about');
   const about = content.about || {};
   const leaders = Array.isArray(about.leadership) ? about.leadership : [];
   const highlights = Array.isArray(about.highlights) ? about.highlights : [];
@@ -20,8 +22,12 @@ export default function About() {
               const image = safeUrl(leader.image);
               return (
                 <article key={leader.id || leader.name} className="flex items-center gap-5 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  {image ? (
-                    <img src={image} alt={leader.name} loading="lazy" className="size-24 shrink-0 rounded-2xl object-cover" />
+                  {!ready ? (
+                    <span className="size-24 shrink-0 animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />
+                  ) : image ? (
+                    <span className="size-24 shrink-0 overflow-hidden rounded-2xl bg-slate-200 dark:bg-slate-800">
+                      <FadeImage src={image} alt={leader.name} loading="lazy" className="size-full object-cover" />
+                    </span>
                   ) : (
                     <span className="grid size-24 shrink-0 place-items-center rounded-2xl bg-brand-100 text-2xl font-bold text-brand-700">{initials(leader.name)}</span>
                   )}

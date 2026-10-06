@@ -1,11 +1,13 @@
 import { useState } from 'react';
+import FadeImage from './FadeImage';
 import Section from './Section';
 import { useSiteContent } from '../lib/SiteContent';
 import { initials, safeUrl } from '../lib/normalize';
 
-function FacultyPhoto({ src, name }) {
+function FacultyPhoto({ src, name, ready }) {
   const [failed, setFailed] = useState(false);
   const url = safeUrl(src);
+  if (!ready) return <span className="block aspect-square w-full animate-pulse bg-slate-200 dark:bg-slate-800" />;
   if (!url || failed) {
     return (
       <span className="grid aspect-square w-full place-items-center bg-gradient-to-br from-brand-100 to-brand-200 text-4xl font-bold text-brand-700 dark:from-brand-900 dark:to-brand-800 dark:text-brand-200">
@@ -13,11 +15,16 @@ function FacultyPhoto({ src, name }) {
       </span>
     );
   }
-  return <img src={url} alt={name} loading="lazy" onError={() => setFailed(true)} className="aspect-square w-full object-cover" />;
+  return (
+    <span className="block aspect-square w-full bg-slate-200 dark:bg-slate-800">
+      <FadeImage src={url} alt={name} loading="lazy" onError={() => setFailed(true)} className="size-full object-cover" />
+    </span>
+  );
 }
 
 export default function Faculty() {
-  const { content } = useSiteContent();
+  const { content, isResolved } = useSiteContent();
+  const ready = isResolved('faculty');
   const faculty = Array.isArray(content.faculty) ? content.faculty : [];
 
   return (
@@ -25,7 +32,7 @@ export default function Faculty() {
       <ul className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {faculty.map(member => (
           <li key={member.id || member.name} className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm transition hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
-            <FacultyPhoto src={member.photo} name={member.name} />
+            <FacultyPhoto src={member.photo} name={member.name} ready={ready} />
             <div className="p-5">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">{member.name || 'Faculty member'}</h3>
               {member.role && <p className="text-sm font-semibold text-brand-600 dark:text-brand-400">{member.role}</p>}

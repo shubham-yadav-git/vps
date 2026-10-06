@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import Dialog from './Dialog';
 import Icon from './Icon';
+import FadeImage from './FadeImage';
 import Section from './Section';
 import { useSiteContent } from '../lib/SiteContent';
 import { galleryItems } from '../lib/normalize';
@@ -59,14 +60,21 @@ function Lightbox({ items, index, onChange, onClose }) {
 }
 
 export default function Gallery() {
-  const { content } = useSiteContent();
+  const { content, isResolved } = useSiteContent();
+  const ready = isResolved('gallery');
   const items = galleryItems(content.gallery);
   const [openIndex, setOpenIndex] = useState(null);
 
-  if (!items.length) return null;
+  if (ready && !items.length) return null;
 
   return (
     <Section id="gallery" eyebrow="Gallery" title="Life at Vikas Public School" intro="Moments from our classrooms, labs, events and celebrations.">
+      {!ready ? (
+        // Real photos come from the database; show shimmer tiles instead of sample photos
+        <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4" aria-busy="true">
+          {[0, 1, 2, 3, 4, 5, 6, 7].map(i => <li key={i} className="aspect-[4/3] animate-pulse rounded-2xl bg-slate-200 dark:bg-slate-800" />)}
+        </ul>
+      ) : (
       <ul className="columns-2 gap-4 sm:columns-3 lg:columns-4">
         {items.map((item, index) => (
           <li key={item.id} className="mb-4 break-inside-avoid">
@@ -76,11 +84,12 @@ export default function Gallery() {
               className="group block w-full overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800"
               aria-label={`View photo: ${item.alt}`}
             >
-              <img src={item.src} alt={item.alt} loading="lazy" className="w-full transition duration-500 group-hover:scale-105" />
+              <FadeImage src={item.src} alt={item.alt} loading="lazy" className="min-h-24 w-full !transition duration-500 group-hover:scale-105" />
             </button>
           </li>
         ))}
       </ul>
+      )}
       <Dialog open={openIndex !== null} onClose={() => setOpenIndex(null)} label="Photo viewer" variant="bare">
         {openIndex !== null && <Lightbox items={items} index={openIndex} onChange={setOpenIndex} onClose={() => setOpenIndex(null)} />}
       </Dialog>

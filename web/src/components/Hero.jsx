@@ -1,17 +1,19 @@
+import FadeImage from './FadeImage';
 import Icon from './Icon';
 import { buttonStyles } from './Section';
 import { useSiteContent } from '../lib/SiteContent';
 import { safeUrl } from '../lib/normalize';
 
 export default function Hero() {
-  const { content } = useSiteContent();
+  const { content, isResolved } = useSiteContent();
   const hero = content.hero || {};
-  const background = safeUrl(hero.backgroundImage, '/campus.jpg');
-  const highlights = (content.about?.highlights || []).slice(0, 4);
+  // Wait for the real banner photo so the default one never flashes first
+  const background = isResolved('hero') ? safeUrl(hero.backgroundImage, '/campus.jpg') : '';
+  const highlights = isResolved('about') ? (content.about?.highlights || []).slice(0, 4) : [];
 
   return (
     <section id="top" aria-label="Welcome" className="relative isolate overflow-hidden bg-brand-950">
-      <img src={background} alt="" className="absolute inset-0 -z-20 size-full object-cover" fetchPriority="high" />
+      {background && <FadeImage key={background} src={background} alt="" className="absolute inset-0 -z-20 size-full object-cover" fetchPriority="high" />}
       <div className="absolute inset-0 -z-10 bg-gradient-to-r from-brand-950/95 via-brand-950/80 to-brand-900/40" />
 
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-36">
@@ -34,7 +36,7 @@ export default function Hero() {
         </div>
 
         {highlights.length > 0 && (
-          <ul className="mt-14 grid max-w-3xl grid-cols-2 gap-3 sm:grid-cols-4">
+          <ul className="mt-14 grid max-w-3xl animate-fade-up grid-cols-2 gap-3 sm:grid-cols-4">
             {highlights.map(item => (
               <li key={item.id || item.title} className="rounded-2xl border border-white/15 bg-white/10 p-4 text-white backdrop-blur">
                 <span className="text-2xl" aria-hidden="true">{item.icon}</span>
