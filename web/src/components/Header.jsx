@@ -6,6 +6,7 @@ import { useSiteContent } from '../lib/SiteContent';
 import { useTheme } from '../lib/theme';
 import { safeUrl } from '../lib/normalize';
 import { useNotices } from '../lib/useNotices';
+import { useAdminFlag } from '../lib/adminFlag';
 
 export const NAV_LINKS = [
   { id: 'about', label: 'About' },
@@ -40,6 +41,7 @@ export default function Header({ linkPrefix = '', onOpenNotices }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const active = useActiveSection(linkPrefix === '');
+  const isAdmin = useAdminFlag();
 
   const logo = content.logo || {};
   const schoolName = logo.schoolName || 'Vikas Public School';
@@ -111,6 +113,17 @@ export default function Header({ linkPrefix = '', onOpenNotices }) {
           </nav>
 
           <div className="ml-auto flex shrink-0 items-center gap-1 xl:ml-2">
+            {isAdmin && (
+              <a
+                href="/admin.html"
+                className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-2 text-sm font-semibold text-amber-900 transition hover:bg-amber-200 dark:bg-amber-500/15 dark:text-amber-200 dark:hover:bg-amber-500/25"
+                aria-label="Open admin panel"
+                title="Admin panel"
+              >
+                <Icon name="clipboard" className="size-4" />
+                <span className="hidden 2xl:inline">Admin panel</span>
+              </a>
+            )}
             <button
               type="button"
               onClick={onOpenNotices}

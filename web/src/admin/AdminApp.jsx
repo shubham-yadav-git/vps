@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Icon from '../components/Icon';
 import { useTheme } from '../lib/theme';
 import { USE_EMULATOR } from '../lib/firebase';
+import { setAdminFlag } from '../lib/adminFlag';
 import { isAdminUser, signOutAdmin, useAuthUser } from './auth';
 import Login from './Login';
 import AboutEditor from './sections/AboutEditor';
@@ -158,6 +159,12 @@ function NotAuthorized({ user }) {
 
 export default function AdminApp() {
   const user = useAuthUser();
+
+  // Lets the public site show an "Admin panel" shortcut in this browser
+  useEffect(() => {
+    if (user !== undefined) setAdminFlag(isAdminUser(user));
+  }, [user]);
+
   return (
     <ToastProvider>
       <ConfirmProvider>

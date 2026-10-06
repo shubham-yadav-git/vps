@@ -60,7 +60,9 @@ export default function Footer({ linkPrefix = '' }) {
       <div className="border-t border-white/10">
         <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 py-5 text-xs text-slate-500 sm:flex-row sm:justify-between sm:px-6 lg:px-8">
           <p>© <span suppressHydrationWarning>{new Date().getFullYear()}</span> Vikas Public School. All rights reserved.</p>
-          <p>Jaunpur, Uttar Pradesh</p>
+          <p>
+            Jaunpur, Uttar Pradesh · <a href="/admin.html" className="text-slate-500 underline-offset-2 hover:text-white hover:underline">Admin</a>
+          </p>
         </div>
       </div>
     </footer>
