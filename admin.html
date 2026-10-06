@@ -4539,18 +4539,21 @@
       // Mobile menu toggle
       function toggleMobileMenu() {
         const mobileOverlay = document.getElementById("mobile-overlay");
-        mobileOverlay.classList.toggle("show");
+        if (mobileOverlay) mobileOverlay.classList.toggle("show");
       }
 
       // Initialize after DOM load
       document.addEventListener("DOMContentLoaded", function () {
         // Set up mobile overlay click handler
+        // The overlay element may not exist; without this guard the rest of this setup never ran
         const mobileOverlay = document.getElementById("mobile-overlay");
-        mobileOverlay.addEventListener("click", function (e) {
-          if (e.target === mobileOverlay) {
-            toggleMobileMenu();
-          }
-        });
+        if (mobileOverlay) {
+          mobileOverlay.addEventListener("click", function (e) {
+            if (e.target === mobileOverlay) {
+              toggleMobileMenu();
+            }
+          });
+        }
 
         // Set up section navigation
         document.querySelectorAll(".nav-item").forEach((item) => {
@@ -4558,22 +4561,22 @@
             const section = this.getAttribute("data-section");
             showSection(section);
             // Close mobile menu if open
-            document.getElementById("mobile-overlay").classList.remove("show");
+            document.getElementById("mobile-overlay")?.classList.remove("show");
           });
         });
 
         // Set up logout button
-        document.getElementById("logout-btn").addEventListener("click", logout);
+        document.getElementById("logout-btn")?.addEventListener("click", logout);
 
         // Set up mobile menu button
         document
           .getElementById("mobile-menu-btn")
-          .addEventListener("click", toggleMobileMenu);
+          ?.addEventListener("click", toggleMobileMenu);
 
         // Form submission handlers
         document
           .getElementById("login-form")
-          .addEventListener("submit", function (e) {
+          ?.addEventListener("submit", function (e) {
             e.preventDefault();
             login();
           });
