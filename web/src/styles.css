@@ -67,6 +67,16 @@
   }
 }
 
+/* Optional sections can put two same-coloured sections side by side; a hairline keeps them apart */
+[data-tone="plain"] + [data-tone="plain"],
+[data-tone="muted"] + [data-tone="muted"] {
+  border-top: 1px solid var(--color-slate-200);
+}
+.dark [data-tone="plain"] + [data-tone="plain"],
+.dark [data-tone="muted"] + [data-tone="muted"] {
+  border-top-color: var(--color-slate-800);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after {

@@ -1,18 +1,33 @@
 import Icon from './Icon';
-import { NAV_LINKS } from './Header';
+import { NAV_LINKS, useExtraLinks } from './Header';
 import { useSiteContent } from '../lib/SiteContent';
 import { contactDetails, emailParts, safeUrl, telHref } from '../lib/normalize';
 
+import { whatsappHref } from '../lib/schoolData';
+
 const SOCIAL = [
-  { name: 'Facebook', icon: 'facebook', href: 'https://facebook.com/vikaspublicschool' },
-  { name: 'Instagram', icon: 'instagram', href: 'https://instagram.com/vikaspublicschool' },
-  { name: 'YouTube', icon: 'youtube', href: 'https://youtube.com/vikaspublicschool' },
+  { key: 'facebook', name: 'Facebook', icon: 'facebook', href: 'https://facebook.com/vikaspublicschool' },
+  { key: 'instagram', name: 'Instagram', icon: 'instagram', href: 'https://instagram.com/vikaspublicschool' },
+  { key: 'youtube', name: 'YouTube', icon: 'youtube', href: 'https://youtube.com/vikaspublicschool' },
 ];
+
+/** Links from Site & SEO once it has been saved; the original links until then. */
+function socialLinks(site = {}) {
+  const configured = SOCIAL.some(s => s.key in site);
+  const links = SOCIAL
+    .map(s => ({ ...s, href: configured ? safeUrl(site[s.key]) : s.href }))
+    .filter(s => /^https?:/.test(s.href));
+  const whatsapp = whatsappHref(site.whatsapp);
+  if (whatsapp) links.push({ key: 'whatsapp', name: 'WhatsApp', icon: 'message', href: whatsapp });
+  return links;
+}
 
 export default function Footer({ linkPrefix = '' }) {
   const { content } = useSiteContent();
   const { address, email, phones } = contactDetails(content);
   const logo = content.logo || {};
+  const social = socialLinks(content.site);
+  const extraLinks = useExtraLinks();
   const linkClass = 'text-slate-400 transition hover:text-white';
 
   return (
@@ -27,7 +42,7 @@ export default function Footer({ linkPrefix = '' }) {
             Nurturing young minds through holistic development, dedicated teachers and a safe, caring campus.
           </p>
           <div className="mt-5 flex gap-2">
-            {SOCIAL.map(s => (
+            {social.map(s => (
               <a key={s.name} href={s.href} target="_blank" rel="noopener" aria-label={s.name} className="rounded-full bg-white/5 p-2.5 text-slate-300 transition hover:bg-brand-600 hover:text-white">
                 <Icon name={s.icon} className="size-4.5" />
               </a>
@@ -38,7 +53,7 @@ export default function Footer({ linkPrefix = '' }) {
         <nav aria-label="Footer">
           <h2 className="text-sm font-semibold tracking-wider text-white uppercase">Explore</h2>
           <ul className="mt-4 space-y-2.5 text-sm">
-            {NAV_LINKS.map(link => (
+            {[...NAV_LINKS, ...extraLinks].map(link => (
               <li key={link.id}><a href={`${linkPrefix}#${link.id}`} className={linkClass}>{link.label}</a></li>
             ))}
             <li><a href="/mandatory-public-disclosure.html" className={linkClass}>Mandatory Public Disclosure</a></li>

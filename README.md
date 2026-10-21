@@ -68,9 +68,11 @@ The admin shows a "Test database" badge when it is using the emulators.
    - These keys are public by design; access is controlled by `firestore.rules`
 
 3. **Set up the admin account** (Firebase Console → Authentication)
-   - Create a user with the email `admin@vikaspublicschool.in`
-   - Under **Settings → User actions**, turn off **Enable create (sign-up)** so nobody else can register
-   - To add another admin, add their email to `isAdmin()` in `firestore.rules`
+   - Create a user with the email `admin@vikaspublicschool.in`. This owner account is always an administrator.
+   - Add other staff from the admin panel's **Staff accounts** page (see below).
+   - Under **Settings → User actions**, keep **Enable create (sign-up)** on so new staff can set their own password.
+     This is safe: an account can only change anything once its email is on the staff list *and* verified.
+     If you prefer to keep sign-up off, create each staff member's account yourself in Authentication → Users.
 
 4. **Deploy the Firestore rules**
    ```bash
@@ -86,22 +88,33 @@ The admin shows a "Test database" badge when it is using the emulators.
 
 ## Security
 
-- Anyone can **read** the website content collections (`faculty`, `gallery`, `testimonials`, `events`, `faq`, `settings`, `cache`, `disclosure_rows`)
-- Only the signed-in admin account can **write** to them
-- The public site never writes to Firestore
+- Anyone can **read** the website content (`faculty`, `gallery`, `testimonials`, `events`, `faq`, `calendar`, `achievements`, `downloads`, `settings`, `cache`, `disclosure_rows`)
+- **Editors** can change website content and work through enquiries
+- **Administrators** can also change contact details, logo, Site & SEO, the mandatory disclosure, staff accounts, and read the activity log
+- The public site's only write is **creating an enquiry** from the contact form; the rules check every field, and visitors can't read, change or delete enquiries
+- The **activity log** is append-only: entries can't be edited or deleted, and each one is tied to the signed-in account
+- Rules are covered by tests: `cd web && npm run test:rules` (runs the Firestore emulator)
 
 ## Admin Panel Features
 
 Sign in at `/admin.html` with the admin account. Every page saves explicitly and warns before you leave with unsaved changes.
 
-- **Dashboard**: Counts, expired notices, duplicate or uncaptioned photos
-- **Faculty Management**: Add, edit, delete faculty members with photos
-- **Gallery Management**: Upload several photos at once (compressed automatically), add captions
-- **Testimonials**: Manage student and parent testimonials
+- **Dashboard**: New enquiries, active notices, upcoming dates, popup status, things that need attention, recent activity
+- **Enquiries**: Messages from the website's contact form; call/WhatsApp links, status (New → Contacted → Visited → Admitted/Closed), follow-up notes, CSV export
 - **Notice Board**: Post notices with a "show until" date; export and import as JSON
-- **FAQ Management**: Add and organize frequently asked questions
+- **Calendar**: Events, exams, holidays and meetings in a month view; upcoming dates appear on the website
+- **Popup & banner**: Schedule a homepage announcement with start and end dates and a live preview
+- **Achievements**: Board results, toppers and awards, with photos, in a drag-to-reorder list
+- **Gallery**: Upload several photos at once (compressed automatically), add captions
+- **Downloads**: Fee structure, syllabus, forms and circulars (PDF/image up to ~900 KB, or a Google Drive link)
+- **Faculty, Testimonials, FAQ**: Drag to set the order shown on the website
 - **Mandatory Disclosure**: Edit sections, columns and rows; attach PDFs or link Google Drive files
-- **Settings**: Update hero banner, about section, academics, logo, school info, contact details
+- **Homepage, contact, logo, school info**: Banner, about, academics and contact details
+- **Site & SEO**: Social links, WhatsApp, Google Maps link, search title and description (baked into the HTML by the nightly rebuild)
+- **Staff accounts**: Give each person their own sign-in as an Editor or Administrator; suspend or remove access
+- **Activity log**: Who changed what, and when
+
+Press **Ctrl K** (⌘K on Mac) anywhere in the panel to jump to a section.
 
 ## Content Management
 

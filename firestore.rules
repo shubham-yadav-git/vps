@@ -1,36 +1,141 @@
 // Firestore Security Rules for Vikas Public School Website
 //
-// Public visitors can read website content. Only the school admin account,
-// signed in through admin.html (Firebase Auth), can change it.
+// Public visitors can read website content and send enquiries. Staff, signed in
+// through admin.html (Firebase Auth), can change content. Admins also manage
+// staff accounts, site-wide settings and the mandatory disclosure.
 //
 // Deploy:  firebase deploy --only firestore:rules
 //   or paste this file into Firebase Console -> Firestore Database -> Rules -> Publish.
 //
-// Before deploying, make sure a user with exactly the email below exists in
-// Firebase Console -> Authentication -> Users, or admin saves will be rejected.
-// To add another admin, add their email to the list in isAdmin().
+// The owner account below is always an admin, so nobody can be locked out.
+// Other staff are listed in staff/{email} from the admin panel's Staff page.
 
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // email_verified is deliberately not required: accounts created in the
-    // Firebase console are unverified by default. Add it once the account is verified.
-    function isAdmin() {
-      return request.auth != null
-        && request.auth.token.email in ['admin@vikaspublicschool.in'];
+    // ---------- Who is asking ----------
+
+    function signedIn() {
+      return request.auth != null && request.auth.token.email is string;
     }
 
+    function myEmail() {
+      return request.auth.token.email.lower();
+    }
+
+    // email_verified is deliberately not required for the owner: accounts created in
+    // the Firebase console are unverified by default.
+    function isOwner() {
+      return signedIn() && myEmail() in ['admin@vikaspublicschool.in'];
+    }
+
+    function staffPath() {
+      return /databases/$(database)/documents/staff/$(myEmail());
+    }
+
+    // Listed staff must verify their email, so nobody can claim an address they don't own
+    function isListedStaff() {
+      return signedIn()
+        && request.auth.token.email_verified == true
+        && exists(staffPath())
+        && get(staffPath()).data.active == true;
+    }
+
+    function isStaff() {
+      return isOwner() || isListedStaff();
+    }
+
+    function isAdmin() {
+      return isOwner() || (isListedStaff() && get(staffPath()).data.role == 'admin');
+    }
+
+    // ---------- Website content ----------
+
+    // Lists shown on the public site; any staff member can edit them
     function isContentCollection(collection) {
       return collection in [
-        'faculty', 'gallery', 'gallery_full', 'testimonials', 'events', 'faq',
-        'settings', 'cache', 'disclosure_rows'
+        'faculty', 'gallery', 'gallery_full', 'testimonials', 'events', 'faq', 'cache',
+        'calendar', 'achievements', 'downloads', 'downloads_files'
       ];
     }
 
     match /{collection}/{document} {
-      allow read: if isContentCollection(collection);
-      allow write: if isAdmin() && isContentCollection(collection);
+      allow read: if isContentCollection(collection) || collection in ['settings', 'disclosure_rows'];
+      allow write: if isStaff() && isContentCollection(collection);
+    }
+
+    // Single-document settings. Editors handle homepage text and the popup;
+    // contact details, branding, SEO and the disclosure are admin-only.
+    match /settings/{name} {
+      allow write: if isAdmin()
+        || (isStaff() && name in ['hero', 'about', 'academics', 'announcement']);
+    }
+
+    match /disclosure_rows/{document} {
+      allow write: if isAdmin();
+    }
+
+    // ---------- Staff accounts ----------
+
+    function validStaff(data) {
+      return data.keys().hasOnly(['name', 'role', 'active', 'addedAt', 'addedBy'])
+        && data.name is string && data.name.size() <= 80
+        && data.role in ['admin', 'editor']
+        && data.active is bool;
+    }
+
+    match /staff/{email} {
+      // Anyone signed in may read their own entry, so the panel can explain why they lack access
+      allow read: if isStaff() || (signedIn() && email == myEmail());
+      allow create, update: if isAdmin() && email == email.lower() && !(email in ['admin@vikaspublicschool.in'])
+        && validStaff(request.resource.data);
+      allow delete: if isAdmin() && !(email in ['admin@vikaspublicschool.in']);
+    }
+
+    // ---------- Activity log (append-only) ----------
+
+    match /activity/{id} {
+      allow read: if isAdmin();
+      allow create: if isStaff()
+        && request.resource.data.keys().hasOnly(['by', 'byName', 'action', 'area', 'label', 'at'])
+        && request.resource.data.by == myEmail()
+        && request.resource.data.action in ['create', 'update', 'delete']
+        && request.resource.data.area is string && request.resource.data.area.size() <= 40
+        && request.resource.data.label is string && request.resource.data.label.size() <= 200
+        && request.resource.data.at == request.time;
+    }
+
+    // ---------- Enquiries from the website ----------
+
+    function optionalString(data, key, max) {
+      return !(key in data) || (data[key] is string && data[key].size() <= max);
+    }
+
+    function validEnquiry(data) {
+      return data.keys().hasOnly(['type', 'parentName', 'phone', 'email', 'studentName', 'classApplying', 'message', 'status', 'createdAt'])
+        && data.keys().hasAll(['type', 'parentName', 'status', 'createdAt'])
+        && data.type in ['admission', 'general']
+        && data.status == 'new'
+        && data.createdAt == request.time
+        && data.parentName is string && data.parentName.size() > 0 && data.parentName.size() <= 100
+        && optionalString(data, 'phone', 20)
+        && optionalString(data, 'email', 120)
+        && optionalString(data, 'studentName', 100)
+        && optionalString(data, 'classApplying', 40)
+        && optionalString(data, 'message', 2000)
+        // A way to reply is required
+        && (('phone' in data && data.phone.size() >= 7) || ('email' in data && data.email.size() >= 5));
+    }
+
+    match /enquiries/{id} {
+      allow create: if validEnquiry(request.resource.data);
+      allow read, delete: if isStaff();
+      // Staff track progress; what the visitor wrote stays as sent
+      allow update: if isStaff()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'notes', 'updatedAt', 'updatedBy'])
+        && request.resource.data.status in ['new', 'contacted', 'visited', 'admitted', 'closed']
+        && (!('notes' in request.resource.data) || (request.resource.data.notes is list && request.resource.data.notes.size() <= 100));
     }
   }
 }

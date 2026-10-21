@@ -90,6 +90,11 @@ export function galleryItems(items) {
     .filter(item => item.src && !seen.has(item.src) && seen.add(item.src));
 }
 
+/** Items in the order set by dragging in the admin panel; items never reordered keep their place. */
+export function byAdminOrder(items) {
+  return (Array.isArray(items) ? [...items] : []).sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+}
+
 export function sortedFaq(items) {
   return (Array.isArray(items) ? items : [])
     .filter(item => item.question)

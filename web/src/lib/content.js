@@ -1,9 +1,9 @@
-import { collection, doc, getDoc, getDocs } from 'firebase/firestore/lite';
+import { addDoc, collection, doc, getDoc, getDocs, serverTimestamp } from 'firebase/firestore/lite';
 import { getDb } from './firebase';
 
 // Collections hold lists; settings documents hold single objects.
-export const COLLECTION_TYPES = ['faculty', 'testimonials', 'gallery', 'events', 'faq'];
-export const SETTINGS_TYPES = ['hero', 'logo', 'about', 'academics', 'school-info', 'contact'];
+export const COLLECTION_TYPES = ['faculty', 'testimonials', 'gallery', 'events', 'faq', 'calendar', 'achievements', 'downloads'];
+export const SETTINGS_TYPES = ['hero', 'logo', 'about', 'academics', 'school-info', 'contact', 'announcement', 'site'];
 
 const STORAGE_PREFIX = 'vps:content:';
 const MAX_CACHE_AGE = 24 * 60 * 60 * 1000;
@@ -80,7 +80,7 @@ export async function refreshContent(onUpdate) {
 
   // Photos are stored inside these documents (hundreds of KB), so fetch the small,
   // above-the-fold content first and let the heavy collections follow
-  const heavy = ['faculty', 'gallery'];
+  const heavy = ['faculty', 'gallery', 'achievements'];
   const light = [...SETTINGS_TYPES, ...COLLECTION_TYPES].filter(type => !heavy.includes(type));
   await Promise.all(light.map(refreshType));
   await Promise.all(heavy.map(refreshType));
@@ -94,6 +94,28 @@ export async function fetchGalleryFull(id) {
     fullPhotos.set(id, getDoc(doc(getDb(), 'gallery_full', id)).then(s => (s.exists() ? s.data().src : '')));
   }
   return fullPhotos.get(id);
+}
+
+const downloadFiles = new Map();
+
+/** A file attached on the Downloads page, fetched only when a visitor opens it. */
+export async function fetchDownloadFile(id) {
+  if (!downloadFiles.has(id)) {
+    downloadFiles.set(id, getDoc(doc(getDb(), 'downloads_files', id)).then(s => (s.exists() ? s.data().data : '')));
+  }
+  return downloadFiles.get(id);
+}
+
+/**
+ * Saves a contact-form enquiry for the office to follow up in the admin panel.
+ * firestore.rules checks every field, so only send the allowed ones.
+ */
+export async function submitEnquiry(fields) {
+  const data = { type: fields.type === 'admission' ? 'admission' : 'general', parentName: fields.parentName, status: 'new', createdAt: serverTimestamp() };
+  for (const key of ['phone', 'email', 'studentName', 'classApplying', 'message']) {
+    if (fields[key]) data[key] = fields[key];
+  }
+  await addDoc(collection(getDb(), 'enquiries'), data);
 }
 
 /** The disclosure document is large (embedded PDFs), so it is fetched fresh, not cached. */

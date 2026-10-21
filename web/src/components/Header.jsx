@@ -7,6 +7,9 @@ import { useTheme } from '../lib/theme';
 import { safeUrl } from '../lib/normalize';
 import { useNotices } from '../lib/useNotices';
 import { useAdminFlag } from '../lib/adminFlag';
+import { sortedAchievements } from './Achievements';
+import { useUpcomingEvents } from './Calendar';
+import { downloadItems } from './Downloads';
 
 export const NAV_LINKS = [
   { id: 'about', label: 'About' },
@@ -17,6 +20,24 @@ export const NAV_LINKS = [
   { id: 'admissions', label: 'Admissions' },
   { id: 'contact', label: 'Contact' },
 ];
+
+// Sections that only appear once the school adds content; linked from the menu and footer when present
+const EXTRA_LINKS = [
+  { id: 'achievements', label: 'Achievements' },
+  { id: 'calendar', label: 'Calendar' },
+  { id: 'downloads', label: 'Downloads' },
+];
+
+export function useExtraLinks() {
+  const { content } = useSiteContent();
+  const upcoming = useUpcomingEvents();
+  const present = {
+    achievements: sortedAchievements(content.achievements).length > 0,
+    calendar: upcoming.length > 0,
+    downloads: downloadItems(content.downloads).length > 0,
+  };
+  return EXTRA_LINKS.filter(link => present[link.id]);
+}
 
 function useActiveSection(enabled) {
   const [active, setActive] = useState('');
@@ -42,6 +63,7 @@ export default function Header({ linkPrefix = '', onOpenNotices }) {
   const [scrolled, setScrolled] = useState(false);
   const active = useActiveSection(linkPrefix === '');
   const isAdmin = useAdminFlag();
+  const extraLinks = useExtraLinks();
 
   const logo = content.logo || {};
   const schoolName = logo.schoolName || 'Vikas Public School';
@@ -171,7 +193,7 @@ export default function Header({ linkPrefix = '', onOpenNotices }) {
           className="border-t border-slate-200 bg-white px-4 pt-2 pb-4 xl:hidden dark:border-slate-800 dark:bg-slate-950"
         >
           <ul className="mx-auto grid max-w-7xl gap-1 sm:grid-cols-2">
-            {[...NAV_LINKS, { id: 'disclosure', label: 'Mandatory Public Disclosure', href: '/mandatory-public-disclosure.html' }].map(link => (
+            {[...NAV_LINKS, ...extraLinks, { id: 'disclosure', label: 'Mandatory Public Disclosure', href: '/mandatory-public-disclosure.html' }].map(link => (
               <li key={link.id}>
                 <a
                   href={link.href || `${linkPrefix}#${link.id}`}

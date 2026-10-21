@@ -59,8 +59,9 @@ export default function FaqEditor() {
     <>
       <PageHeader
         title="FAQ"
+        icon="help"
         description="Questions and answers in the FAQ section, in the order shown here."
-        actions={items && <Button icon="sparkles" onClick={() => setItems(list => [...list, { id: '', question: '', answer: '' }])}>Add question</Button>}
+        actions={items && <Button icon="plus" onClick={() => setItems(list => [...list, { id: '', question: '', answer: '' }])}>Add question</Button>}
       />
       {error && <ErrorBox onRetry={load}>{error}</ErrorBox>}
       {!items && !error && <Loading />}

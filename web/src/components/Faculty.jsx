@@ -2,7 +2,7 @@ import { useState } from 'react';
 import FadeImage from './FadeImage';
 import Section from './Section';
 import { useSiteContent } from '../lib/SiteContent';
-import { initials, safeUrl } from '../lib/normalize';
+import { byAdminOrder, initials, safeUrl } from '../lib/normalize';
 
 function FacultyPhoto({ src, name, ready }) {
   const [failed, setFailed] = useState(false);
@@ -25,7 +25,7 @@ function FacultyPhoto({ src, name, ready }) {
 export default function Faculty() {
   const { content, isResolved } = useSiteContent();
   const ready = isResolved('faculty');
-  const faculty = Array.isArray(content.faculty) ? content.faculty : [];
+  const faculty = byAdminOrder(content.faculty);
 
   return (
     <Section id="faculty" eyebrow="Our faculty" title="Experienced, caring teachers" intro="Dedicated educators who mentor every student to reach their potential.">

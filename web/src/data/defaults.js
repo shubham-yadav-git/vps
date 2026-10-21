@@ -75,4 +75,9 @@ export const DEFAULT_CONTENT = {
   ],
   // Notices are date-sensitive, so they are only shown once loaded in the browser
   events: [],
+  calendar: [],
+  achievements: [],
+  downloads: [],
+  announcement: {},
+  site: {},
 };

@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+  # Nightly rebuild so Site & SEO changes made in the admin panel reach the built HTML
+  schedule:
+    - cron: '30 20 * * *' # 02:00 IST
+  workflow_dispatch:
 
 permissions:
   contents: read

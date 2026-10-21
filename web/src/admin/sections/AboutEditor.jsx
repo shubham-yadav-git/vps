@@ -29,7 +29,7 @@ export default function AboutEditor() {
 
   return (
     <>
-      <PageHeader title="About section" description="The introduction, leadership profiles and highlight cards on the homepage." />
+      <PageHeader icon="book" title="About & leadership" description="The introduction, leadership profiles and highlight cards on the homepage." />
       {form.status === 'loading' && <Loading />}
       {form.status === 'error' && <ErrorBox onRetry={form.reload}>{form.error}</ErrorBox>}
       {form.status === 'ready' && (
@@ -41,7 +41,7 @@ export default function AboutEditor() {
           <Card
             title="Leadership"
             description="Manager, principal and other leaders."
-            actions={<Button variant="secondary" size="sm" icon="sparkles" onClick={() => form.setField('leadership', [...values.leadership, { id: '', name: '', position: '', description: '', image: '' }])}>Add person</Button>}
+            actions={<Button variant="secondary" size="sm" icon="plus" onClick={() => form.setField('leadership', [...values.leadership, { id: '', name: '', position: '', description: '', image: '' }])}>Add person</Button>}
           >
             <div className="grid gap-6 lg:grid-cols-2">
               {values.leadership.map((leader, index) => (
@@ -61,7 +61,7 @@ export default function AboutEditor() {
           <Card
             title="Highlights"
             description="The cards under the leadership profiles, also shown in the homepage banner."
-            actions={<Button variant="secondary" size="sm" icon="sparkles" onClick={() => form.setField('highlights', [...values.highlights, { id: '', icon: '⭐', title: '', description: '' }])}>Add highlight</Button>}
+            actions={<Button variant="secondary" size="sm" icon="plus" onClick={() => form.setField('highlights', [...values.highlights, { id: '', icon: '⭐', title: '', description: '' }])}>Add highlight</Button>}
           >
             <div className="grid gap-4 lg:grid-cols-2">
               {values.highlights.map((item, index) => (

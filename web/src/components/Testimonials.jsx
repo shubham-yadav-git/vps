@@ -1,11 +1,11 @@
 import Icon from './Icon';
 import Section from './Section';
 import { useSiteContent } from '../lib/SiteContent';
-import { initials } from '../lib/normalize';
+import { byAdminOrder, initials } from '../lib/normalize';
 
 export default function Testimonials() {
   const { content } = useSiteContent();
-  const testimonials = (Array.isArray(content.testimonials) ? content.testimonials : []).filter(t => t.text);
+  const testimonials = byAdminOrder(content.testimonials).filter(t => t.text);
   if (!testimonials.length) return null;
 
   return (

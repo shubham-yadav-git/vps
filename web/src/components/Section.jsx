@@ -4,7 +4,7 @@ export default function Section({ id, eyebrow, title, intro, tone = 'plain', chi
     muted: 'bg-slate-50 dark:bg-slate-900/60',
   };
   return (
-    <section id={id} aria-labelledby={`${id}-heading`} className={`${tones[tone]} py-16 sm:py-24`}>
+    <section id={id} data-tone={tone} aria-labelledby={`${id}-heading`} className={`${tones[tone]} py-16 sm:py-24`}>
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
         <header className="mx-auto mb-12 max-w-2xl text-center">
           {eyebrow && (

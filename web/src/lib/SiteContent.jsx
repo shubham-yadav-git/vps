@@ -7,11 +7,11 @@ const loadContentModule = () => import('./content');
 const SiteContentContext = createContext(null);
 
 // Merge one fetched type over the current content. Empty lists keep the existing
-// content (matching the old site), except notices, where "none" is meaningful.
+// content (matching the old site), except date-driven lists, where "none" is meaningful.
 function mergeType(content, type, data) {
   if (data === null || data === undefined) return content;
   if (Array.isArray(data)) {
-    if (!data.length && type !== 'events') return content;
+    if (!data.length && !['events', 'calendar', 'achievements', 'downloads'].includes(type)) return content;
     return { ...content, [type]: data };
   }
   return { ...content, [type]: { ...(content[type] || {}), ...data } };
