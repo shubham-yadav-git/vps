@@ -34,7 +34,7 @@ export default function Login() {
   }
 
   return (
-    <div className="grid min-h-dvh place-items-center bg-gradient-to-br from-brand-50 via-white to-emerald-50 px-4 dark:from-slate-950 dark:via-slate-950 dark:to-brand-950">
+    <div className="grid min-h-dvh place-items-center bg-gradient-to-br from-brand-50 via-white to-amber-50 px-4 dark:from-slate-950 dark:via-slate-950 dark:to-brand-950">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <img src="/logo.png" alt="" width="64" height="64" className="mx-auto size-16 rounded-full" />
