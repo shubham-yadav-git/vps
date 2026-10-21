@@ -85,3 +85,39 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Dark mode: charcoal surfaces with the school's gold in place of blue. Light mode keeps the
+   values in @theme. Greys step up from page to section to card to border; the brand scale
+   becomes gold for buttons, links and highlights, and deep bronze for the darker panels. */
+.dark {
+  --color-slate-950: #101010;
+  --color-slate-900: #1b1b1b;
+  --color-slate-800: #2c2c2c;
+  --color-slate-700: #3d3d3d;
+  --color-slate-600: #5c5c5c;
+  --color-slate-500: #808080;
+  --color-slate-400: #a8a8a8;
+  --color-slate-300: #cfcfcf;
+  --color-slate-200: #e2e2e2;
+
+  --color-brand-50: #fdf6e3;
+  --color-brand-100: #f8e9bf;
+  --color-brand-200: #f1d58a;
+  --color-brand-300: #ebc767;
+  --color-brand-400: #e3b341;
+  --color-brand-500: #d4a12a;
+  --color-brand-600: #e0ad3c;
+  --color-brand-700: #4a3a14;
+  --color-brand-800: #3a2d10;
+  --color-brand-900: #2a210c;
+  --color-brand-950: #1a1508;
+}
+
+/* Gold buttons and badges need dark text, and darken slightly on hover */
+.dark .bg-brand-600 {
+  color: #1a1406;
+}
+.dark .bg-brand-600:hover,
+.dark .bg-brand-600:focus-visible {
+  background-color: var(--color-brand-500);
+}

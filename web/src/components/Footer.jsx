@@ -31,7 +31,7 @@ export default function Footer({ linkPrefix = '' }) {
   const linkClass = 'text-slate-400 transition hover:text-white';
 
   return (
-    <footer className="bg-slate-950 text-slate-300 dark:border-t dark:border-slate-800">
+    <footer className="bg-slate-950 text-slate-300 dark:border-t dark:border-slate-800 dark:bg-[#0a0a0a]">
       <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
         <div className="lg:col-span-2">
           <div className="flex items-center gap-3">
